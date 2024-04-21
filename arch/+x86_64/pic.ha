@@ -26,7 +26,7 @@ export fn pic_eoi(irq: u8) void = {
 
 fn pic_wait() void = for (let i = 0z; i < 8; i += 1) void;
 
-export fn pic_init() void = {
+export fn init_pic() void = {
 	pic_remap(PIC1_OFFS, PIC2_OFFS);
 };
 

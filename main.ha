@@ -22,9 +22,14 @@ export fn main(ctx: *boot::context) void = {
 			mod.phys, mod.length);
 	};
 
-	log::println("Nothing to do now. Spinning forever");
+	log::printfln("TSC measured at {} Hz", arch::tsc_rate);
 
-	// XXX TEMP
+	log::println("Spinning wheels for 1sec");
+	let start = arch::rdtsc();
+	let end = start + arch::tsc_rate;
+	for (arch::rdtsc() < end) void;
+	log::println("Done. Now what?");
+
 	arch::pic_unmask(1); // Enable IRQ 1 (keyboard) for testing
 
 	x86_64::sti();

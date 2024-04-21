@@ -101,3 +101,8 @@ arch.x86_64.cli:
 arch.x86_64.sti:
 	sti
 	ret
+
+.global arch.x86_64.pause
+arch.x86_64.pause:
+	hlt
+	jmp arch.x86_64.pause
