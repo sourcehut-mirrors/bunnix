@@ -2,7 +2,7 @@
 // Only valid with a lower half identity map
 export type bootctx = struct {
 	// Kernel command line
-	cmdline: str,
+	cmdline: const str,
 	// Memory map
 	mmap: []marea,
 	// null if no device tree is available
@@ -10,7 +10,7 @@ export type bootctx = struct {
 	// Boot modules, if provided
 	mods: []module,
 	// Framebuffer, if available
-	fb: bootfb,
+	fb: nullable *bootfb,
 };
 
 // Memory purpose.

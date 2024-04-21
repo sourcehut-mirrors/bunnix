@@ -2,6 +2,8 @@ use boot;
 use mb;
 use rt;
 
+type kentry = fn(ctx: *boot::bootctx) never;
+
 export fn bmain(mb: *mb::multiboot, mb_magic: u32, esp: *opaque) never = {
 	switch (mb_magic) {
 	case mb::MAGIC =>
@@ -15,11 +17,12 @@ export fn bmain(mb: *mb::multiboot, mb_magic: u32, esp: *opaque) never = {
 
 fn bmain_mb2(mb: *mb::multiboot) never = {
 	rt::writestr("bunixboot via multiboot\n");
+	assert(mb.mods_count >= 1, "Nothing to boot? Did you provide a multiboot module?");
 
 	mmap_init(mb);
 	mmu_init();
 
-	assert(mb.mods_count >= 1, "Nothing to boot? Did you provide a multiboot module?");
-
-	abort("TODO");
+	const bctx = bootctx_init(mb);
+	// kenter(bctx); // TODO
+	abort();
 };

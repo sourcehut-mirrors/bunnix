@@ -12,4 +12,4 @@ bunix:
 
 init:
 	$(HAREBUILD) -T+user -o $@
-.PHONY: bunix
+.PHONY: init
