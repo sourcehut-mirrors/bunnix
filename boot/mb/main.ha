@@ -1,5 +1,6 @@
-use rt;
+use boot;
 use mb;
+use rt;
 
 fn bmain_mb2(mb: *mb::multiboot) never = {
 	rt::writestr("bunixboot via multiboot\n");
