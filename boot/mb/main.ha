@@ -1,4 +1,5 @@
 use boot;
+use format::elf;
 use mb;
 use rt;
 
@@ -16,13 +17,22 @@ export fn bmain(mb: *mb::multiboot, mb_magic: u32, esp: *opaque) never = {
 };
 
 fn bmain_mb2(mb: *mb::multiboot) never = {
-	rt::writestr("bunixboot via multiboot\n");
+	rt::writestr("bunixboot: booting via multiboot... ");
 	assert(mb.mods_count >= 1, "Nothing to boot? Did you provide a multiboot module?");
 
 	mmap_init(mb);
 	mmu_init();
 
 	const bctx = bootctx_init(mb);
-	// kenter(bctx); // TODO
-	abort();
+
+	const mods = mb.mods_addr: uintptr: *[*]mb::module;
+	const mods = mods[..mb.mods_count];
+	const image = mods[0].start: uintptr: *elf::header64;
+	const kenter = load(image);
+
+	// Note: the loader can overwrite the multiboot context, which can no
+	// longer be used beyond this point.
+
+	rt::writestr("ok\n");
+	kenter(bctx);
 };

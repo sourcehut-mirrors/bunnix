@@ -1,3 +1,5 @@
+use arch::x86_64;
+
 def VGA_CONS: *[*]u16 = 0xb8000: uintptr: *[*]u16;
 def VGA_ROWS: size = 25;
 def VGA_COLS: size = 80;
@@ -30,8 +32,8 @@ type vga_color = enum u8 {
 
 @init fn init() void = {
 	// Disable cursor
-	outb(0x3D4, 0x0A);
-	outb(0x3D5, 0x20);
+	x86_64::outb(0x3D4, 0x0A);
+	x86_64::outb(0x3D5, 0x20);
 
 	// Don't overwrite any earlier VGA text
 	let last = VGA_ROWS - 1;

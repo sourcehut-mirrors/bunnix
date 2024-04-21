@@ -1,8 +1,8 @@
 // Page size (4096)
-def PAGESIZE: size = 4096;
+export def PAGESIZE: size = 4096;
 
 // [[PAGESIZE]] as a uintptr
-def UPAGESIZE: uintptr = 4096: uintptr;
+export def UPAGESIZE: uintptr = 4096: uintptr;
 
 // Page map level 4 entry, maps up to 256TiB of memory
 export type pml4e = pde;

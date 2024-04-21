@@ -23,6 +23,12 @@ SECTIONS
 		PROVIDE_HIDDEN (__init_array_end = .);
 	}
 
+	.fini_array : {
+		PROVIDE_HIDDEN (__fini_array_start = .);
+		KEEP (*(.fini_array))
+		PROVIDE_HIDDEN (__fini_array_end = .);
+	}
+
 	_loader_code_end = .;
 
 	. = ALIGN(4K);

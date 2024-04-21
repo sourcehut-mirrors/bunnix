@@ -1,3 +1,4 @@
+use arch::x86_64;
 use boot;
 use mb;
 use types::c;
@@ -8,9 +9,6 @@ let @symbol("_loader_data_start") loader_data_start: [*]u8;
 let @symbol("_loader_data_end") loader_data_end: [*]u8;
 let @symbol("_loader_data_runtime_start") loader_data_runtime_start: [*]u8;
 let @symbol("_loader_data_runtime_end") loader_data_runtime_end: [*]u8;
-
-def PAGESIZE: size = 4096;
-def UPAGESIZE: uintptr = 4096: uintptr;
 
 def STATIC_MAREA: size = 256;
 
@@ -82,25 +80,25 @@ fn mmap_init(mb: *mb::multiboot) void = {
 // Reclassifies the given memory range in the memory map.
 fn mmap_reclassify(start: uintptr, end: uintptr, kind: boot::mtype) void = {
 	// Align on page boundary
-	if (start % UPAGESIZE != 0) {
-		start &= ~(UPAGESIZE - 1);
+	if (start % x86_64::UPAGESIZE != 0) {
+		start &= ~(x86_64::UPAGESIZE - 1);
 	};
-	if (end % UPAGESIZE != 0) {
-		end &= ~(UPAGESIZE - 1);
-		end += UPAGESIZE;
+	if (end % x86_64::UPAGESIZE != 0) {
+		end &= ~(x86_64::UPAGESIZE - 1);
+		end += x86_64::UPAGESIZE;
 	};
 
-	const npage = ((end - start) / UPAGESIZE): size;
+	const npage = ((end - start) / x86_64::UPAGESIZE): size;
 	for (let i = 0z; i < len(mmap); i += 1) {
 		const entry = mmap[i];
 		const estart = entry.phys;
-		const eend = entry.phys + entry.pages: uintptr * UPAGESIZE;
+		const eend = entry.phys + entry.pages: uintptr * x86_64::UPAGESIZE;
 		if (estart <= start && eend > end) {
 			// [...####...]
 			static delete(mmap[i]);
 			static insert(mmap[i], boot::marea {
 				phys = entry.phys,
-				pages = ((end - estart) / UPAGESIZE): size,
+				pages = ((end - estart) / x86_64::UPAGESIZE): size,
 				mtype = entry.mtype,
 			});
 			static insert(mmap[i+1], boot::marea {
@@ -110,7 +108,7 @@ fn mmap_reclassify(start: uintptr, end: uintptr, kind: boot::mtype) void = {
 			});
 			static insert(mmap[i+2], boot::marea {
 				phys = end,
-				pages = ((eend - end) / UPAGESIZE): size,
+				pages = ((eend - end) / x86_64::UPAGESIZE): size,
 				mtype = entry.mtype,
 			});
 			i += 2;

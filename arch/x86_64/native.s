@@ -13,3 +13,10 @@ arch.x86_64.rdcr3:
 arch.x86_64.invlpg:
 	invlpg (%rdi)
 	ret
+
+.global arch.x86_64.outb
+arch.x86_64.outb:
+	mov %di, %dx
+	mov %sil, %al
+	outb %al, %dx
+	ret

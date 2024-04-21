@@ -6,3 +6,6 @@ export fn wrcr3(addr: uintptr) void;
 
 // Invalidates an address in the page table.
 export fn invlpg(addr: uintptr) void;
+
+// Writes the given 8-bit value to the given port.
+export fn outb(port: u16, val: u8) void;

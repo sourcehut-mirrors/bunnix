@@ -28,7 +28,7 @@ fn mmu_init() void = {
 	for (let i = 0z; i < IDENT_PDS; i += 1)
 	for (let j = 0z; j < 512; j += 1) {
 		const phys = j: uintptr * 0x200000 + i * 0x200000 * 512;
-		ident_pd[i][j] = phys: pde | pde::P | pde::W | pde::PS | pde::G;
+		ident_pd[i][j] = phys: pde | pde::P | pde::W | pde::PS;
 	};
 
 	// Map kernel at 0xFFFFFFFFC0000000
@@ -36,4 +36,11 @@ fn mmu_init() void = {
 	kernel_pd[0] = &kernel_pt: uintptr: pde | pde::P | pde::W | pde::G;
 
 	x86_64::wrcr3(&pml4: uintptr);
+};
+
+fn kmmap(virt: uintptr, phys: uintptr, flags: pte) void = {
+	assert(phys % x86_64::PAGESIZE == 0 && virt % x86_64::PAGESIZE == 0);
+	assert(virt >= KERNEL_START && virt < KERNEL_MAXVIRT);
+	const pti = ((virt >> 12) & 0x1FFF): size;
+	kernel_pt[pti] = phys: pte | flags | pte::P | pte::G;
 };

@@ -39,3 +39,21 @@ nographic: bunix.iso
 		-display none \
 		-serial stdio
 .PHONY: nographic
+
+gdb: bunix.iso
+	qemu-system-$(QEMUARCH) $(QEMUFLAGS) -s -S -m 1G -no-reboot -no-shutdown \
+		-drive file=bunix.iso,format=raw \
+		-display sdl \
+		-serial stdio
+.PHONY: gdb
+
+nographic-gdb: bunix.iso
+	qemu-system-$(QEMUARCH) $(QEMUFLAGS) -s -S -m 1G -no-reboot -no-shutdown \
+		-drive file=bunix.iso,format=raw \
+		-display none \
+		-serial stdio
+.PHONY: nographic-gdb
+
+gdbc:
+	gdb -x gdb.cmd
+.PHONY: gdbc
