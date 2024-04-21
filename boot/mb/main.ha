@@ -17,7 +17,7 @@ export fn bmain(mb: *mb::multiboot, mb_magic: u32, esp: *opaque) never = {
 };
 
 fn bmain_mb2(mb: *mb::multiboot) never = {
-	rt::writestr("bunixboot: booting via multiboot... ");
+	rt::writestr("bunnixboot: booting via multiboot... ");
 	assert(mb.mods_count >= 1, "Nothing to boot? Did you provide a multiboot module?");
 
 	mmap_init(mb);

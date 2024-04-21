@@ -1,4 +1,4 @@
-all: bunix init
+all: bunnix init
 
 include config.mk
 include mk/$(ARCH).mk
@@ -6,10 +6,13 @@ include mk/$(ARCH).mk
 HARECONFIG = -a$(HAREARCH) -T^+$(HAREARCH) -RF
 HAREBUILD=HAREPATH=. $(HARE) build $(HARECONFIG)
 
-bunix:
-	$(HAREBUILD) -T+bunix -o $@
-.PHONY: bunix
+bunnix:
+	$(HAREBUILD) -T+bunnix -o $@
+.PHONY: bunnix
 
 init:
 	$(HAREBUILD) -T+user -o $@
 .PHONY: init
+
+clean: arch-clean
+	rm -f bunnix init
