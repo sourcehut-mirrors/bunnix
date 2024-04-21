@@ -1,0 +1,1 @@
+fn halt() never;
