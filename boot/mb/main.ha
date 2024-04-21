@@ -9,9 +9,9 @@ fn bmain_mb2(mb: *mb::multiboot) never = {
 
 export fn bmain(mb: *mb::multiboot, mb_magic: u32, esp: *opaque) never = {
 	switch (mb_magic) {
-	case mb::MB_MAGIC =>
+	case mb::MAGIC =>
 		bmain_mb2(mb);
-	case mb::MB2_MAGIC =>
+	case mb::MAGIC2 =>
 		abort("Multiboot 2 not yet supported");
 	case =>
 		abort("Unknown multiboot environment");
