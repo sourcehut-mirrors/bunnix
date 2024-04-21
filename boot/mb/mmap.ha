@@ -48,11 +48,71 @@ fn mmap_init(mb: *mb::multiboot) void = {
 		});
 	};
 
-	mmap_normalize(mb);
+	mmap_reclassify(
+		&loader_code_start: uintptr,
+		&loader_code_end: uintptr,
+		boot::mtype::LOADER_CODE,
+	);
+	mmap_reclassify(
+		&loader_data_start: uintptr,
+		&loader_data_end: uintptr,
+		boot::mtype::LOADER_DATA,
+	);
+
+	// Skip the first module (i.e. the kernel)
+	const mods = mb.mods_addr: uintptr: *[*]mb::module;
+	const mods = mods[..mb.mods_count];
+	for (let i = 1z; i < len(mods); i += 1) {
+		const mod = &mods[i];
+		mmap_reclassify(
+			mod.start: uintptr,
+			mod.end: uintptr,
+			boot::mtype::LOADER_DATA,
+		);
+	};
 };
 
-// Fills in the memory map with more detail, subdividing and retyping areas used
-// for the bootloader data.
-fn mmap_normalize(mb: *mb::multiboot) void = {
-	return; // TODO
+// Reclassifies the given memory range in the memory map.
+fn mmap_reclassify(start: uintptr, end: uintptr, kind: boot::mtype) void = {
+	// Align on page boundary
+	if (start % UPAGESIZE != 0) {
+		start &= ~(UPAGESIZE - 1);
+	};
+	if (end % UPAGESIZE != 0) {
+		end &= ~(UPAGESIZE - 1);
+		end += UPAGESIZE;
+	};
+
+	const npage = ((end - start) / UPAGESIZE): size;
+	for (let i = 0z; i < len(mmap); i += 1) {
+		const entry = mmap[i];
+		const estart = entry.phys;
+		const eend = entry.phys + entry.pages: uintptr * UPAGESIZE;
+		if (estart <= start && eend > end) {
+			// [...####...]
+			static delete(mmap[i]);
+			static insert(mmap[i], boot::marea {
+				phys = entry.phys,
+				pages = ((end - estart) / UPAGESIZE): size,
+				mtype = entry.mtype,
+			});
+			static insert(mmap[i+1], boot::marea {
+				phys = start,
+				pages = npage,
+				mtype = kind,
+			});
+			static insert(mmap[i+2], boot::marea {
+				phys = end,
+				pages = ((eend - end) / UPAGESIZE): size,
+				mtype = entry.mtype,
+			});
+			i += 2;
+		} else if (estart <= start && eend > start) {
+			// [...##]##...
+			abort(); // TODO
+		} else if (estart <= end && eend > end) {
+			// ...##[##...]
+			abort(); // TODO
+		};
+	};
 };
