@@ -1,7 +1,8 @@
-// Linkage
-use arch::main;
+use arch::main;		// link
+use log;
 
 export fn main() void = {
-	writestr("Hello from the kernel!\n");
+	log::println("Hello from the kernel!");
+
 	abort(); // TODO
 };
