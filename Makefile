@@ -1,4 +1,4 @@
-all: bunix
+all: bunix init
 
 include config.mk
 include mk/$(ARCH).mk
@@ -8,4 +8,8 @@ HAREBUILD=HAREPATH=. $(HARE) build $(HARECONFIG)
 
 bunix:
 	$(HAREBUILD) -T+bunix -o $@
+.PHONY: bunix
+
+init:
+	$(HAREBUILD) -T+user -o $@
 .PHONY: bunix
