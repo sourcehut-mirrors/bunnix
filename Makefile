@@ -11,7 +11,7 @@ bunnix:
 .PHONY: bunnix
 
 init:
-	$(HAREBUILD) -T+user -o $@
+	$(HAREBUILD) -T+user -o $@ cmd/init/
 .PHONY: init
 
 clean: arch-clean
