@@ -14,7 +14,7 @@ export type bootctx = struct {
 };
 
 // Memory purpose.
-export type mpurpose = enum uint {
+export type mtype = enum uint {
 	// Conventional memory available for any purpose
 	CONVENTIONAL,
 	// Reclaimable ACPI memory
@@ -42,7 +42,7 @@ export type marea = struct {
 	// Length in pages
 	pages: size,
 	// Purpose
-	purpose: mpurpose,
+	mtype: mtype,
 };
 
 // Boot module

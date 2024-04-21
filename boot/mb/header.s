@@ -4,8 +4,8 @@
 // (c) 2022 Drew DeVault <sir@cmpwn.com>
 .code32
 .extern bss_start
-.extern end
-.extern phys
+.extern _bootloader_start
+.extern _bootloader_end
 
 .section .multiboot
 .set MB_MAGIC,			0x1BADB002
@@ -22,9 +22,9 @@ multiboot_header:
 .long MB_FLAGS
 .long MB_CHECKSUM
 .long multiboot_header	/* header_addr */
-.long phys		/* load_addr */
+.long _bootloader_start	/* load_addr */
 .long bss_start		/* load_end_addr */
-.long end		/* bss_end_addr */
+.long _bootloader_end	/* bss_end_addr */
 .long _start		/* entry_addr */
 .long 0x00000000
 .long 1024
@@ -52,9 +52,9 @@ mb2_tag_addr:
 .word 0
 .long 24
 .long multiboot2_header
-.long phys
+.long _bootloader_start
 .long bss_start
-.long end
+.long _bootloader_end
 
 .align 8
 mb2_tag_entry:

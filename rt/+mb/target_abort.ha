@@ -6,6 +6,10 @@ fn target_abort(
 ) never = {
 	writestr("Bootloader abort: ");
 	writestr(*path);
+	writestr(":");
+	write(u64tos(line));
+	writestr(":");
+	write(u64tos(col));
 	writestr(": ");
 	writestr(msg);
 	halt();

@@ -4,37 +4,41 @@ ENTRY(_start)
 SECTIONS
 {
 	. = 1M;
-	phys = .;
+	_bootloader_start = .;
+
+	_loader_code_start = .;
  
-	.text BLOCK(4K) : ALIGN(4K)
-	{
+	.text : {
 		*(.multiboot)
 		*(.text.*)
 	}
- 
-	.rodata BLOCK(4K) : ALIGN(4K)
-	{
+
+	.rodata : {
 		*(.rodata.*)
 	}
- 
-	.data BLOCK(4K) : ALIGN(4K)
-	{
-		*(.data.*)
-	}
 
-	.init_array :
-        {
+	.init_array : {
 		PROVIDE_HIDDEN (__init_array_start = .);
 		KEEP (*(.init_array))
 		PROVIDE_HIDDEN (__init_array_end = .);
 	}
+
+	_loader_code_end = .;
+
+	. = ALIGN(4K);
+
+	_loader_data_start = .;
  
-	.bss BLOCK(4K) : ALIGN(4K)
-	{
+	.data : {
+		*(.data.*)
+	}
+
+	.bss : {
 		PROVIDE(bss_start = .);
 		*(COMMON)
 		*(.bss.*)
 	}
 
-	end = .;
+	_loader_data_end = .;
+	_bootloader_end = .;
 }
