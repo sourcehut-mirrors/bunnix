@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 // (c) Hare authors <https://harelang.org>
 
-export def MAGIC: str = "\x7FELF";
+export def MAGIC: [_]u8 = ['\x7F', 'E', 'L', 'F'];
 export def EI_MAG0: uint = 0;
 export def EI_MAG1: uint = 1;
 export def EI_MAG2: uint = 2;
