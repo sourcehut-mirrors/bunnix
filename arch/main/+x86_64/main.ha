@@ -1,3 +1,4 @@
+use arch;
 use rt;
 
 @symbol("main") fn kmain() never;
