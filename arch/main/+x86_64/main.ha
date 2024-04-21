@@ -1,12 +1,13 @@
 use arch;
 use arch::dev;
+use boot;
 use cons;
 use log;
 use rt;
 
-@symbol("main") fn kmain() never;
+@symbol("main") fn kmain(ctx: *boot::context) never;
 
-export fn main() never = {
+export fn main(ctx: *boot::context) never = {
 	static let vgacons = dev::vga_console { ... };
 	const vgabase = arch::phys_tokernel(dev::VGA_CONSBASE: uintptr);
 	dev::vga_init(&vgacons, vgabase: *[dev::VGA_CELLS]u16);
@@ -21,5 +22,5 @@ export fn main() never = {
 
 	rt::do_init();
 
-	kmain();
+	kmain(ctx);
 };

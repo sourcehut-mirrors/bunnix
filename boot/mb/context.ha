@@ -5,7 +5,7 @@ use strings;
 use types::c;
 
 // Static boot context
-let ctx = boot::bootctx { ... };
+let ctx = boot::context { ... };
 
 def CMDLINE_MAX: size = 4096;
 let cmdline_buf: [CMDLINE_MAX]u8 = [0...];
@@ -17,7 +17,7 @@ let static_mods: [STATIC_MODS]boot::module = [
 
 let bootfb = boot::bootfb { ... };
 
-fn bootctx_init(mb: *mb::multiboot) *boot::bootctx = {
+fn bootctx_init(mb: *mb::multiboot) *boot::context = {
 	const mods = mb.mods_addr: uintptr: *[*]mb::module;
 	const mods = mods[..mb.mods_count];
 	if (len(mods) > STATIC_MODS) {

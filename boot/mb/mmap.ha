@@ -1,7 +1,6 @@
 use arch::x86_64;
 use boot;
 use mb;
-use types::c;
 
 let @symbol("_loader_code_start") loader_code_start: [*]u8;
 let @symbol("_loader_code_end") loader_code_end: [*]u8;
@@ -81,10 +80,10 @@ fn mmap_init(mb: *mb::multiboot) void = {
 fn mmap_reclassify(start: uintptr, end: uintptr, kind: boot::mtype) void = {
 	// Align on page boundary
 	if (start % x86_64::UPAGESIZE != 0) {
-		start &= ~(x86_64::UPAGESIZE - 1);
+		start &= ~0xFFF;
 	};
 	if (end % x86_64::UPAGESIZE != 0) {
-		end &= ~(x86_64::UPAGESIZE - 1);
+		end &= ~0xFFF;
 		end += x86_64::UPAGESIZE;
 	};
 
@@ -93,31 +92,29 @@ fn mmap_reclassify(start: uintptr, end: uintptr, kind: boot::mtype) void = {
 		const entry = mmap[i];
 		const estart = entry.phys;
 		const eend = entry.phys + entry.pages: uintptr * x86_64::UPAGESIZE;
-		if (estart <= start && eend > end) {
-			// [...####...]
-			static delete(mmap[i]);
-			static insert(mmap[i], boot::marea {
-				phys = entry.phys,
-				pages = ((end - estart) / x86_64::UPAGESIZE): size,
-				mtype = entry.mtype,
-			});
-			static insert(mmap[i+1], boot::marea {
+		if (estart <= start && end < eend) {
+			mmap[i] = boot::marea {
 				phys = start,
 				pages = npage,
 				mtype = kind,
-			});
-			static insert(mmap[i+2], boot::marea {
-				phys = end,
-				pages = ((eend - end) / x86_64::UPAGESIZE): size,
-				mtype = entry.mtype,
-			});
-			i += 2;
-		} else if (estart <= start && eend > start) {
-			// [...##]##...
-			abort(); // TODO
-		} else if (estart <= end && eend > end) {
-			// ...##[##...]
-			abort(); // TODO
+			};
+			if (end != eend) {
+				static insert(mmap[i+1], boot::marea {
+					phys = end,
+					pages = ((eend - end) / x86_64::UPAGESIZE): size,
+					mtype = entry.mtype,
+				});
+			};
+			if (start != estart) {
+				static insert(mmap[i], boot::marea {
+					phys = estart,
+					pages = ((end - estart) / x86_64::UPAGESIZE): size,
+					mtype = entry.mtype,
+				});
+			};
+			return;
 		};
 	};
+
+	abort("weird memory layout, bailing out");
 };

@@ -3,7 +3,7 @@ use format::elf;
 use mb;
 use rt;
 
-type kentry = fn(ctx: *boot::bootctx) never;
+type kentry = fn(ctx: *boot::context) never;
 
 export fn bmain(mb: *mb::multiboot, mb_magic: u32, esp: *opaque) never = {
 	switch (mb_magic) {

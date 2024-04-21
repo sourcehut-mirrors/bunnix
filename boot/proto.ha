@@ -1,6 +1,6 @@
 // Boot context data structure
 // Only valid with a lower half identity map
-export type bootctx = struct {
+export type context = struct {
 	// Kernel command line
 	cmdline: const str,
 	// Memory map
@@ -35,6 +35,30 @@ export type mtype = enum uint {
 	EFI_RUNTIME_DATA,
 	// Loaded kernel image
 	KERNEL_IMAGE,
+};
+
+// Converts an [[mtype]] into a human friendly string.
+export fn mtype_str(mt: mtype) const str = {
+	switch (mt) {
+	case mtype::CONVENTIONAL =>
+		return "CONVENTIONAL";
+	case mtype::ACPI_RECLAIM =>
+		return "ACPI_RECLAIM";
+	case mtype::ACPI_NVS =>
+		return "ACPI_NVS";
+	case mtype::LOADER_CODE =>
+		return "LOADER_CODE";
+	case mtype::LOADER_DATA_RECLAIM =>
+		return "LOADER_DATA_RECLAIM";
+	case mtype::LOADER_DATA_RUNTIME =>
+		return "LOADER_DATA_RUNTIME";
+	case mtype::EFI_RUNTIME_CODE =>
+		return "EFI_RUNTIME_CODE";
+	case mtype::EFI_RUNTIME_DATA =>
+		return "EFI_RUNTIME_DATA";
+	case mtype::KERNEL_IMAGE =>
+		return "KERNEL_IMAGE";
+	};
 };
 
 // Memory map memory area

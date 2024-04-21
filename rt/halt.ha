@@ -1,1 +1,1 @@
-fn halt() never;
+export fn halt() never;

@@ -88,12 +88,11 @@ fn init_brk(sz: size) uintptr = {
 			continue;
 		};
 
-		static delete(mmap[i]);
-		static insert(mmap[i], boot::marea {
+		mmap[i] = boot::marea {
 			phys = entry.phys,
 			pages = npage,
 			mtype = boot::mtype::KERNEL_IMAGE,
-		});
+		};
 		if (entry.pages != npage) {
 			static insert(mmap[i+1], boot::marea {
 				phys = entry.phys + npage: uintptr * UPAGESIZE,
