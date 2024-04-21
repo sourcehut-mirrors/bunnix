@@ -40,5 +40,23 @@ SECTIONS
 	}
 
 	_loader_data_end = .;
+
+	_loader_data_runtime_start = .;
+
+	/* Reserve page tables */
+       . = ALIGN(4K);
+       pml4 = .;
+       . += 512 * 8;
+       pdpt = .;
+       . += 512 * 8;
+       ident_pd = .;
+       . += 512 * 8 * 64;
+       kernel_pd = .;
+       . += 512 * 8;
+       kernel_pt = .;
+       . += 512 * 8;
+
+	_loader_data_runtime_end = .;
+
 	_bootloader_end = .;
 }

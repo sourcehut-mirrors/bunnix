@@ -23,10 +23,12 @@ export type mtype = enum uint {
 	ACPI_NVS,
 	// Loader code
 	LOADER_CODE,
-	// Loader data, including:
+	// Reclaimable loader data, including:
 	// - bootctx and all associated data structures
 	// - boot modules
-	LOADER_DATA,
+	LOADER_DATA_RECLAIM,
+	// Non-reclaimable loader data, such as page tables
+	LOADER_DATA_RUNTIME,
 	// EFI runtime services code
 	EFI_RUNTIME_CODE,
 	// EFI runtime services data

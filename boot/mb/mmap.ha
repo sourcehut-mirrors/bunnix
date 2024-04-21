@@ -6,6 +6,8 @@ let @symbol("_loader_code_start") loader_code_start: [*]u8;
 let @symbol("_loader_code_end") loader_code_end: [*]u8;
 let @symbol("_loader_data_start") loader_data_start: [*]u8;
 let @symbol("_loader_data_end") loader_data_end: [*]u8;
+let @symbol("_loader_data_runtime_start") loader_data_runtime_start: [*]u8;
+let @symbol("_loader_data_runtime_end") loader_data_runtime_end: [*]u8;
 
 def PAGESIZE: size = 4096;
 def UPAGESIZE: uintptr = 4096: uintptr;
@@ -56,7 +58,12 @@ fn mmap_init(mb: *mb::multiboot) void = {
 	mmap_reclassify(
 		&loader_data_start: uintptr,
 		&loader_data_end: uintptr,
-		boot::mtype::LOADER_DATA,
+		boot::mtype::LOADER_DATA_RECLAIM,
+	);
+	mmap_reclassify(
+		&loader_data_runtime_start: uintptr,
+		&loader_data_runtime_end: uintptr,
+		boot::mtype::LOADER_DATA_RUNTIME,
 	);
 
 	// Skip the first module (i.e. the kernel)
@@ -67,7 +74,7 @@ fn mmap_init(mb: *mb::multiboot) void = {
 		mmap_reclassify(
 			mod.start: uintptr,
 			mod.end: uintptr,
-			boot::mtype::LOADER_DATA,
+			boot::mtype::LOADER_DATA_RECLAIM,
 		);
 	};
 };
