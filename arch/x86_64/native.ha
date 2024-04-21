@@ -1,12 +1,12 @@
-// Reads the current page table from CR3.
+export fn _lgdt(gdt: *opaque) void;
+export fn ltr(tss: u16) void;
+export fn lidt(idt: *opaque) void;
+export fn lseg(seg: u16) void;
+export fn rdmsr(msr: u32) u64;
+export fn wrmsr(msr: u32, value: u64) void;
 export fn rdcr3() uintptr;
-
-// Writes an address to the CR3 register (setting the current page table).
 export fn wrcr3(addr: uintptr) void;
-
-// Invalidates an address in the page table.
 export fn invlpg(addr: uintptr) void;
-
 export fn outb(port: u16, val: u8) void;
 export fn inb(port: u16) u8;
 export fn outw(port: u16, val: u16) void;

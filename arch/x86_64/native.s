@@ -1,4 +1,22 @@
 .text
+
+.globl arch.x86_64.rdmsr
+arch.x86_64.rdmsr:
+	mov %edi, %ecx
+	rdmsr
+	shl $32, %rdx
+	or %rdx, %rax
+	ret
+
+.globl arch.x86_64.wrmsr
+arch.x86_64.wrmsr:
+	mov %edi, %ecx
+	mov %esi, %eax
+	mov %rsi, %rdx
+	shr $32, %rdx
+	wrmsr
+	ret
+
 .globl arch.x86_64.wrcr3
 arch.x86_64.wrcr3:
 	mov %rdi, %cr3
@@ -51,4 +69,25 @@ arch.x86_64.outl:
 arch.x86_64.inl:
 	mov %di, %dx
 	inl %dx, %eax
+	ret
+
+.globl arch.x86_64._lgdt
+arch.x86_64._lgdt:
+	lgdt (%rdi)
+	ret
+
+.globl arch.x86_64.ltr
+arch.x86_64.ltr:
+	ltr %di
+	ret
+
+.globl arch.x86_64.lidt
+arch.x86_64.lidt:
+	lidt (%rdi)
+	ret
+
+.globl arch.x86_64.lseg
+arch.x86_64.lseg:
+	movw %di, %fs
+	movw %di, %gs
 	ret
