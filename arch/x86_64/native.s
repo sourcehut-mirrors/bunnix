@@ -81,8 +81,8 @@ arch.x86_64.ltr:
 	ltr %di
 	ret
 
-.globl arch.x86_64.lidt
-arch.x86_64.lidt:
+.globl arch.x86_64._lidt
+arch.x86_64._lidt:
 	lidt (%rdi)
 	ret
 
@@ -90,4 +90,14 @@ arch.x86_64.lidt:
 arch.x86_64.lseg:
 	movw %di, %fs
 	movw %di, %gs
+	ret
+
+.globl arch.x86_64.cli
+arch.x86_64.cli:
+	cli
+	ret
+
+.globl arch.x86_64.sti
+arch.x86_64.sti:
+	sti
 	ret

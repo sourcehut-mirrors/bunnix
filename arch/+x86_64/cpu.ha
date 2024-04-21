@@ -24,4 +24,9 @@ export fn init_cpu(i: size) void = {
 	init_tss(cpu);
 
 	x86_64::lgdt(&cpu.gdt, NGDT);
+	x86_64::ltr(SEG_TSS: u16 << 3);
+	x86_64::lidt(&idt);
+	x86_64::lseg(SEG_KDATA: u16 << 3);
+
+	// TODO: Set gs/gsbase to the CPU local state
 };

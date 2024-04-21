@@ -1,0 +1,3 @@
+This module provides constants, types, and small routines (some in assembly,
+some in Hare) which provide access to low-level x86_64 features. This module
+does not have any dependencies and can be used from any part of the kernel.
