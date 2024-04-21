@@ -10,7 +10,7 @@ bunixboot.mb:
 
 all: bunixboot.mb
 
-bunix.iso: bunixboot.mb boot/mb/syslinux.cfg
+bunix.iso: bunixboot.mb boot/mb/syslinux.cfg bunix init
 	mkdir -p .isodir
 	cp boot/mb/syslinux.cfg .isodir/syslinux.cfg
 	install -m644 $(SYSLINUX)/mboot.c32 .isodir/mboot.c32
@@ -19,6 +19,8 @@ bunix.iso: bunixboot.mb boot/mb/syslinux.cfg
 	install -m644 $(SYSLINUX)/isolinux.bin .isodir/isolinux.bin
 
 	cp bunixboot.mb .isodir/bunixboot.mb
+	cp bunix .isodir/bunix
+	cp init .isodir/init
 
 	mkisofs -o $@ -b isolinux.bin -c boot.cat \
 		-no-emul-boot -boot-load-size 4 -boot-info-table .isodir

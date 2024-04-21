@@ -11,13 +11,14 @@ export fn bmain(mb: *mb::multiboot, mb_magic: u32, esp: *opaque) never = {
 	case =>
 		abort("Unknown multiboot environment");
 	};
-
 };
 
 fn bmain_mb2(mb: *mb::multiboot) never = {
 	rt::writestr("bunixboot via multiboot\n");
 
 	mmap_init(mb);
+
+	assert(mb.mods_count >= 1, "Nothing to boot? Did you provide a multiboot module?");
 
 	abort("TODO");
 };
