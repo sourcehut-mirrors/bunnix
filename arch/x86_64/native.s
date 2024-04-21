@@ -1,32 +1,5 @@
 .text
 
-.globl arch.x86_64.rdmsr
-arch.x86_64.rdmsr:
-	mov %edi, %ecx
-	rdmsr
-	shl $32, %rdx
-	or %rdx, %rax
-	ret
-
-.globl arch.x86_64.wrmsr
-arch.x86_64.wrmsr:
-	mov %edi, %ecx
-	mov %esi, %eax
-	mov %rsi, %rdx
-	shr $32, %rdx
-	wrmsr
-	ret
-
-.globl arch.x86_64.wrcr3
-arch.x86_64.wrcr3:
-	mov %rdi, %cr3
-	ret
-
-.globl arch.x86_64.rdcr3
-arch.x86_64.rdcr3:
-	mov %cr3, %rax
-	ret
-
 .globl arch.x86_64.invlpg
 arch.x86_64.invlpg:
 	invlpg (%rdi)
@@ -100,6 +73,53 @@ arch.x86_64.cli:
 .globl arch.x86_64.sti
 arch.x86_64.sti:
 	sti
+	ret
+
+.globl arch.x86_64.rdmsr
+arch.x86_64.rdmsr:
+	mov %edi, %ecx
+	rdmsr
+	shl $32, %rdx
+	or %rdx, %rax
+	ret
+
+.globl arch.x86_64.wrmsr
+arch.x86_64.wrmsr:
+	mov %edi, %ecx
+	mov %esi, %eax
+	mov %rsi, %rdx
+	shr $32, %rdx
+	wrmsr
+	ret
+
+.globl arch.x86_64.rdcr0
+arch.x86_64.rdcr0:
+	mov %cr0, %rax
+	ret
+
+.globl arch.x86_64.rdcr2
+arch.x86_64.rdcr2:
+	mov %cr2, %rax
+	ret
+
+.globl arch.x86_64.rdcr3
+arch.x86_64.rdcr3:
+	mov %cr3, %rax
+	ret
+
+.globl arch.x86_64.wrcr3
+arch.x86_64.wrcr3:
+	mov %rdi, %cr3
+	ret
+
+.globl arch.x86_64.rdcr4
+arch.x86_64.rdcr4:
+	mov %cr4, %rax
+	ret
+
+.globl arch.x86_64.wrcr0
+arch.x86_64.wrcr0:
+	mov %rdi, %cr0
 	ret
 
 .global arch.x86_64.pause

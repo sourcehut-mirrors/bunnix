@@ -2,10 +2,6 @@ export fn _lgdt(gdt: *opaque) void;
 export fn ltr(tss: u16) void;
 export fn _lidt(idt: *opaque) void;
 export fn lseg(seg: u16) void;
-export fn rdmsr(msr: u32) u64;
-export fn wrmsr(msr: u32, value: u64) void;
-export fn rdcr3() uintptr;
-export fn wrcr3(addr: uintptr) void;
 export fn invlpg(addr: uintptr) void;
 export fn outb(port: u16, val: u8) void;
 export fn inb(port: u16) u8;
@@ -15,6 +11,15 @@ export fn outl(port: u16, val: u32) void;
 export fn inl(port: u16) u32;
 export fn cli() void;
 export fn sti() void;
+
+export fn rdmsr(msr: u32) u64;
+export fn wrmsr(msr: u32, value: u64) void;
+
+export fn rdcr0() u64;
+export fn rdcr2() u64;
+export fn rdcr3() u64;
+export fn wrcr3(addr: uintptr) void;
+export fn rdcr4() u64;
 
 // Waits indefinitely.
 export fn pause() never;

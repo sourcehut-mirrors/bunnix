@@ -125,7 +125,6 @@ isr_common:
 	cld
 
 	mov %rsp, %rdi
-	mov $_kernel_stack_top, %rsp
 	call arch.isr_handler
 _isr_exit:
 	mov %rax, %rsp
