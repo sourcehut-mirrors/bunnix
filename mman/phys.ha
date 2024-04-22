@@ -1,6 +1,7 @@
 // Physical memory manager (simple bitmap allocator)
 use arch;
 use arch::{PAGESIZE, UPAGESIZE};
+use bytes;
 use errors::{error, errno};
 use log;
 
@@ -61,8 +62,10 @@ fn newblock(
 
 	let bitmap = data[ix..ix+bitmaplen];
 	ix += bitmaplen;
+	bytes::zero(bitmap);
 
 	let refcount = data[ix..ix+refcounts];
+	bytes::zero(refcount);
 
 	// Mark overhead as in use
 	for (let i = 0z; i < overpages; i += 1) {
