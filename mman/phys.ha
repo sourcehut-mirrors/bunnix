@@ -14,7 +14,7 @@ export type mflag = enum uint {
 	LOWMEM = 1 << 0,
 };
 
-export type block = struct {
+type block = struct {
 	base: uintptr,
 	pages: uint,
 	pages_used: uint,
@@ -25,7 +25,7 @@ export type block = struct {
 	next: nullable *block,
 };
 
-export fn newblock(
+fn newblock(
 	phys: uintptr,
 	pages: uint,
 	flags: mflag = mflag::NONE,
@@ -86,12 +86,12 @@ export fn newblock(
 
 // Allocates enough continuous pages of physical memory to satisfy a request of
 // "length" bytes, returning the first physical address of the allocation.
+//
+// Returns [[errno::NOMEM]] if the request cannot be satisfied.
 export fn physalloc(
 	length: size,
 	flags: mflag = mflag::NONE,
 ) (uintptr | error) = {
-	let cur = mhead;
-
 	let npage = (length / PAGESIZE): uint;
 	if (length % PAGESIZE != 0) {
 		npage += 1;
@@ -99,7 +99,7 @@ export fn physalloc(
 
 	// TODO: Prioritize high memory if the user did not request low memory
 	// explicitly (to save low memory for such requests)
-	for (cur != null; cur = (cur: *block).next) {
+	for (let cur = mhead; cur != null; cur = (cur: *block).next) {
 		const cur = cur as *block;
 		if (flags != mflag::NONE && cur.flags != flags) {
 			continue;
@@ -143,12 +143,83 @@ export fn physalloc(
 };
 
 // Increments the reference count of the given range of pages.
+//
+// Returns [[errno::OVERFLOW]] if the refcount would exceed 255.
+//
+// Raises a runtime assertion if the provided address range is not managed by
+// the memory manager.
 export fn ref(addr: uintptr, length: size) (void | error) = {
-	abort(); // TODO
+	let npage = length / PAGESIZE;
+	if (length % PAGESIZE != 0) {
+		npage += 1;
+	};
+
+	let block = getblock(addr);
+	const max = block.base + (block.pages * PAGESIZE): uintptr;
+	assert(addr + length: uintptr <= max,
+		"mman::ref address range exceeds physical address range");
+	const offs = addr - block.base;
+	const page = (offs / UPAGESIZE): size;
+
+	for (let i = page; i < page + npage; i += 1) {
+		if (block.refcount[i] == 255) {
+			// Roll back the operation
+			i -= 1;
+			for (i >= page && i < page + npage; i -= 1) {
+				block.refcount[i] -= 1;
+			};
+			return errno::OVERFLOW;
+		};
+
+		const ix = i / 8;
+		const shift = (i % 8): u8;
+		assert(block.bitmap[ix] >> shift & 1 == 1);
+
+		block.refcount[i] += 1;
+	};
 };
 
 // Decrements the reference count of the given range of pages, freeing them if
 // necessary.
 export fn unref(addr: uintptr, length: size) void = {
-	abort(); // TODO
+	let npage = length / PAGESIZE;
+	if (length % PAGESIZE != 0) {
+		npage += 1;
+	};
+
+	let block = getblock(addr);
+	const max = block.base + (block.pages * PAGESIZE): uintptr;
+	assert(addr + length: uintptr <= max,
+		"mman::ref address range exceeds physical address range");
+	const offs = addr - block.base;
+	const page = (offs / UPAGESIZE): size;
+
+	for (let i = page; i < page + npage; i += 1) {
+		assert(block.refcount[i] != 0, "mman::unref: double free");
+
+		const ix = i / 8;
+		const shift = (i % 8): u8;
+		assert(block.bitmap[ix] >> shift & 1 == 1);
+
+		block.refcount[i] -= 1;
+		if (block.refcount[i] == 0) {
+			block.bitmap[ix] &= ~(1 << shift);
+			if (block.min_free_page > i) {
+				block.min_free_page = i: uint;
+			};
+		};
+	};
+};
+
+fn getblock(addr: uintptr) *block = {
+	for (let cur = mhead; cur != null; cur = (cur: *block).next) {
+		const cur = cur as *block;
+		const min = cur.base;
+		const max = cur.base + (cur.pages * PAGESIZE): uintptr;
+		if (min <= addr && addr < max) {
+			return cur;
+		};
+	};
+
+	abort("Attempted to look up unmanaged physical address");
 };

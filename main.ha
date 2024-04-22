@@ -19,10 +19,25 @@ export fn main(ctx: *boot::context) void = {
 	mman::init(ctx);
 
 	log::println("Exercising the page allocator a bit");
-	const base = mman::physalloc(10 * arch::PAGESIZE)!;
-	log::printfln("Allocation of ten pages: 0x{:x}", base);
-	const base = mman::physalloc(20 * arch::PAGESIZE)!;
-	log::printfln("Allocation of another twenty pages: 0x{:x}", base);
+	const alloc1 = mman::physalloc(10 * arch::PAGESIZE)!;
+	log::printfln("Allocation of ten pages: 0x{:x}", alloc1);
+	const alloc2 = mman::physalloc(20 * arch::PAGESIZE)!;
+	log::printfln("Allocation of another twenty pages: 0x{:x}", alloc2);
+
+	log::printfln("Increase refcount at 0x{:x}", alloc1);
+	mman::ref(alloc1, 10 * arch::PAGESIZE)!;
+	log::printfln("Decrease refcount at 0x{:x}", alloc1);
+	mman::unref(alloc1, 10 * arch::PAGESIZE);
+	mman::unref(alloc1, 10 * arch::PAGESIZE);
+
+	log::print("Reclaim that allocation: ");
+	const alloc3 = mman::physalloc(10 * arch::PAGESIZE)!;
+	log::printfln("got 0x{:x}", alloc3);
+	assert(alloc1 == alloc3);
+
+	log::println("How about a double free?");
+	mman::unref(alloc3, 10 * arch::PAGESIZE);
+	mman::unref(alloc3, 10 * arch::PAGESIZE);
 
 	for (true) void;
 };
