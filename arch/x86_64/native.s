@@ -107,11 +107,6 @@ arch.x86_64.rdcr3:
 	mov %cr3, %rax
 	ret
 
-.globl arch.x86_64.wrcr3
-arch.x86_64.wrcr3:
-	mov %rdi, %cr3
-	ret
-
 .globl arch.x86_64.rdcr4
 arch.x86_64.rdcr4:
 	mov %cr4, %rax
@@ -122,7 +117,38 @@ arch.x86_64.wrcr0:
 	mov %rdi, %cr0
 	ret
 
+.globl arch.x86_64.wrcr3
+arch.x86_64.wrcr3:
+	mov %rdi, %cr3
+	ret
+
+.globl arch.x86_64.wrcr4
+arch.x86_64.wrcr4:
+	mov %rdi, %cr4
+	ret
+
 .global arch.x86_64.pause
 arch.x86_64.pause:
 	hlt
 	jmp arch.x86_64.pause
+
+.global arch.x86_64.do_cpuid
+.type arch.x86_64.do_cpuid,@function
+arch.x86_64.do_cpuid:
+	pushq %rdx
+	pushq %rcx
+	pushq %rbx
+
+	movq %rdi, %rax
+	cpuid
+
+	movl %edx, 0(%rsi)
+	movl %ecx, 4(%rsi)
+	movl %ebx, 8(%rsi)
+	movl %eax, 12(%rsi)
+
+	popq %rbx
+	popq %rcx
+	popq %rdx
+	ret
+
