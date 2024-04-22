@@ -1,13 +1,19 @@
 use arch::{PAGESIZE, UPAGESIZE};
 use boot;
 use log;
+use rt;
 use types;
 
 let total_pages: size = 0z;
 let pages_used: size = 0z;
 
+const slab_runtime = rt::malloc_iface {
+	malloc = &slaballoc,
+	free_ = &slabfree,
+	realloc = &slabrealloc,
+};
+
 export fn init(ctx: *boot::context) void = {
-	log::println("init memory manager");
 	for (const entry .. ctx.mmap) {
 		if (entry.mtype != boot::mtype::CONVENTIONAL) {
 			continue;
@@ -21,4 +27,6 @@ export fn init(ctx: *boot::context) void = {
 
 	log::printfln("{} bytes of memory available; {} bytes of overhead",
 		total_pages * PAGESIZE, pages_used * PAGESIZE);
+
+	rt::configure_malloc(&slab_runtime);
 };
