@@ -3,6 +3,7 @@ use boot;
 use mman;
 use log;
 use rt;
+use fs;
 
 export fn main(ctx: *boot::context) void = {
 	log::println("Bunnix kernel boot");
