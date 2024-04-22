@@ -3,6 +3,7 @@ use errors::{error, errno};
 // Generic file data structure, generally embedded in a filesystem-specific
 // structure.
 export type file = struct {
+	impl: *file_iface,
 	inode: *inode,
 	pos: size,
 };
@@ -33,8 +34,8 @@ export type fn_file_readdir = fn(fd: *file, dent: *dirent) (void | EOF | error);
 
 // file implementation
 export type file_iface = struct {
-	read: *fn_file_read,
-	write: *fn_file_write,
-	seek: *fn_file_seek,
-	readdir: *fn_file_readdir,
+	read: nullable *fn_file_read,
+	write: nullable *fn_file_write,
+	seek: nullable *fn_file_seek,
+	readdir: nullable *fn_file_readdir,
 };

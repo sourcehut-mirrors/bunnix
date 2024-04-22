@@ -7,7 +7,7 @@ export type inode = struct {
 	sb: const *superblock,
 	ino: uint,
 	dev: (uint, uint),
-	mode: uint,
+	mode: mode,
 	uid: uint,
 	gid: uint,
 	blocks: size,
@@ -34,10 +34,10 @@ export type fn_inode_rmdir = fn(ino: *inode, name: str) (void | error);
 
 // inode implementation.
 export type inode_iface = struct {
-	open: *fn_inode_open,
-	link: *fn_inode_link,
-	unlink: *fn_inode_unlink,
-	create: *fn_inode_create,
-	mkdir: *fn_inode_mkdir,
-	rmdir: *fn_inode_rmdir,
+	open: nullable *fn_inode_open,
+	link: nullable *fn_inode_link,
+	unlink: nullable *fn_inode_unlink,
+	create: nullable *fn_inode_create,
+	mkdir: nullable *fn_inode_mkdir,
+	rmdir: nullable *fn_inode_rmdir,
 };
