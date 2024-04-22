@@ -35,9 +35,15 @@ export fn main(ctx: *boot::context) void = {
 	log::printfln("got 0x{:x}", alloc3);
 	assert(alloc1 == alloc3);
 
-	log::println("How about a double free?");
-	mman::unref(alloc3, 10 * arch::PAGESIZE);
-	mman::unref(alloc3, 10 * arch::PAGESIZE);
+	log::println("Testing the slab allocator");
+	const ptr = mman::slaballoc(32): *int;
+	log::printfln("Got 0x{:x} for alloc of 32 bytes", ptr);
+	*ptr = 42;
+	log::println("Freeing it");
+	mman::slabfree(ptr);
+
+	log::println("Try a double free?");
+	mman::slabfree(ptr);
 
 	for (true) void;
 };
