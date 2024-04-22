@@ -20,6 +20,8 @@ let mmap_static: [STATIC_MAREA * 2]boot::marea = [
 let mmap: []boot::marea = [];
 
 fn mmap_init(mb: *mb::multiboot) void = {
+	assert(mb.flags & mb::INFO_MEM_MAP != 0);
+
 	mmap = mmap_static[..0];
 
 	let nmmap = mb.mmap_length / size(mb::mmap_entry);
@@ -30,19 +32,28 @@ fn mmap_init(mb: *mb::multiboot) void = {
 	const entries = mb.mmap_addr: uintptr: *[*]mb::mmap_entry;
 	const entries = entries[..nmmap];
 	for (const entry &.. entries) {
+		// TODO: This is not strictly speaking required by multiboot
+		assert(entry.sz == size(mb::mmap_entry) - size(u32));
+
 		const mtype = switch (entry.typ) {
 		case mb::mem_type::AVAILABLE =>
 			yield boot::mtype::CONVENTIONAL;
-		case mb::mem_type::ACPI_RECLAIMABLE  =>
+		case mb::mem_type::ACPI_RECLAIMABLE =>
 			yield boot::mtype::ACPI_RECLAIM;
 		case mb::mem_type::NVS  =>
 			yield boot::mtype::ACPI_NVS;
 		case => continue;
 		};
 
+		// Discard entries with physical addresses outside of our
+		// identity map (64 GiB); TODO: support more memory
+		if (entry.addr + entry.length >= 0x1000000000) {
+			continue;
+		};
+
 		static append(mmap, boot::marea {
 			phys = entry.addr: uintptr,
-			pages = entry.length,
+			pages = entry.length: size / x86_64::PAGESIZE,
 			mtype = mtype,
 		});
 	};
@@ -92,7 +103,7 @@ fn mmap_reclassify(start: uintptr, end: uintptr, kind: boot::mtype) void = {
 		const entry = mmap[i];
 		const estart = entry.phys;
 		const eend = entry.phys + entry.pages: uintptr * x86_64::UPAGESIZE;
-		if (estart <= start && end < eend) {
+		if (estart <= start && end <= eend) {
 			mmap[i] = boot::marea {
 				phys = start,
 				pages = npage,

@@ -23,7 +23,7 @@ fn bmain_mb2(mb: *mb::multiboot) never = {
 	mmap_init(mb);
 	mmu_init();
 
-	const bctx = bootctx_init(mb);
+	let bctx = bootctx_init(mb);
 
 	const mods = mb.mods_addr: uintptr: *[*]mb::module;
 	const mods = mods[..mb.mods_count];
@@ -32,6 +32,9 @@ fn bmain_mb2(mb: *mb::multiboot) never = {
 
 	// Note: the loader can overwrite the multiboot context, which can no
 	// longer be used beyond this point.
+
+	// The loader can modify the memory map (to make room for the kernel)
+	bctx.mmap = mmap;
 
 	rt::writestr("ok\n");
 	kenter(bctx);
