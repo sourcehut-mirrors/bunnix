@@ -7,12 +7,34 @@ export def IDENT_START: uintptr = 0xFFFFFF8000000000: uintptr;
 export def IDENT_SIZE: size = IDENT_PDS * 1024 * 1024 * 1024;
 export def IDENT_END: uintptr = IDENT_START + IDENT_SIZE: uintptr;
 
-let kernel_pml4: *x86_64::pml4 = null: *x86_64::pml4;
-let kernel_pdpt: *x86_64::pdpt = null: *x86_64::pdpt;
-let kernel_pt: *x86_64::pt = null: *x86_64::pt;
+def PADDR_MASK: uintptr = ~(0x7ff | (1 << 63));
+
+let kernel_pml4: *pml4 = null: *pml4;
+let kernel_pdpt: *pdpt = null: *pdpt;
+let kernel_pdpt_phys: uintptr = 0;
+let kernel_pt: *pt = null: *pt;
 
 let @symbol("_kernel_start") kernel_start: u8;
 let @symbol("_kernel_end") kernel_end: u8;
+
+@init fn init() void = {
+	// Fetch kernel page tables from bootloader
+	const pml4_phys = x86_64::rdcr3(): uintptr;
+	kernel_pml4 = phys_tokernel(pml4_phys): *pml4;
+
+	const pdpte = getpdpte(pml4_phys, &kernel_start: uintptr) as *pdpte;
+	kernel_pdpt_phys = *pdpte: uintptr & PADDR_MASK;
+	kernel_pdpt = phys_tokernel(kernel_pdpt_phys): *pdpt;
+
+	const pte = getpte(pml4_phys, &kernel_start: uintptr) as *pte;
+	const pte_phys = *pte: uintptr & PADDR_MASK;
+	kernel_pt = phys_tokernel(pte_phys): *pt;
+};
+
+// Maps the kernel in the higher half of the given page table.
+export fn mapkernel(pml4: *pml4) void = {
+	pml4[511] = kernel_pdpt_phys | pde::P | pde::W;
+};
 
 // Maps a physical memory address to the kernel's identity-mapped address space.
 export fn phys_tokernel(ptr: uintptr) *opaque = {

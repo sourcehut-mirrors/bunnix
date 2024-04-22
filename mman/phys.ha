@@ -26,7 +26,7 @@ type block = struct {
 	next: nullable *block,
 };
 
-fn newblock(
+fn new_block(
 	phys: uintptr,
 	pages: uint,
 	flags: mflag = mflag::NONE,

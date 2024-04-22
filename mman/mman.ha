@@ -20,7 +20,7 @@ export fn init(ctx: *boot::context) void = {
 		};
 
 		assert(entry.pages < types::UINT_MAX);
-		const block = newblock(entry.phys, entry.pages: uint);
+		const block = new_block(entry.phys, entry.pages: uint);
 		total_pages += block.pages;
 		pages_used += block.pages_used;
 	};
