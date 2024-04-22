@@ -139,6 +139,11 @@ export fn physalloc(
 
 		cur.pages_used += npage;
 		cur.min_free_page = i + npage;
+
+		// TODO: mflag::NOZERO might be useful?
+		let data = arch::phys_tokernel(base): *[*]u8;
+		bytes::zero(data[..npage * PAGESIZE]);
+
 		return base;
 	};
 
