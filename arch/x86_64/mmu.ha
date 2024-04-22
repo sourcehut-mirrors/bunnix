@@ -4,6 +4,9 @@ export def PAGESIZE: size = 4096;
 // [[PAGESIZE]] as a uintptr
 export def UPAGESIZE: uintptr = 4096: uintptr;
 
+// Mask with a page table entry to get the physical address for that record.
+export def PADDR_MASK: uintptr = ~(0x7ff | (1 << 63));
+
 // Page map level 4 entry, maps up to 256TiB of memory
 export type pml4e = pde;
 

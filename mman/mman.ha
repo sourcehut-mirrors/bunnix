@@ -4,6 +4,19 @@ use log;
 use rt;
 use types;
 
+// Flags for [[mmap]] operations.
+export type prot = enum uint {
+	NONE	= 0,
+	READ	= 1 << 0,
+	WRITE	= 1 << 1,
+	EXEC	= 1 << 2,
+};
+
+// Flags for [[mmap]] operations. (TBD)
+export type flag = enum uint {
+	NONE = 0,
+};
+
 let total_pages: size = 0z;
 let pages_used: size = 0z;
 

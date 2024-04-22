@@ -3,6 +3,8 @@ export type errno = enum uint {
 	NONE = 0,
 	NOMEM,
 	OVERFLOW,
+	INVAL,
+	EXIST,
 };
 
 // Error condition.

@@ -1,13 +1,12 @@
 use arch::x86_64;
 use arch::x86_64::{pml4, pml4e, pdpt, pdpte, pd, pde, pt, pte};
+use arch::x86_64::{PADDR_MASK};
 
 // Memory map is defined in hare.sc, including kernel page tables
 export def IDENT_PDS: size = 64;
 export def IDENT_START: uintptr = 0xFFFFFF8000000000: uintptr;
 export def IDENT_SIZE: size = IDENT_PDS * 1024 * 1024 * 1024;
 export def IDENT_END: uintptr = IDENT_START + IDENT_SIZE: uintptr;
-
-def PADDR_MASK: uintptr = ~(0x7ff | (1 << 63));
 
 let kernel_pml4: *pml4 = null: *pml4;
 let kernel_pml4_phys: uintptr = 0;
