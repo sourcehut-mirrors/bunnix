@@ -15,3 +15,10 @@ export type bus_iface = struct {
 export fn bus_scan(bus: *bus) void = {
 	bus.bus.scan(bus);
 };
+
+let buses: []*bus = [];
+
+// Registers a bus with the system.
+export fn bus_register(bus: *bus) void = {
+	append(buses, bus);
+};

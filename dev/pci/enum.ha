@@ -48,7 +48,14 @@ fn scan_func(
 	slot: u8,
 	func: u8,
 ) void = {
-	// TODO: Check for bridges
 	const device = device(bus, slot, func);
-	// TODO
+	const bus = device_bus(device);
+	const slot = device_slot(device);
+	const func = device_func(device);
+	const class = read_type(dev, device);
+	const (class, subclass) = class_lookup(class);
+	log::printfln("{:x}:{:x}.{} {} {}",
+		bus, slot, func, class, subclass);
+
+	// TODO: Load driver
 };
