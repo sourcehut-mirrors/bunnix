@@ -12,8 +12,6 @@ const partnames: []rune = [
 // - blocksz and serial are copied from the parent
 // - partitions is always empty
 // - never added directly to the block device registry
-//
-// May be subtyped, e.g. blockpart_gpt
 export type blockpart = struct {
 	blockdev,
 	bdev: *blockdev,
@@ -40,7 +38,7 @@ export fn scanpart(bdev: *blockdev) (void | error) = {
 	const gpt = &buf[512]: *gpt;
 	if (gpt.magic == GPT_MAGIC) {
 		bdev.part_type = part_type::GPT;
-		abort("TODO: GPT");
+		scanpart_gpt(bdev, gpt, &partlist)?;
 	} else if (mbr.magic == MBR_MAGIC) {
 		bdev.part_type = part_type::MBR;
 		scanpart_mbr(bdev, mbr, &partlist)?;

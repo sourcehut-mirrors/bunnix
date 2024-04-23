@@ -1,0 +1,5 @@
+label: gpt
+# Partition 1, EFI system partition, 64 MiB
+size=64MiB, type="EFI System", name="boot"
+# Partition 2, ext4, 64 MiB
+size=+, type="Linux filesystem", name="root"

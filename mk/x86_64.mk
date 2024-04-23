@@ -21,6 +21,10 @@ disk.mbr.img: fs.fat.img
 	sfdisk $@ < scripts/mkdisk-mbr
 	dd if=fs.fat.img of=$@ seek=2048
 
+disk.gpt.img: fs.fat.img
+	qemu-img create -f raw $@ 128M
+	sfdisk $@ < scripts/mkdisk-gpt
+
 bunnix.iso: bunnixboot.mb boot/mb/syslinux.cfg bunnix init
 	mkdir -p .isodir
 	cp boot/mb/syslinux.cfg .isodir/syslinux.cfg
@@ -45,28 +49,30 @@ QEMUARGS=\
 	$(QEMUFLAGS) -m 1G -no-reboot -no-shutdown \
 	-drive file=bunnix.iso,format=raw \
 	-drive id=disk-mbr,file=disk.mbr.img,if=none,format=raw \
+	-drive id=disk-gpt,file=disk.gpt.img,if=none,format=raw \
 	-device ahci,id=ahci \
-	-device ide-hd,drive=disk-mbr,bus=ahci.0
+	-device ide-hd,drive=disk-mbr,bus=ahci.0 \
+	-device ide-hd,drive=disk-gpt,bus=ahci.1
 
-run: bunnix.iso disk.mbr.img
+run: bunnix.iso disk.mbr.img disk.gpt.img
 	qemu-system-$(QEMUARCH) $(QEMUARGS) \
 		-display sdl \
 		-serial stdio
 .PHONY: run
 
-nographic: bunnix.iso disk.mbr.img
+nographic: bunnix.iso disk.mbr.img disk.gpt.img
 	qemu-system-$(QEMUARCH) $(QEMUARGS) \
 		-display none \
 		-serial stdio
 .PHONY: nographic
 
-gdb: bunnix.iso disk.mbr.img
+gdb: bunnix.iso disk.mbr.img disk.gpt.img
 	qemu-system-$(QEMUARCH) $(QEMUARGS) -s -S \
 		-display sdl \
 		-serial stdio
 .PHONY: gdb
 
-nographic-gdb: bunnix.iso disk.mbr.img
+nographic-gdb: bunnix.iso disk.mbr.img disk.gpt.img
 	qemu-system-$(QEMUARCH) $(QEMUARGS) -s -S \
 		-display none \
 		-serial stdio

@@ -2,6 +2,9 @@
 // (c) Hare authors <https://harelang.org>
 
 use bytes;
+use strconv;
+use strconv::{base};
+use strings;
 
 // A UUID.
 export type uuid = [16]u8;
@@ -31,3 +34,43 @@ def NODE: size = 10;
 
 // Returns true if two UUIDs are equal.
 export fn compare(a: uuid, b: uuid) bool = bytes::equal(a, b);
+
+fn hexconv(val: u8) []u8 = {
+	static let buf: [8]u8 = [0...];
+	const bytes = strings::toutf8(strconv::u8tos(val, base::HEX));
+	let i = 0z;
+	if (len(bytes) < 2) {
+		buf[0] = '0';
+		i += 1;
+	};
+	buf[i..i+len(bytes)] = bytes[..];
+	return buf[..i+len(bytes)];
+};
+
+// Encodes a UUID as a string. The return value is statically allocated, the
+// caller must use [[strings::dup]] to extend its lifetime.
+export fn encodestr(in: uuid) str = {
+	static let buf: [UUID_STRLEN]u8 = [0...];
+	let buf = buf[..0];
+
+	for (let i = TIME_LOW; i < TIME_LOW + 4; i += 1) {
+		static append(buf, hexconv(in[i])...);
+	};
+	static append(buf, '-');
+	for (let i = TIME_MID; i < TIME_MID + 2; i += 1) {
+		static append(buf, hexconv(in[i])...);
+	};
+	static append(buf, '-');
+	for (let i = TIME_HI_AND_VERSION; i < TIME_HI_AND_VERSION + 2; i += 1) {
+		static append(buf, hexconv(in[i])...);
+	};
+	static append(buf, '-');
+	static append(buf, hexconv(in[CLOCK_SEQ_HI_AND_RESERVED])...);
+	static append(buf, hexconv(in[CLOCK_SEQ_LOW])...);
+	static append(buf, '-');
+	for (let i = NODE; i < NODE + 6; i += 1) {
+		static append(buf, hexconv(in[i])...);
+	};
+
+	return strings::fromutf8_unsafe(buf);
+};

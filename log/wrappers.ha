@@ -30,6 +30,14 @@ export fn println(args: fmt::formattable...) size =
 
 // Formats text for printing and writes it to the kernel log, followed by a line
 // feed.
+export fn kprintf(subsys: str, fmt: str, args: fmt::field...) size = {
+	const z = printf("[{:-6}] ", subsys);
+	z += fmt::fprintf(cons, fmt, args...);
+	return z;
+};
+
+// Formats text for printing and writes it to the kernel log, followed by a line
+// feed.
 export fn kprintfln(subsys: str, fmt: str, args: fmt::field...) size = {
 	const z = printf("[{:-6}] ", subsys);
 	z += fmt::fprintfln(cons, fmt, args...);
