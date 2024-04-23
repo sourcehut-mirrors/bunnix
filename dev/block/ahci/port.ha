@@ -1,9 +1,19 @@
+use dev::block;
 use errors::{error, errno};
 use log;
 use mman;
 use rt;
 use sched;
 use time;
+
+type ahci_port = struct {
+	block::blockdev,
+	base: *ahci_controller,
+	port: *hba_port,
+	sectors: size,
+	devtype: devtype,
+	mmio: *ahci_port_mmio,
+};
 
 type ahci_port_mmio = struct {
 	cmdlist: [32]hba_cmd_header,
@@ -29,6 +39,9 @@ fn port_init(
 
 	let mmio = base: *ahci_port_mmio;
 	let port = alloc(ahci_port {
+		impl = &bdev_impl,
+		iface = block::interface::SATA,
+		blocksz = SECTORSZ,
 		mmio = mmio,
 		base = dev,
 		port = hba_port,

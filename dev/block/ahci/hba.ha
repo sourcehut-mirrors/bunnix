@@ -1,4 +1,5 @@
 use ata;
+use dev::block;
 use log;
 use sched;
 use time;
@@ -54,6 +55,7 @@ fn hba_init(dev: *ahci_controller) void = {
 		port.sectors = id.sectors;
 		log::kprintfln(AHCI, "Port {}: {} : SN {} : {} sectors",
 			i, id.model, id.serial, id.sectors);
+		block::register(port);
 	};
 };
 

@@ -21,14 +21,6 @@ type ahci_controller = struct {
 	slots: u32,
 };
 
-type ahci_port = struct {
-	base: *ahci_controller,
-	port: *hba_port,
-	sectors: size,
-	devtype: devtype,
-	mmio: *ahci_port_mmio,
-};
-
 @init fn register() void = {
 	pci::register_driver(&ahci_driver);
 };
