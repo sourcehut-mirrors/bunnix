@@ -25,7 +25,7 @@ export fn main(ctx: *boot::context) never = {
 	rt::do_init();
 
 	// x86_64 initialization
-	arch::init();
+	arch::earlyinit();
 
 	// Kernel proper
 	kmain(ctx);

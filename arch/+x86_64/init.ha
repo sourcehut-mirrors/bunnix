@@ -1,6 +1,9 @@
 use arch::x86_64;
 use log;
 
+// Forward declaration
+fn arch::dev::init() void;
+
 const X86_64: str = "x86_64";
 
 // Flags indicating the availability of machine features
@@ -15,6 +18,11 @@ export let feat = machflag::NONE;
 
 // Initializes architecture-specific kernel state.
 export fn init() void = {
+	arch::dev::init();
+};
+
+// Initializes architecture-specific kernel state, prior to MMU initialization.
+export fn earlyinit() void = {
 	let cpuid = x86_64::cpuid_out { ... };
 	x86_64::cpuid(x86_64::CPUID_FEAT, &cpuid);
 

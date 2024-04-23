@@ -1,12 +1,10 @@
 use arch::main;		// link
-use arch_dev = arch::dev;
+use arch;
 use boot;
 use dev;
 use log;
 use mman;
 use rt;
-// XXX TEMP
-use dev::block;
 
 const KERN: str = "kern";
 
@@ -16,7 +14,7 @@ export fn main(ctx: *boot::context) void = {
 
 	mman::init(ctx);
 
-	arch_dev::init();
+	arch::init();
 	dev::scan();
 
 	log::println("Nothing to do; idling");
