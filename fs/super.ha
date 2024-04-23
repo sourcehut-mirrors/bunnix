@@ -10,3 +10,7 @@ export type sb_get_root_func = fn(sb: *superblock) *inode;
 export type superblock_iface = struct {
 	get_root: *sb_get_root_func,
 };
+
+export fn superblock_get_root(sb: *superblock) *inode = {
+	return sb.impl.get_root(sb);
+};

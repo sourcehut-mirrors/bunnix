@@ -50,12 +50,24 @@ fn mkinode(sb: *superblock, ino: uint, mode: fs::mode) inode = {
 
 const inode_dir_impl = fs::inode_iface {
 	open = &inode_open,
+	lookup = &inode_lookup,
+	create = &inode_create,
 	mkdir = &inode_mkdir,
 	...
 };
 
 fn inode_open(ino: *fs::inode) (*fs::file | error) = {
 	return mkfile(ino: *inode);
+};
+
+fn inode_lookup(ino: *fs::inode, name: str) (*fs::inode | error) = {
+	const ino = ino: *inode;
+	match (dir_findchild(ino, name)) {
+	case null =>
+		return errno::NOENT;
+	case let dent: *dirent =>
+		return dent.inode;
+	};
 };
 
 fn inode_mkchild(ino: *fs::inode, name: str, mode: fs::mode) (*fs::inode | error) = {

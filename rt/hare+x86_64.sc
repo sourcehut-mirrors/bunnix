@@ -45,7 +45,7 @@ SECTIONS {
 
 		. = ALIGN(4096);
 		_kernel_stack_bottom = .;
-		. += 16384;
+		. += 65535;
 		_kernel_stack_top = .;
 	} :data
 
