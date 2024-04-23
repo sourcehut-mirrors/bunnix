@@ -58,9 +58,21 @@ const blockpart_impl = blockdev_iface {
 };
 
 fn blockpart_read(bdev: *blockdev, lba: size, buf: []u8) (void | error) = {
-	abort(); // TODO
+	const bpart = bdev: *blockpart;
+	const max = bpart.lba + bdev.blocks;
+	const elba = bpart.lba + lba;
+	if (elba >= max || elba < lba) {
+		return errno::OVERFLOW;
+	};
+	return read(bpart.bdev, elba, buf);
 };
 
 fn blockpart_write(bdev: *blockdev, lba: size, buf: []u8) (void | error) = {
-	abort(); // TODO
+	const bpart = bdev: *blockpart;
+	const max = bpart.lba + bdev.blocks;
+	const elba = bpart.lba + lba;
+	if (elba >= max || elba < lba) {
+		return errno::OVERFLOW;
+	};
+	return write(bpart.bdev, elba, buf);
 };
