@@ -5,6 +5,7 @@ use arch::x86_64::{PAGESIZE, UPAGESIZE, PADDR_MASK};
 use errors::{error, errno};
 
 def UBRK_INIT: uintptr = 0x400000000000u64: uintptr;
+def GUARD: uintptr = UPAGESIZE * 2;
 
 // TODO: Assign ASID to each vspace
 
@@ -115,7 +116,7 @@ export fn mmap(
 	};
 
 	if (dobrk) {
-		vs.brk += i: uintptr;
+		vs.brk += i: uintptr + GUARD;
 	};
 
 	return base;
