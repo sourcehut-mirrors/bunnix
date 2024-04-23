@@ -19,18 +19,6 @@ export fn main(ctx: *boot::context) void = {
 	arch_dev::init();
 	dev::scan();
 
-	const bdevs = block::all();
-	if (len(bdevs) >= 1) {
-		const block = block::all()[0];
-		log::printf("Reading first sector of {}{}... ",
-			block::iface_str(block.iface), block.serial);
-		let buf: [512]u8 = [0...];
-		block::read(block, 0, buf)!;
-		log::println("ok");
-		log::println("First 128 bytes:");
-		log::dump(buf[..128]);
-	};
-
 	log::println("Nothing to do; idling");
 	rt::halt();
 };

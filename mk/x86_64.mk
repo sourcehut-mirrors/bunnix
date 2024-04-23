@@ -19,7 +19,6 @@ fs.fat.img:
 disk.mbr.img: fs.fat.img
 	qemu-img create -f raw $@ 128M
 	sfdisk $@ < scripts/mkdisk-mbr
-	echo "master boot record goes here, this test disk does not have a bootloader, la-dee-da" | dd of=$@
 	dd if=fs.fat.img of=$@ seek=2048
 
 bunnix.iso: bunnixboot.mb boot/mb/syslinux.cfg bunnix init

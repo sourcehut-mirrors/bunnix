@@ -10,6 +10,8 @@ export type blockdev = struct {
 	serial: uint,
 	blocksz: size,
 	blocks: size,
+	part_type: part_type,
+	parts: []blockpart,
 };
 
 // Reads a sector from a block device. len(buf) shall be a multiple of the block
@@ -36,6 +38,7 @@ export fn register(bdev: *blockdev) void = {
 	log::kprintfln(BLOCK, "Registered block device {}{} ({} bytes)",
 		iface_str(bdev.iface), bdev.serial,
 		bdev.blocks * bdev.blocksz);
+	scanpart(bdev)!;
 };
 
 // Returns all registered block devices.

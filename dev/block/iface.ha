@@ -3,6 +3,9 @@ export type interface = enum uint {
 	SATA,
 	ATAPI,
 	NVME,
+
+	// Internal use
+	BLOCKPART,
 };
 
 let serials: [_]uint = [
@@ -20,5 +23,7 @@ export fn iface_str(iface: interface) const str = {
 		return "atapi";
 	case interface::NVME =>
 		return "nvme";
+	case interface::BLOCKPART =>
+		return "[part]";
 	};
 };
