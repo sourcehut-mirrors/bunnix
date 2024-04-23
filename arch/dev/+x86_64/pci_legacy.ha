@@ -4,11 +4,11 @@ use dev::pci;
 def PCI_CONF_ADDR: u16 = 0xCF8;
 def PCI_CONF_DATA: u16 = 0xCFC;
 
-type pci_legacy = struct {
+export type pci_legacy = struct {
 	pci::pcidev,
 };
 
-let legacy_pci_bus = pci_legacy {
+export let legacy_pci_bus = pci_legacy {
 	impl = &pci_impl,
 };
 
