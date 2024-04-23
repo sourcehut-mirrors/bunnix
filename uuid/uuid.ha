@@ -37,7 +37,7 @@ export fn compare(a: uuid, b: uuid) bool = bytes::equal(a, b);
 
 fn hexconv(val: u8) []u8 = {
 	static let buf: [8]u8 = [0...];
-	const bytes = strings::toutf8(strconv::u8tos(val, base::HEX));
+	const bytes = strings::toutf8(strconv::u8tos(val, base::HEX_LOWER));
 	let i = 0z;
 	if (len(bytes) < 2) {
 		buf[0] = '0';
