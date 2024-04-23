@@ -40,5 +40,24 @@ fn bdev_writesectors(
 	lba: size,
 	buf: []u8,
 ) (void | error) = {
-	abort(); // TODO
+	const bdev = bdev: *ahci_port;
+	assert(len(buf) % SECTORSZ == 0);
+
+	const hba = bdev.base;
+	const buffer = getbuffer(hba.pool, len(buf))!;
+	defer releasebuffer(hba.pool, &buffer);
+
+	const nbyte = len(buf);
+	assert(nbyte < buffer.prdt.1);
+	buffer.data[..nbyte] = buf[..nbyte];
+
+	// TODO: Non-blocking operation
+	let cmd = prep_write_dma_ext(bdev, lba, buffer.prdt)!;
+	port_wait(bdev);
+	port_submitcmd(bdev, cmd);
+	port_waitcmd(bdev, cmd);
+
+	const _is = bdev.port._is;
+	bdev.port._is = _is;
+	assert(_is & HBA_PxIS_TFES == 0);
 };
