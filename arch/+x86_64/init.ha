@@ -1,6 +1,8 @@
 use arch::x86_64;
 use log;
 
+def X86_64: str = "x86_64";
+
 // Flags indicating the availability of machine features
 export type machflag = enum u64 {
 	NONE	= 0,
@@ -21,7 +23,7 @@ export fn init() void = {
 		x86_64::wrcr0((cr0 & ~(1 << 2)) | 1 << 1);
 		feat |= machflag::SSE;
 	} else {
-		log::println("Warning: SSE is not available");
+		log::kprintln(X86_64, "Warning: SSE is not available");
 	};
 
 	let cr4 = x86_64::rdcr4();
@@ -34,13 +36,13 @@ export fn init() void = {
 		feat |= machflag::PCID;
 		cr4 |= x86_64::CR4_PCIDE;
 	} else {
-		log::println("Warning: PCID is not available");
+		log::kprintln(X86_64, "Warning: PCID is not available");
 	};
 	cr4 &= ~x86_64::CR4_TSD; // Allow rdtsc from userspace
 	x86_64::wrcr4(cr4);
 
 	init_tsc();
-	log::printfln("TSC measured at {} MHz", tsc_rate / 1000000);
+	log::kprintfln(X86_64, "TSC measured at {} MHz", tsc_rate / 1000000);
 
 	init_pic();
 	init_idt();

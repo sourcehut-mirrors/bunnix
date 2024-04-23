@@ -6,9 +6,11 @@ use log;
 use mman;
 use rt;
 
+def KERN: str = "kern";
+
 export fn main(ctx: *boot::context) void = {
-	log::println("Bunnix kernel boot");
-	log::printfln("command line: {}", ctx.cmdline);
+	log::kprintln(KERN, "Bunnix kernel boot");
+	log::kprintfln(KERN, "command line: {}", ctx.cmdline);
 
 	mman::init(ctx);
 

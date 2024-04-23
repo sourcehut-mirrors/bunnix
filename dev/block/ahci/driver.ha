@@ -2,6 +2,7 @@ use dev::pci;
 use log;
 use mman;
 
+def AHCI: str = "ahci";
 def AHCI_PCI_CLASS: u16 = 0x0106;
 
 const ahci_driver = pci::driver {
@@ -26,7 +27,7 @@ fn ahci_probe(info: *pci::probe_info) nullable *pci::pcidev = {
 	const version = ghc.vs;
 	const major = ghc.vs >> 16;
 	const minor = ghc.vs & 0xFFFF;
-	log::printfln("AHCI controller version {}.{}", major, minor);
+	log::kprintfln(AHCI, "AHCI controller version {}.{}", major, minor);
 
 	// TODO: Initialize controller
 

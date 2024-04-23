@@ -4,6 +4,8 @@ use log;
 use rt;
 use types;
 
+def MMAN: str = "mman";
+
 // Flags for [[mmap]] operations.
 export type prot = enum uint {
 	NONE	= 0,
@@ -47,7 +49,8 @@ export fn init(ctx: *boot::context) void = {
 		pages_used += block.pages_used;
 	};
 
-	log::printfln("{} bytes of memory available; {} bytes of overhead",
+	log::kprintfln(MMAN,
+		"{} bytes of memory available; {} bytes of overhead",
 		total_pages * PAGESIZE, pages_used * PAGESIZE);
 
 	rt::configure_malloc(&slab_runtime);

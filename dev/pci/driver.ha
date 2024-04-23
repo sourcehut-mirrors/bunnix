@@ -1,5 +1,7 @@
 use log;
 
+def PCI: str = "pci";
+
 // PCI driver probe implementation.
 export type fn_probe = fn(info: *probe_info) nullable *pcidev;
 
@@ -50,7 +52,7 @@ export fn probe(bus: *pcibus, device: u32) void = {
 	const slot = device_slot(device);
 	const func = device_func(device);
 	const (class, subclass) = class_lookup(class);
-	log::printfln("{:x}:{:x}.{} {} {}: driver '{}'",
+	log::kprintfln(PCI, "{:x}:{:x}.{} {} {}: driver '{}'",
 		bus, slot, func, class, subclass, driver.name);
 
 	match (driver.probe(&info)) {

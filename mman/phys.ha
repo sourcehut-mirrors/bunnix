@@ -31,7 +31,9 @@ fn new_block(
 	pages: uint,
 	flags: mflag = mflag::NONE,
 ) *block = {
-	log::printfln("Initializing block at 0x{:x} of {} pages", phys, pages);
+	log::kprintfln(MMAN,
+		"Initializing block at 0x{:x} of {} pages",
+		phys, pages);
 
 	let data: *[*]u8 = arch::phys_tokernel(phys): *[*]u8;
 	let data = data[..pages * PAGESIZE];
