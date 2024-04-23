@@ -1,0 +1,5 @@
+label: mbr
+# Partition 1, FAT32, 64 MiB
+start=2048, size=64MiB, type=0x7, bootable
+# Partition 2, ext4, 64 MiB
+size="+", type=L

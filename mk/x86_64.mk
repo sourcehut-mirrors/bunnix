@@ -10,6 +10,17 @@ bunnixboot.mb:
 
 all: bunnixboot.mb
 
+fs.fat.img:
+	qemu-img create -f raw $@ 48M
+	mkdosfs $@
+	mcopy -i $@ README.md ::README.md
+	mcopy -i $@ COPYING ::COPYING
+
+disk.mbr.img: fs.fat.img
+	qemu-img create -f raw $@ 128M
+	sfdisk $@ < scripts/mkdisk-mbr
+	dd if=fs.fat.img of=$@ seek=2048
+
 bunnix.iso: bunnixboot.mb boot/mb/syslinux.cfg bunnix init
 	mkdir -p .isodir
 	cp boot/mb/syslinux.cfg .isodir/syslinux.cfg
@@ -30,30 +41,31 @@ arch-clean:
 	rm -rf bunnix.iso bunnixboot.mb .isodir
 .PHONY: arch-clean
 
-run: bunnix.iso
-	qemu-system-$(QEMUARCH) $(QEMUFLAGS) -m 1G -no-reboot -no-shutdown \
-		-drive file=bunnix.iso,format=raw \
+QEMUARGS=\
+	$(QEMUFLAGS) -m 1G -no-reboot -no-shutdown \
+	-drive file=bunnix.iso,format=raw \
+	-drive id=disk-mbr,file=disk.mbr.img,if=none,format=raw \
+
+run: bunnix.iso disk.mbr.img
+	qemu-system-$(QEMUARCH) $(QEMUARGS) \
 		-display sdl \
 		-serial stdio
 .PHONY: run
 
-nographic: bunnix.iso
-	qemu-system-$(QEMUARCH) $(QEMUFLAGS) -m 1G -no-reboot -no-shutdown \
-		-drive file=bunnix.iso,format=raw \
+nographic: bunnix.iso disk.mbr.img
+	qemu-system-$(QEMUARCH) $(QEMUARGS) \
 		-display none \
 		-serial stdio
 .PHONY: nographic
 
-gdb: bunnix.iso
-	qemu-system-$(QEMUARCH) $(QEMUFLAGS) -s -S -m 1G -no-reboot -no-shutdown \
-		-drive file=bunnix.iso,format=raw \
+gdb: bunnix.iso disk.mbr.img
+	qemu-system-$(QEMUARCH) $(QEMUARGS) -s -S \
 		-display sdl \
 		-serial stdio
 .PHONY: gdb
 
-nographic-gdb: bunnix.iso
-	qemu-system-$(QEMUARCH) $(QEMUFLAGS) -s -S -m 1G -no-reboot -no-shutdown \
-		-drive file=bunnix.iso,format=raw \
+nographic-gdb: bunnix.iso disk.mbr.img
+	qemu-system-$(QEMUARCH) $(QEMUARGS) -s -S \
 		-display none \
 		-serial stdio
 .PHONY: nographic-gdb

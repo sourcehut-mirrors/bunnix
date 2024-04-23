@@ -24,7 +24,7 @@ export fn main(ctx: *boot::context) void = {
 
 fn pci_enum(dev: *pci::pcidev, device: u32, user: nullable *opaque) void = {
 	const bus = pci::device_bus(device);
-	const slot = pci::device_bus(device);
+	const slot = pci::device_slot(device);
 	const func = pci::device_func(device);
 	const class = pci::read_type(dev, device);
 	const (class, subclass) = pci::class_lookup(class);

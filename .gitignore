@@ -1,5 +1,6 @@
 .isodir/
 *.iso
+*.img
 *.mb
 /bunnix
 /init
