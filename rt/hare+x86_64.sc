@@ -44,6 +44,7 @@ SECTIONS {
 		*(.bss.*)
 
 		. = ALIGN(4K);
+		. += 8192; /* 2 guard pages */
 		_kernel_stack_bottom = .;
 		. += 65535;
 		_kernel_stack_top = .;
