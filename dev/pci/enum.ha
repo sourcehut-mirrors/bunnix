@@ -57,5 +57,5 @@ fn scan_func(
 	log::printfln("{:x}:{:x}.{} {} {}",
 		bus, slot, func, class, subclass);
 
-	// TODO: Load driver
+	probe(dev, device);
 };

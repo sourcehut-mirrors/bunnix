@@ -45,6 +45,8 @@ QEMUARGS=\
 	$(QEMUFLAGS) -m 1G -no-reboot -no-shutdown \
 	-drive file=bunnix.iso,format=raw \
 	-drive id=disk-mbr,file=disk.mbr.img,if=none,format=raw \
+	-device ahci,id=ahci \
+	-device ide-hd,drive=disk-mbr,bus=ahci.0
 
 run: bunnix.iso disk.mbr.img
 	qemu-system-$(QEMUARCH) $(QEMUARGS) \
