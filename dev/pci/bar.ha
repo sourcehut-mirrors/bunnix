@@ -1,3 +1,5 @@
+use mman;
+
 // PCI Base Address Register
 export type bar = enum uint {
 	BAR0,
@@ -46,4 +48,17 @@ export fn probe_bar_size(bus: *pcibus, device: u32, bar: bar) size = {
 	};
 
 	return val & ~(val - 1);
+};
+
+// Maps the specified PCI device into kernel memory.
+export fn mmap_device(
+	bus: *pcibus,
+	device: u32,
+	bar: bar,
+	flag: mman::flag = mman::flag::CD,
+	prot: mman::prot = mman::prot::READ | mman::prot::WRITE,
+) uintptr = {
+	const paddr = read_bar_addr(bus, device, bar);
+	const length = probe_bar_size(bus, device, bar);
+	return mman::mmap(&mman::kernel, paddr, 0, length, prot, flag)!;
 };

@@ -7,7 +7,7 @@ export const bus_impl = dev::bus_iface {
 
 fn pci_scan(bus: *dev::bus) void = {
 	const dev = bus: *pcibus;
-	log::println("PCI device enumeration");
+	log::println("Begin PCI device enumeration");
 	if (readb(dev, 0, PCI_HEADER_TYPE) & 0x80 == 0) {
 		scan_bus(dev, 0);
 	};
@@ -49,13 +49,5 @@ fn scan_func(
 	func: u8,
 ) void = {
 	const device = device(bus, slot, func);
-	const bus = device_bus(device);
-	const slot = device_slot(device);
-	const func = device_func(device);
-	const class = read_type(dev, device);
-	const (class, subclass) = class_lookup(class);
-	log::printfln("{:x}:{:x}.{} {} {}",
-		bus, slot, func, class, subclass);
-
 	probe(dev, device);
 };

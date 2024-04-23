@@ -1,3 +1,5 @@
+use log;
+
 // PCI driver probe implementation.
 export type fn_probe = fn(info: *probe_info) nullable *pcidev;
 
@@ -31,16 +33,29 @@ export fn probe(bus: *pcibus, device: u32) void = {
 		device = device,
 	};
 	const class = read_type(bus, device);
-	for (let cur = drivers_head; cur != null; cur = (cur: *driver).next) {
+
+	let cur = drivers_head;
+	for (cur != null; cur = (cur: *driver).next) {
 		const cur = cur: *driver;
 		if (cur.class == class) {
-			const dev = cur.probe(&info);
-			match (dev) {
-			case null => yield;
-			case let dev: *pcidev =>
-				append(devices, dev);
-			};
 			break;
 		};
+	};
+	if (cur == null) {
+		return;
+	};
+
+	const driver = cur: *driver;
+	const bus = device_bus(device);
+	const slot = device_slot(device);
+	const func = device_func(device);
+	const (class, subclass) = class_lookup(class);
+	log::printfln("{:x}:{:x}.{} {} {}: driver '{}'",
+		bus, slot, func, class, subclass, driver.name);
+
+	match (driver.probe(&info)) {
+	case null => return;
+	case let dev: *pcidev =>
+		append(devices, dev);
 	};
 };

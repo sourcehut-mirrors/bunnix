@@ -3,7 +3,7 @@ use arch::x86_64;
 use arch::x86_64::{pml4e, pdpte, pde, pte};
 use arch::x86_64::{PAGESIZE, UPAGESIZE, PADDR_MASK};
 use errors::{error, errno};
-use log;
+use log; // XXX TEMP
 
 def UBRK_INIT: uintptr = 0x400000000000u64: uintptr;
 
@@ -102,6 +102,10 @@ export fn mmap(
 };
 
 fn map_tables(vs: *vspace, vaddr: uintptr) (*pte | error) = {
+	// Mask out higher half addresses
+	def HIGH_MASK: uintptr = ((1 << 48) - 1): uintptr;
+	vaddr = vaddr & HIGH_MASK;
+
 	const pml4i = vaddr >> 39;
 	const pdpti = vaddr >> 30 & 0x1FF;
 	const pdi = vaddr >> 21 & 0x1FF;
