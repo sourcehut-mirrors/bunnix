@@ -4,6 +4,7 @@ def ROOT_INODE: uint = 1;
 
 export type superblock = struct {
 	fs::superblock,
+	next_ino: uint,
 	root: inode,
 };
 
@@ -11,6 +12,7 @@ export type superblock = struct {
 export fn new() *fs::superblock = {
 	let sb = alloc(superblock {
 		impl = &super_impl,
+		next_ino = 1,
 		root = mkinode(
 			null: *superblock,
 			ROOT_INODE,
@@ -28,4 +30,9 @@ const super_impl = fs::superblock_iface {
 fn sb_get_root(sb: *fs::superblock) *fs::inode = {
 	const sb = sb: *superblock;
 	return &sb.root;
+};
+
+fn sb_get_ino(sb: *superblock) uint = {
+	defer sb.next_ino += 1;
+	return sb.next_ino;
 };

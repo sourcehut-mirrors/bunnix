@@ -20,11 +20,3 @@ fn mkfile(ino: *inode) (*fs::file | error) = {
 		...
 	});
 };
-
-const file_impl_dir = fs::file_iface {
-	...
-};
-
-const file_impl_reg = fs::file_iface {
-	...
-};
