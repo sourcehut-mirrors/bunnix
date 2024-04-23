@@ -44,9 +44,6 @@ export fn scanpart(bdev: *blockdev) (void | error) = {
 		scanpart_mbr(bdev, mbr, &partlist)?;
 	} else {
 		bdev.part_type = part_type::UNKNOWN;
-		log::kprintfln(BLOCK,
-			"{}{}: unknown partition scheme (raw disk?)",
-			iface_str(bdev.iface), bdev.serial);
 	};
 
 	bdev.parts = partlist;
