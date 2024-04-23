@@ -8,8 +8,12 @@ export const bus_impl = dev::bus_iface {
 fn pci_scan(bus: *dev::bus) void = {
 	const dev = bus: *pcibus;
 	log::kprintln(PCI, "Begin device enumeration");
-	if (readb(dev, 0, PCI_HEADER_TYPE) & 0x80 == 0) {
-		scan_bus(dev, 0);
+
+	for (let bus = 0; bus < 256; bus += 1) {
+		const bus = bus: u8;
+		if (readb(dev, bus, PCI_HEADER_TYPE) & 0x80 == 0) {
+			scan_bus(dev, bus);
+		};
 	};
 
 	// TODO: Scan bridges
