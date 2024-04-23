@@ -1,4 +1,5 @@
 use mman;
+use log;
 
 // PCI Base Address Register
 export type bar = enum uint {
@@ -58,7 +59,7 @@ export fn mmap_device(
 	flag: mman::flag = mman::flag::CD,
 	prot: mman::prot = mman::prot::READ | mman::prot::WRITE,
 ) uintptr = {
-	const paddr = read_bar_addr(bus, device, bar);
 	const length = probe_bar_size(bus, device, bar);
+	const paddr = read_bar_addr(bus, device, bar) & ~0b1111;
 	return mman::mmap(&mman::kernel, paddr, 0, length, prot, flag)!;
 };

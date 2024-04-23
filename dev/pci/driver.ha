@@ -1,6 +1,6 @@
 use log;
 
-def PCI: str = "pci";
+const PCI: str = "pci";
 
 // PCI driver probe implementation.
 export type fn_probe = fn(info: *probe_info) nullable *pcidev;

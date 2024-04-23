@@ -2,7 +2,8 @@ use dev::pci;
 use log;
 use mman;
 
-def AHCI: str = "ahci";
+const AHCI: str = "ahci";
+
 def AHCI_PCI_CLASS: u16 = 0x0106;
 
 const ahci_driver = pci::driver {
@@ -14,6 +15,18 @@ const ahci_driver = pci::driver {
 
 type ahci_controller = struct {
 	pci::pcidev,
+	hba: *hba_ghc,
+	pool: *buffer_pool,
+	ports: [32]nullable *ahci_port,
+	slots: u32,
+};
+
+type ahci_port = struct {
+	base: *ahci_controller,
+	port: *hba_port,
+	sectors: size,
+	devtype: devtype,
+	mmio: *ahci_port_mmio,
 };
 
 @init fn register() void = {
@@ -27,14 +40,18 @@ fn ahci_probe(info: *pci::probe_info) nullable *pci::pcidev = {
 	const version = ghc.vs;
 	const major = ghc.vs >> 16;
 	const minor = ghc.vs & 0xFFFF;
-	log::kprintfln(AHCI, "AHCI controller version {}.{}", major, minor);
+	log::kprintfln(AHCI, "AHCI controller version {}.{} mapped to {}",
+		major, minor, ghc);
 
-	// TODO: Initialize controller
+	const pool = buffer_pool_init();
 
-	let pcidev = alloc(ahci_controller {
+	let controller = alloc(ahci_controller {
 		driver = &ahci_driver,
+		pool = &pool,
 		bus = info.bus,
+		hba = ghc,
+		...
 	});
-
-	return pcidev;
+	hba_init(controller);
+	return controller;
 };

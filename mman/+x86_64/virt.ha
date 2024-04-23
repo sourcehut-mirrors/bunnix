@@ -3,7 +3,6 @@ use arch::x86_64;
 use arch::x86_64::{pml4e, pdpte, pde, pte};
 use arch::x86_64::{PAGESIZE, UPAGESIZE, PADDR_MASK};
 use errors::{error, errno};
-use log; // XXX TEMP
 
 def UBRK_INIT: uintptr = 0x400000000000u64: uintptr;
 
@@ -47,6 +46,12 @@ export fn vspace_map(vs: *vspace) void = {
 	x86_64::wrcr3(vs.pml4);
 };
 
+// Returns the physical memory address mapped to this virtual address.
+export fn mmap_phys(vs: *vspace, vaddr: uintptr) uintptr = {
+	const pte = arch::getpte(vs.pml4, vaddr) as *pte;
+	return *pte: uintptr & PADDR_MASK;
+};
+
 // Maps physical pages into a virtual address space.
 export fn mmap(
 	vs: *vspace,
@@ -56,8 +61,18 @@ export fn mmap(
 	prot: prot,
 	flags: flag,
 ) (uintptr | error) = {
+	let dobrk = vaddr == 0;
 	if (vaddr == 0) {
 		vaddr = vs.brk;
+	};
+
+	if (flags & flag::ANON != 0) {
+		let aflag = mflag::NONE;
+		if (flags & flag::DMA32 != 0) {
+			aflag |= mflag::LOWMEM;
+		};
+
+		paddr = physalloc(length, aflag)?;
 	};
 
 	let base = vaddr;
@@ -91,11 +106,16 @@ export fn mmap(
 	// TODO: If we fail to allocate memory for the intermediate tables, we
 	// should probably free the intermediate tables we allocated for the
 	// operation
-	for (let i = 0z; i < length; i += PAGESIZE) {
+	let i = 0z;
+	for (i < length; i += PAGESIZE) {
 		const phys = paddr + i: uintptr * UPAGESIZE;
 		let ent = map_tables(vs, vaddr + i: uintptr * UPAGESIZE)?;
 		*ent = phys | mflag;
 		x86_64::invlpg(vaddr + i);
+	};
+
+	if (dobrk) {
+		vs.brk += i: uintptr;
 	};
 
 	return base;

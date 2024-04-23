@@ -7,6 +7,7 @@ export type errno = enum uint {
 	EXIST,
 	NOTSUP,
 	NOENT,
+	BUSY,
 };
 
 // Error condition.

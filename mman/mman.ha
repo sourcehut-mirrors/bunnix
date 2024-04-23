@@ -4,7 +4,7 @@ use log;
 use rt;
 use types;
 
-def MMAN: str = "mman";
+const MMAN: str = "mman";
 
 // Flags for [[mmap]] operations.
 export type prot = enum uint {
@@ -17,6 +17,7 @@ export type prot = enum uint {
 // Flags for [[mmap]] operations.
 export type flag = enum uint {
 	NONE = 0,
+	ANON = 1 << 0,
 
 	// == Kernel flags
 
@@ -26,6 +27,9 @@ export type flag = enum uint {
 	CD	= 1 << 25,
 	// Write-through
 	WT	= 1 << 26,
+	// When combined with ANON, causes the physical pages to be allocated
+	// from low memory.
+	DMA32	= 1 << 27,
 };
 
 let total_pages: size = 0z;

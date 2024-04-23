@@ -1,9 +1,3 @@
-type ahci_port_mmio = struct {
-	cmdlist: [32]hba_cmd_header,
-	cmdtable: [32]hba_cmd_table,
-	fis: hba_fis,
-};
-
 type hba_ghc = struct {
 	cap: u32,
 	ghc: u32,

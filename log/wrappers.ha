@@ -3,6 +3,12 @@
 
 use fmt;
 
+// The string "WARN" (log prefix)
+export const WARN: str = "WARN";
+
+// The string "ERR" (log prefix)
+export const ERR: str = "ERR";
+
 // Formats text for printing and writes it to the kernel log.
 export fn printf(fmt: str, args: fmt::field...) size =
 	fmt::fprintf(cons, fmt, args...);

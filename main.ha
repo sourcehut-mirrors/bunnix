@@ -6,7 +6,7 @@ use log;
 use mman;
 use rt;
 
-def KERN: str = "kern";
+const KERN: str = "kern";
 
 export fn main(ctx: *boot::context) void = {
 	log::kprintln(KERN, "Bunnix kernel boot");
