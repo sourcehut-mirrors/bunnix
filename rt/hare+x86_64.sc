@@ -14,13 +14,13 @@ SECTIONS {
 	. = 0xFFFFFFFFC0000000;
 	_kernel_start = .;
 
-	. = ALIGN(4096);
+	. = ALIGN(4K);
 	.text : {
 		KEEP (*(.text))
 		*(.text.*)
 	} :text
 
-	. = ALIGN(4096);
+	. = ALIGN(4K);
 	.data : {
 		KEEP (*(.data))
 		*(.data.*)
@@ -38,16 +38,20 @@ SECTIONS {
 		PROVIDE_HIDDEN (__fini_array_end = .);
 	}
 
-	. = ALIGN(4096);
+	. = ALIGN(4K);
 	.bss : {
 		KEEP (*(.bss))
 		*(.bss.*)
 
-		. = ALIGN(4096);
+		. = ALIGN(4K);
 		_kernel_stack_bottom = .;
 		. += 65535;
 		_kernel_stack_top = .;
 	} :data
 
 	_kernel_end = .;
+
+        . = ALIGN(4K);
+
+        _kernel_brk = .;
 }

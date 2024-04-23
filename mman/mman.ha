@@ -12,9 +12,18 @@ export type prot = enum uint {
 	EXEC	= 1 << 2,
 };
 
-// Flags for [[mmap]] operations. (TBD)
+// Flags for [[mmap]] operations.
 export type flag = enum uint {
 	NONE = 0,
+
+	// == Kernel flags
+
+	// Mapping visible to userspace
+	USER	= 1 << 24,
+	// Disable cache
+	CD	= 1 << 25,
+	// Write-through
+	WT	= 1 << 26,
 };
 
 let total_pages: size = 0z;

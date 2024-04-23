@@ -5,7 +5,7 @@ use arch::x86_64::{PAGESIZE, UPAGESIZE, PADDR_MASK};
 use errors::{error, errno};
 use log;
 
-def BRK_INIT: uintptr = 0x400000000000;
+def UBRK_INIT: uintptr = 0x400000000000u64: uintptr;
 
 // TODO: Assign ASID to each vspace
 
@@ -17,6 +17,19 @@ export type vspace = struct {
 	brk: uintptr,
 };
 
+let @symbol("_kernel_brk") kernel_brk: [*]u8;
+
+// Kernel virtual address space.
+export let kernel = vspace {
+	pml4 = 0,
+	brk = 0,
+};
+
+@init fn init() void = {
+	kernel.pml4 = x86_64::rdcr3(): uintptr;
+	kernel.brk = &kernel_brk: uintptr;
+};
+
 // Initializes a new address space, returning [[errno::NOMEM]] if there is not
 // sufficient memory.
 export fn new_vspace() (*vspace | error) = {
@@ -25,7 +38,7 @@ export fn new_vspace() (*vspace | error) = {
 	arch::map_kernel(pml4);
 	return alloc(vspace {
 		pml4 = pml4_phys,
-		brk = BRK_INIT,
+		brk = UBRK_INIT,
 	});
 };
 
@@ -56,7 +69,17 @@ export fn mmap(
 		return errno::INVAL;
 	};
 
-	const mflag = pte::P | pte::U;
+	const mflag = pte::P;
+	if (flags & flag::USER != 0) {
+		mflag |= pte::U;
+	};
+	if (flags & flag::CD != 0) {
+		mflag |= pte::PCD;
+	};
+	if (flags & flag::WT != 0) {
+		mflag |= pte::PWT;
+	};
+
 	if (prot & prot::WRITE != 0) {
 		mflag |= pte::W;
 	};
@@ -72,6 +95,7 @@ export fn mmap(
 		const phys = paddr + i: uintptr * UPAGESIZE;
 		let ent = map_tables(vs, vaddr + i: uintptr * UPAGESIZE)?;
 		*ent = phys | mflag;
+		x86_64::invlpg(vaddr + i);
 	};
 
 	return base;
