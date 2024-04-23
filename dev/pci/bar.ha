@@ -10,9 +10,9 @@ export type bar = enum uint {
 
 // Returns the address of a BAR register. The return value includes the PCI
 // flags; the caller should interpret them or mask them out.
-export fn read_bar_addr(dev: *pcidev, device: u32, bar: bar) uintptr = {
+export fn read_bar_addr(bus: *pcibus, device: u32, bar: bar) uintptr = {
 	const bar = bar: u8;
-	let val: u64 = readl(dev, device, PCI_BAR0 + bar * 4);
+	let val: u64 = readl(bus, device, PCI_BAR0 + bar * 4);
 	if (val & 1 == 1) {
 		// I/O space
 		return val: uintptr;
@@ -21,19 +21,19 @@ export fn read_bar_addr(dev: *pcidev, device: u32, bar: bar) uintptr = {
 	case 0, 1 =>
 		return val: uintptr;
 	case 2 =>
-		const msw = readl(dev, device, PCI_BAR0 + (bar + 1) * 4);
+		const msw = readl(bus, device, PCI_BAR0 + (bar + 1) * 4);
 		return (val | msw << 32): uintptr;
 	case => abort();
 	};
 };
 
 // Returns the length of the given BAR register's memory area.
-export fn probe_bar_size(dev: *pcidev, device: u32, bar: bar) size = {
+export fn probe_bar_size(bus: *pcibus, device: u32, bar: bar) size = {
 	const bar = bar: u8;
-	const orig = readl(dev, device, PCI_BAR0 + bar * 4);
-	defer writel(dev, device, PCI_BAR0 + bar * 4, orig);
-	writel(dev, device, PCI_BAR0 + bar * 4, ~0u32);
-	let val = readl(dev, device, PCI_BAR0 + bar * 4);
+	const orig = readl(bus, device, PCI_BAR0 + bar * 4);
+	defer writel(bus, device, PCI_BAR0 + bar * 4, orig);
+	writel(bus, device, PCI_BAR0 + bar * 4, ~0u32);
+	let val = readl(bus, device, PCI_BAR0 + bar * 4);
 
 	if (orig & 1 == 1) {
 		val &= 0xFFFFFFFC;

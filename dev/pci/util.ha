@@ -12,7 +12,7 @@ export fn device(bus: u8, slot: u8, func: u8) u32 =
 	bus: u32 << 16 | slot: u32 << 8 | func: u32;
 
 // Returns the device class/subclass for a given device.
-export fn read_type(dev: *pcidev, device: u32) u16 = {
-	return ((readb(dev, device, PCI_CLASS): u16 << 8)
-		| readb(dev, device, PCI_SUBCLASS): u16);
+export fn read_type(bus: *pcibus, device: u32) u16 = {
+	return ((readb(bus, device, PCI_CLASS): u16 << 8)
+		| readb(bus, device, PCI_SUBCLASS): u16);
 };
