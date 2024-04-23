@@ -111,6 +111,7 @@ export fn mmap(
 	for (i < length; i += PAGESIZE) {
 		const phys = paddr + i: uintptr * UPAGESIZE;
 		let ent = map_tables(vs, vaddr + i: uintptr * UPAGESIZE)?;
+		assert(*ent & pte::P == 0, "mmap: double map");
 		*ent = phys | mflag;
 		x86_64::invlpg(vaddr + i);
 	};
