@@ -52,7 +52,7 @@ fn hba_init(dev: *ahci_controller) void = {
 
 		let id = ata::ident { ... };
 		ata::decode_ident(buffer.data, &id);
-		port.sectors = id.sectors;
+		port.blocks = id.sectors;
 		log::kprintfln(AHCI, "Port {}: {} : SN {} : {} sectors",
 			i, id.model, id.serial, id.sectors);
 		block::register(port);

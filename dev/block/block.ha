@@ -9,13 +9,7 @@ export type blockdev = struct {
 	iface: interface,
 	serial: uint,
 	blocksz: size,
-};
-
-// Block device interface
-export type interface = enum uint {
-	SATA,
-	ATAPI,
-	NVME,
+	blocks: size,
 };
 
 // Reads a sector from a block device. len(buf) shall be a multiple of the block
@@ -36,22 +30,27 @@ let blockdevs: []*blockdev = [];
 
 // Registers a block device on the system, initializing its serial.
 export fn register(bdev: *blockdev) void = {
-	static let serial: uint = 0;
-	defer serial += 1;
-	bdev.serial = serial;
+	bdev.serial = serials[bdev.iface];
+	serials[bdev.iface] += 1;
 	append(blockdevs, bdev);
-	log::kprintfln(BLOCK, "Registered block device {}{}",
-		iface_str(bdev.iface), bdev.serial);
+	log::kprintfln(BLOCK, "Registered block device {}{} ({} bytes)",
+		iface_str(bdev.iface), bdev.serial,
+		bdev.blocks * bdev.blocksz);
 };
 
-// Returns a human-friendly representation of [[interface]].
-export fn iface_str(iface: interface) const str = {
-	switch (iface) {
-	case interface::SATA =>
-		return "sata";
-	case interface::ATAPI =>
-		return "atapi";
-	case interface::NVME =>
-		return "nvme";
-	};
+// Returns all registered block devices.
+export fn all() []*blockdev = {
+	return blockdevs;
+};
+
+// Reads a sector from a block device. len(buf) shall be a multiple of the block
+// device's block size.
+export fn read(bdev: *blockdev, lba: size, buf: []u8) (void | error) = {
+	return bdev.impl.read(bdev, lba, buf);
+};
+
+// Writes a sector of a block device. len(buf) shall be a multiple of the block
+// device's block size.
+export fn write(bdev: *blockdev, lba: size, buf: []u8) (void | error) = {
+	return bdev.impl.write(bdev, lba, buf);
 };

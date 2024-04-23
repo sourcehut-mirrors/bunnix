@@ -39,7 +39,7 @@ fn ahci_probe(info: *pci::probe_info) nullable *pci::pcidev = {
 
 	let controller = alloc(ahci_controller {
 		driver = &ahci_driver,
-		pool = &pool,
+		pool = pool,
 		bus = info.bus,
 		hba = ghc,
 		...

@@ -10,7 +10,6 @@ type ahci_port = struct {
 	block::blockdev,
 	base: *ahci_controller,
 	port: *hba_port,
-	sectors: size,
 	devtype: devtype,
 	mmio: *ahci_port_mmio,
 };

@@ -21,18 +21,19 @@ export type buffer = struct {
 	mask: u64,
 };
 
-export fn buffer_pool_init() buffer_pool = {
+export fn buffer_pool_init() *buffer_pool = {
 	const nbyte = NBUFFER * SECTORSZ;
 	const base = mman::mmap(&mman::kernel, 0, 0, nbyte,
 		mman::prot::READ | mman::prot::WRITE,
 		mman::flag::ANON | mman::flag::CD | mman::flag::DMA32)!;
 	const phys = mman::mmap_phys(&mman::kernel, base: uintptr);
-	log::kprintfln(AHCI, "Mapped DMA pool at 0x{:x}", base);
-	return buffer_pool {
+	log::kprintfln(AHCI, "Mapped DMA pool at 0x{:x} : {:x}",
+		base, phys);
+	return alloc(buffer_pool {
 		virt = base: *[NBUFFER * SECTORSZ]u8,
 		phys = phys,
 		bitmap = 0,
-	};
+	});
 };
 
 // Locks a buffer from the pool. May return a buffer smaller than the requested
