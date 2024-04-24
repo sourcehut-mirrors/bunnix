@@ -3,5 +3,6 @@
 *.img
 *.mb
 *.o
+*.a
 /bunnix
 /init
