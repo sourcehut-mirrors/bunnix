@@ -48,7 +48,7 @@ export fn open(name: str) (*blockdev | error) = {
 		return errno::NOENT;
 	} else if (len(result[3].content) != 0) {
 		const rn = strings::toutf8(result[3].content)[0];
-		part = ('a' - rn): int;
+		part = (rn - 'a'): int;
 	};
 
 	const iface = str_iface(iface);
