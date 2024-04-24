@@ -15,6 +15,7 @@ export fn main(ctx: *boot::context) void = {
 	mman::init(ctx);
 
 	arch::init();
+
 	dev::scan();
 
 	log::println("Nothing to do; idling");

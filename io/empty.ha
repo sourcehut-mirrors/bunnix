@@ -9,10 +9,11 @@ const _empty_vt: vtable = vtable {
 	...
 };
 
-const _empty: stream = &_empty_vt;
+// Static global [[io::empty]].
+export const static_empty: stream = &_empty_vt;
 
 // A [[stream]] which always reads EOF and discards any writes.
-export const empty: *stream = &_empty;
+export const empty: *stream = &static_empty;
 
 fn empty_read(s: *stream, buf: []u8) (size | EOF | error) = EOF;
 

@@ -1,13 +1,13 @@
-use cons;
+use io;
 
-let cons: *cons::console = &cons::empty;
+let cons: *io::stream = &io::static_empty;
 
 // Sets the kernel console driver.
-export fn setcons(to: *cons::console) void = {
+export fn setcons(to: *io::stream) void = {
 	cons = to;
 };
 
 // Writes data to the kernel console.
 export fn write(buf: []u8) size = {
-	return cons::write(cons, buf);
+	return io::write(cons, buf)!;
 };

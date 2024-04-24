@@ -1,5 +1,6 @@
 use arch::x86_64;
-use cons;
+use errors::{error, errno};
+use io;
 
 // Number of rows in the VGA console.
 export def VGA_ROWS: size = 25;
@@ -14,7 +15,7 @@ export def VGA_CELLS: size = VGA_ROWS * VGA_COLS;
 export const VGA_CONSBASE: *[VGA_CELLS]u16 = 0xb8000: uintptr: *[VGA_CELLS]u16;
 
 export type vga_console = struct {
-	cons::console,
+	vtable: io::stream,
 	base: nullable *[VGA_CELLS]u16,
 	row: uint,
 	col: uint,
@@ -43,14 +44,17 @@ export type vga_color = enum u8 {
 // Initializes a new VGA console.
 export fn vga_init(cons: *vga_console, base: *[VGA_CELLS]u16) void = {
 	*cons = vga_console {
-		write = &vga_write,
-		clear = &vga_clear,
+		vtable = &vga_vtable,
 		base = base,
 		...
 	};
 	curdisable();
 	initpos(cons);
-	cons::register(cons);
+};
+
+const vga_vtable = io::vtable {
+	writer = &vga_write,
+	...
 };
 
 fn curdisable() void = {
@@ -113,21 +117,11 @@ fn vga_putc(cons: *vga_console, rn: u8) void = {
 	};
 };
 
-fn vga_write(cons: *cons::console, buf: []u8) size = {
+fn vga_write(cons: *io::stream, buf: const []u8) (size | error) = {
 	let cons = cons: *vga_console;
-	assert(cons.write == &vga_write);
+	assert(cons.vtable == &vga_vtable);
 	for (let i = 0z; i < len(buf); i += 1) {
 		vga_putc(cons, buf[i]);
 	};
 	return len(buf);
-};
-
-fn vga_clear(cons: *cons::console) void = {
-	let cons = cons: *vga_console;
-	assert(cons.clear == &vga_clear);
-	let base = cons.base: *[VGA_ROWS * VGA_COLS]u16;
-	const empty = mkcell(' ', vga_color::BLACK, vga_color::LIGHT_GREY);
-	for (let i = 0z; i < len(base); i += 1) {
-		base[i] = empty;
-	};
 };

@@ -11,7 +11,7 @@ use types;
 export type field = (...formattable | *mods);
 
 // Tagged union of all types which are formattable.
-export type formattable = (...types::integer | uintptr | str | rune | bool |
+export type formattable = (...types::numeric | uintptr | str | rune | bool |
 	nullable *opaque | void);
 
 // Negative modifier. Specifies for numerical arguments when to prepend a plus

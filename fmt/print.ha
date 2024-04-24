@@ -2,40 +2,41 @@
 // (c) Hare authors <https://harelang.org>
 
 use encoding::utf8;
-use cons;
+use errors::{error, errno};
+use io;
 use math;
 use strconv;
 use strings;
 use types;
 
 // Formats values for printing using the default format modifiers and writes
-// them to an [[cons::console]] separated by spaces.
-export fn fprint(h: *cons::console, args: formattable...) size = {
+// them to an [[io::stream]] separated by spaces.
+export fn fprint(h: *io::stream, args: formattable...) (error | size) = {
 	let mod = mods { ... };
 	let n = 0z;
 	for (let i = 0z; i < len(args); i += 1) {
-		n += format(h, args[i], &mod);
+		n += format(h, args[i], &mod)?;
 		if (i != len(args) - 1) {
-			n += format(h, " ", &mod);
+			n += format(h, " ", &mod)?;
 		};
 	};
 	return n;
 };
 
-// Formats text for printing and writes it to an [[cons::console]].
+// Formats text for printing and writes it to an [[io::stream]].
 export fn fprintf(
-	h: *cons::console,
+	h: *io::stream,
 	fmt: str,
 	args: field...
-) size = {
+) (error | size) = {
 	let n = 0z, i = 0z;
 	let it = iter(fmt, args);
 	for (true) match (next(&it)) {
 	case done => break;
 	case let s: str =>
-		n += format(h, s, &mods { ... });
+		n += format(h, s, &mods { ... })?;
 	case let f: (formattable, mods) =>
-		n += format(h, f.0, &f.1);
+		n += format(h, f.0, &f.1)?;
 	};
 
 	assert(!it.checkunused || it.idx == len(args), "Too many parameters given");
@@ -43,15 +44,15 @@ export fn fprintf(
 };
 
 fn format(
-	out: *cons::console,
+	out: *io::stream,
 	arg: formattable,
 	mod: *mods,
-) size = {
+) (size | error) = {
 	let start = 0z;
 	// guaranteed not to have starting padding in either of these cases
 	// saves the extra format_raw()
 	if (mod.width > 0 && mod.alignment != alignment::LEFT) {
-		let width = format_raw(&cons::empty, arg, mod);
+		let width = format_raw(io::empty, arg, mod)?;
 		let pad = if (width > mod.width) 0z else mod.width - width;
 
 		switch (mod.alignment) {
@@ -63,44 +64,44 @@ fn format(
 
 	let z = 0z;
 	for (z < start) {
-		z += cons::write(out, utf8::encoderune(mod.pad));
+		z += io::write(out, utf8::encoderune(mod.pad))?;
 	};
-	z += format_raw(out, arg, mod);
+	z += format_raw(out, arg, mod)?;
 	for (z < mod.width) {
-		z += cons::write(out, utf8::encoderune(mod.pad));
+		z += io::write(out, utf8::encoderune(mod.pad))?;
 	};
 
 	return z;
 };
 
 fn format_raw(
-	out: *cons::console,
+	out: *io::stream,
 	arg: formattable,
 	mod: *mods,
-) size = match (arg) {
+) (size | error) = match (arg) {
 case void =>
-	return cons::write(out, strings::toutf8("void"));
+	return io::write(out, strings::toutf8("void"));
 case let r: rune =>
-	return cons::write(out, utf8::encoderune(r));
+	return io::write(out, utf8::encoderune(r));
 case let s: str =>
 	if (mod.prec > 0 && mod.prec < len(s)) {
 		s = strings::sub(s, 0, mod.prec);
 	};
-	return cons::write(out, strings::toutf8(s));
+	return io::write(out, strings::toutf8(s));
 case let b: bool =>
-	return cons::write(out, strings::toutf8(if (b) "true" else "false"));
+	return io::write(out, strings::toutf8(if (b) "true" else "false"));
 case let p: uintptr =>
 	const s = strconv::uptrtos(p, mod.base);
-	return cons::write(out, strings::toutf8(s));
+	return io::write(out, strings::toutf8(s));
 case let v: nullable *opaque =>
 	match (v) {
 	case let v: *opaque =>
-		let z = cons::write(out, strings::toutf8("0x"));
+		let z = io::write(out, strings::toutf8("0x"))?;
 		const s = strconv::uptrtos(v: uintptr, strconv::base::HEX_LOWER);
-		z += cons::write(out, strings::toutf8(s));
+		z += io::write(out, strings::toutf8(s))?;
 		return z;
 	case null =>
-		return cons::write(out, strings::toutf8("(null)"));
+		return io::write(out, strings::toutf8("(null)"));
 	};
 case let i: types::integer =>
 	let neg = match (i) {
@@ -125,10 +126,10 @@ case let i: types::integer =>
 		yield mod.prec - len(sign) - len(i);
 	};
 
-	let z = cons::write(out, strings::toutf8(sign));
+	let z = io::write(out, strings::toutf8(sign))?;
 	for (let i = 0z; i < pad) {
-		i += cons::write(out, ['0']);
+		i += io::write(out, ['0'])?;
 	};
 	z += pad;
-	return z + cons::write(out, strings::toutf8(i));
+	return z + io::write(out, strings::toutf8(i))?;
 };
