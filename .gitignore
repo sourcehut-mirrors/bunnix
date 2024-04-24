@@ -2,5 +2,6 @@
 *.iso
 *.img
 *.mb
+*.o
 /bunnix
 /init
