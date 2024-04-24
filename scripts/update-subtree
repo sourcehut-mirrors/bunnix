@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# Usage: ./update-subtree <tree>
+#
+# Accepted trees:
+# - lwext4
+tree=$1
+
+case $tree in
+	lwext4)
+		prefix=vendor/lwext4
+		repo=https://github.com/gkostka/lwext4
+		ref=master
+		;;
+	*)
+		echo "Unknown subtree"
+		exit 1
+		;;
+esac
+
+git subtree pull --squash --prefix=$prefix $repo $ref
