@@ -16,10 +16,17 @@ fs.fat.img:
 	mcopy -i $@ README.md ::README.md
 	mcopy -i $@ COPYING ::COPYING
 
-disk.mbr.img: fs.fat.img
+fs.ext4.img:
+	mkdir .ext4dir
+	cp COPYING README.md .ext4dir
+	qemu-img create -f raw $@ 48M
+	mkfs.ext4 -d .ext4dir -O^metadata_csum $@
+
+disk.mbr.img: fs.fat.img fs.ext4.img
 	qemu-img create -f raw $@ 128M
 	sfdisk $@ < scripts/mkdisk-mbr
 	dd if=fs.fat.img of=$@ seek=2048
+	dd if=fs.ext4.img of=$@ seek=133120
 
 disk.gpt.img: fs.fat.img
 	qemu-img create -f raw $@ 128M
