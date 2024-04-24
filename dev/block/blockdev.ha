@@ -1,4 +1,5 @@
 use errors::{error, errno};
+use fmt;
 
 // Block device.
 export type blockdev = struct {
@@ -35,4 +36,20 @@ export fn read(bdev: *blockdev, lba: size, buf: []u8) (void | error) = {
 // device's block size.
 export fn write(bdev: *blockdev, lba: size, buf: []u8) (void | error) = {
 	return bdev.impl.write(bdev, lba, buf);
+};
+
+// Returns the name of this block device. The return value is statically
+// allocated.
+export fn name(bdev: *blockdev) const str = {
+	static let buf: [256]u8 = [0...];
+	if (bdev.iface == interface::BLOCKPART) {
+		const part = bdev: *blockpart;
+		return fmt::bsprintf(buf, "{}{}{}",
+			iface_str(part.bdev.iface),
+			part.bdev.serial,
+			partnames[part.partno]);
+	} else {
+		return fmt::bsprintf(buf, "{}{}",
+			iface_str(bdev.iface), bdev.serial);
+	};
 };
