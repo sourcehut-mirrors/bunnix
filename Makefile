@@ -6,13 +6,15 @@ include mk/$(ARCH).mk
 HARECONFIG = -a$(HAREARCH) -T^+$(HAREARCH) -RF
 HAREBUILD=HAREPATH=. $(HARE) build $(HARECONFIG)
 
-bunnix:
-	$(HAREBUILD) -T+bunnix -o $@
+include vendor/Makefile
+
+bunnix: $(CTARGETS)
+	$(HAREBUILD) $(LIBS) -T+bunnix -o $@
 .PHONY: bunnix
 
 init:
 	$(HAREBUILD) -T+user -o $@ cmd/init/
 .PHONY: init
 
-clean: arch-clean
+clean: clean-arch clean-vendor
 	rm -f bunnix init

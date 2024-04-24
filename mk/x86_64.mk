@@ -41,7 +41,7 @@ bunnix.iso: bunnixboot.mb boot/mb/syslinux.cfg bunnix init
 		-no-emul-boot -boot-load-size 4 -boot-info-table .isodir
 	isohybrid $@
 
-arch-clean:
+clean-arch:
 	rm -rf bunnix.iso bunnixboot.mb .isodir
 .PHONY: arch-clean
 

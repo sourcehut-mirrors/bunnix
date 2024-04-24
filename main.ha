@@ -7,6 +7,10 @@ use dev::block;
 use log;
 use mman;
 use rt;
+// For testing:
+use lib::lwext4;
+
+@symbol("ext4_umount") fn ext4_umount(mount_point: nullable *opaque) int;
 
 const KERN: str = "kern";
 
