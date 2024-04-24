@@ -1,0 +1,2 @@
+This is the upstream Hare I/O module, patched to only support io::stream for
+internal kernel I/O abstractions like memio.

@@ -3,6 +3,7 @@ export type errno = enum uint {
 	NONE = 0,
 	NOMEM,
 	OVERFLOW,
+	UNDERFLOW,
 	INVAL,
 	EXIST,
 	NOTSUP,
