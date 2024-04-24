@@ -1,11 +1,7 @@
 use types::c;
+use log;
 
 export type FILE = opaque;
-
-// XXX Hack
-export const stdin: *FILE = 0: uintptr: *FILE;
-export const stdout: *FILE = 1: uintptr: *FILE;
-export const stderr: *FILE = 2: uintptr: *FILE;
 
 // stub
 export @symbol("fflush") fn fflush(stream: nullable *FILE) int = {
@@ -13,12 +9,6 @@ export @symbol("fflush") fn fflush(stream: nullable *FILE) int = {
 };
 
 // stub
-// XXX: ... is omitted due to some kind of SSE bug with qbe(?)
-export @symbol("printf") fn printf(format: *const c::char) int = {
-	return 0;
-};
-
-// stub
 export @symbol("puts") fn puts(s: const *c::char) int = {
-	return 1;
+	return log::println(c::tostr_unsafe(s)): int;
 };
