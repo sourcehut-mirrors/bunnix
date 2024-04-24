@@ -13,7 +13,8 @@ export @symbol("fflush") fn fflush(stream: nullable *FILE) int = {
 };
 
 // stub
-export @symbol("printf") fn printf(format: *const c::char, ...) int = {
+// XXX: ... is omitted due to some kind of SSE bug with qbe(?)
+export @symbol("printf") fn printf(format: *const c::char) int = {
 	return 0;
 };
 
