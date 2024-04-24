@@ -29,6 +29,3 @@ export type blockdev = struct {
 	fs: nullable *fs,
 	journal: nullable *opaque,
 };
-
-export type bcache = opaque;
-export type fs = opaque;
