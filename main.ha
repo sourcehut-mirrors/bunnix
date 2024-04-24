@@ -2,6 +2,7 @@ use arch::main;		// link
 use arch;
 use boot;
 use dev;
+use dev::block;
 use log;
 use mman;
 use rt;
