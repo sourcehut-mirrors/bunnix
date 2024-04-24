@@ -3,15 +3,9 @@ use blibc;		// link
 use arch;
 use boot;
 use dev;
-use dev::block;
 use log;
 use mman;
 use rt;
-// For testing:
-use lib::lwext4;
-use types::c;
-use errors::{errno};
-use strings;
 
 const KERN: str = "kern";
 
@@ -25,6 +19,9 @@ export fn main(ctx: *boot::context) void = {
 
 	// Scan for devices
 	dev::scan();
+
+	// System startup
+	// (TODO)
 
 	log::println("Nothing to do; idling");
 	rt::halt();
