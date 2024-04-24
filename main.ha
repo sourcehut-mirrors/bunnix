@@ -1,4 +1,5 @@
 use arch::main;		// link
+use blibc;		// link
 use arch;
 use boot;
 use dev;

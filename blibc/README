@@ -1,0 +1,1 @@
+blibc provides support code for C libraries linked into the Bunnix kernel.
