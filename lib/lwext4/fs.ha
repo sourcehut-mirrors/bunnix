@@ -1,3 +1,7 @@
+// See ext4_fs.h
+
+use errors::{errno, error};
+
 export type jbd_fs = opaque;
 export type jbd_journal = opaque;
 export type jbd_trans = opaque;
@@ -36,6 +40,6 @@ export type inode_ref = struct {
 	dirty: bool,
 };
 
-export @symbol("ext4_fs_init") fn fs_init(*fs, *blockdev, bool) int;
-export @symbol("ext4_fs_fini") fn fs_fini(*fs) int;
-export @symbol("ext4_fs_get_inode_ref") fn fs_get_inode_ref(*fs, u32, *inode_ref) int;
+export @symbol("ext4_fs_init") fn fs_init(*fs, *blockdev, bool) errno;
+export @symbol("ext4_fs_fini") fn fs_fini(*fs) errno;
+export @symbol("ext4_fs_get_inode_ref") fn fs_get_inode_ref(*fs, u32, *inode_ref) errno;

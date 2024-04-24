@@ -29,3 +29,5 @@ export type blockdev = struct {
 	fs: nullable *fs,
 	journal: nullable *opaque,
 };
+
+export @symbol("ext4_block_init") fn block_init(*blockdev) errno;
