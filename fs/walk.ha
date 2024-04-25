@@ -42,3 +42,16 @@ export fn inode_walk(
 		};
 	};
 };
+
+// Walks a VFS from the root to find the node at a given path.
+export fn walk(
+	root: *vfs,
+	path: str,
+	flag: walkflag = walkflag::NONE,
+) (*inode | error) = {
+	const p = path::init(path)!;
+	const iter = path::iter(&p);
+	const mp = find_mountpoint(root, &iter)?;
+	const root = superblock_get_root(mp.sb);
+	return inode_walk(root, &iter, flag);
+};

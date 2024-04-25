@@ -15,6 +15,8 @@ use strings;
 
 const KERN: str = "kern";
 
+let root = fs::vfs { ... };
+
 export fn main(ctx: *boot::context) void = {
 	log::kprintln(KERN, "Bunnix kernel boot");
 	log::kprintfln(KERN, "Kernel command line: {}", ctx.cmdline);
@@ -29,19 +31,18 @@ export fn main(ctx: *boot::context) void = {
 	// System startup
 	// (TODO)
 
+	log::kprintln(KERN, "Mount root from sata0b as ext4");
 	const bdev = block::open("sata0b")!;
 	const fs = ext4::open(bdev)!;
-	const root = fs::superblock_get_root(fs);
+	fs::mount_root(&root, fs);
+
+	const dir = fs::walk(&root, "/")!;
 	log::printfln("root inode: {} mode 0{:o} uid/gid {}:{} dev {}",
-		root, root.mode: uint, root.uid, root.gid, root.dev);
-	listdir(root);
+		dir, dir.mode: uint, dir.uid, dir.gid, dir.dev);
+	listdir(dir);
 
 	log::println("First 128 bytes of /bunnix/config.mk:");
-	const path = path::init("/bunnix/config.mk")!;
-	const iter = path::iter(&path);
-	path::nextiter(&iter); // Skip /
-	const node = fs::inode_walk(root, &iter)!;
-
+	const node = fs::walk(&root, "/bunnix/config.mk")!;
 	const file = fs::inode_open(node)!;
 	let buf: [128]u8 = [0...];
 	const n = fs::file_read(file, buf) as size;

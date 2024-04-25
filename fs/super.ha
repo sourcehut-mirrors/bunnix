@@ -1,3 +1,5 @@
+use dev::block;
+
 // Superblock, i.e. a reference to a single filesystem
 export type superblock = struct {
 	impl: const *superblock_iface,
