@@ -30,7 +30,19 @@ export fn main(ctx: *boot::context) void = {
 	const bdev = block::open("sata0b")!;
 	const fs = ext4::open(bdev)!;
 	const root = fs::superblock_get_root(fs);
-	log::printfln("root inode: {}", root);
+	log::printfln("root inode: {} mode 0{:o} uid/gid {}:{} dev {}",
+		root, root.mode: uint, root.uid, root.gid, root.dev);
+	const rootfd = fs::inode_open(root)!;
+	log::println("Contents of root:");
+
+	let dent = fs::dirent { ... };
+	for (true) {
+		match (fs::file_readdir(rootfd, &dent)!) {
+		case void => yield;
+		case fs::EOF => break;
+		};
+		log::printfln("{}", dent.name);
+	};
 
 	log::println("Nothing to do; idling");
 	rt::halt();

@@ -6,12 +6,13 @@ export type inode = struct {
 	impl: const *inode_iface,
 	sb: const *superblock,
 	ino: uint,
-	dev: (uint, uint),
+	dev: uint,
 	mode: mode,
 	uid: uint,
 	gid: uint,
 	blocks: size,
 	bytes: size,
+	// TODO: Add times
 };
 
 // Opens an inode file.

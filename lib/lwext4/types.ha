@@ -203,3 +203,28 @@ export def EXT4_INODE_FLAG_EOFBLOCKS: uint = 0x00400000;
 export def EXT4_INODE_FLAG_RESERVED: uint = 0x80000000;
 
 export def EXT4_INODE_ROOT_INDEX: uint = 2;
+
+export def EXT4_DIRECTORY_FILENAME_LEN: uint = 255;
+
+export def EXT4_DE_UNKNOWN: u8 = 0;
+export def EXT4_DE_REG_FILE: u8 = 1;
+export def EXT4_DE_DIR: u8 = 2;
+export def EXT4_DE_CHRDEV: u8 = 3;
+export def EXT4_DE_BLKDEV: u8 = 4;
+export def EXT4_DE_FIFO: u8 = 5;
+export def EXT4_DE_SOCK: u8 = 6;
+export def EXT4_DE_SYMLIN: u8 = 7;
+
+export type dir_en_internal = union {
+	name_length_high: u8,
+	inode_type: u8,
+};
+
+export type dir_en = struct {
+	inode: u32,
+	entry_len: u16,
+	name_len: u8,
+
+	in: dir_en_internal,
+	name: [*]c::char,
+};
