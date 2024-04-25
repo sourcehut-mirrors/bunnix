@@ -18,10 +18,18 @@ fs.fat.img:
 
 fs.ext4.img:
 	mkdir -p .ext4dir
-	cp COPYING README.md .ext4dir
 	# Copy the source tree into the ext4 system just to have some
 	# interesting files to look at
 	git archive --prefix=bunnix/ HEAD | tar -C .ext4dir/ -x
+	mkdir -p \
+		.ext4dir/bin \
+		.ext4dir/boot \
+		.ext4dir/dev \
+		.ext4dir/etc \
+		.ext4dir/lib \
+		.ext4dir/proc \
+		.ext4dir/tmp \
+		.ext4dir/var
 	qemu-img create -f raw $@ 48M
 	mkfs.ext4 -d .ext4dir -O^metadata_csum $@
 

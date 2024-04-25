@@ -15,7 +15,7 @@ export type superblock = struct {
 
 // Opens a block device as an ext4 filesystem.
 export fn open(bdev: *block::blockdev) (*fs::superblock | error) = {
-	log::kprintfln(EXT4, "Opening filesystem from {}", block::name(bdev));
+	log::kprintfln(EXT4, "Opening ext4 filesystem from {}", block::name(bdev));
 
 	// TODO:
 	// - Verify block dev not in use by another filesystem

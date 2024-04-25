@@ -24,6 +24,26 @@ export fn mount_root(
 	});
 };
 
+// Mounts a filesystem at the given path.
+export fn mount_fs(
+	vfs: *vfs,
+	fs: const *superblock,
+	path: str,
+) (void | error) = {
+	for (let mnt &.. vfs.mounts) {
+		if (mnt.path == path) {
+			return errno::BUSY;
+		};
+	};
+
+	// TODO: Check that mountpoint exists
+
+	append(vfs.mounts, mountpoint {
+		path = strings::dup(path),
+		sb = fs,
+	});
+};
+
 // Finds the mountpoint associated with the given path and trims off the leading
 // path components.
 export fn find_mountpoint(
