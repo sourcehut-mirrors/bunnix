@@ -11,7 +11,8 @@ export type inode = struct {
 
 fn get_inode(sb: *superblock, ino: u32) (*inode | error) = {
 	let ref = lwext4::inode_ref { ... };
-	let r = lwext4::fs_get_inode_ref(&sb.lwfs, ino, &ref);
+	let fs = &sb.mp.fs;
+	let r = lwext4::fs_get_inode_ref(fs, ino, &ref);
 	if (r != errno::NONE) {
 		return r;
 	};
@@ -19,7 +20,7 @@ fn get_inode(sb: *superblock, ino: u32) (*inode | error) = {
 };
 
 fn inode_from_ref(sb: *superblock, ref: *lwext4::inode_ref) (*inode | error) = {
-	let lsb = &sb.lwfs.sb;
+	let fs = &sb.mp.fs;
 	let ino = alloc(inode {
 		impl = &inode_impl,
 		sb = sb,
@@ -27,12 +28,12 @@ fn inode_from_ref(sb: *superblock, ref: *lwext4::inode_ref) (*inode | error) = {
 		inode = ref.inode as *lwext4::inode,
 		...
 	});
-	ino.mode = lwext4::inode_get_mode(lsb, ino.inode): fs::mode;
+	ino.mode = lwext4::inode_get_mode(&fs.sb, ino.inode): fs::mode;
 	ino.uid = lwext4::inode_get_uid(ino.inode);
 	ino.gid = lwext4::inode_get_gid(ino.inode);
 	ino.dev = lwext4::inode_get_dev(ino.inode);
-	ino.bytes = lwext4::inode_get_size(lsb, ino.inode);
-	ino.blocks = lwext4::inode_get_blocks_count(lsb, ino.inode);
+	ino.bytes = lwext4::inode_get_size(&fs.sb, ino.inode);
+	ino.blocks = lwext4::inode_get_blocks_count(&fs.sb, ino.inode);
 	return ino;
 };
 

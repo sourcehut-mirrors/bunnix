@@ -6,6 +6,7 @@ export type file = struct {
 	fs::file,
 	union {
 		diter: lwext4::dir_iter,
+		lwfile: lwext4::file,
 	},
 };
 

@@ -37,14 +37,14 @@ fn dir_readdir(fd: *fs::file, dent: *fs::dirent) (void | fs::EOF | error) = {
 
 	const inode = fd.inode: *inode;
 	const sb = inode.sb: *superblock;
-	const lwsb = &sb.lwfs.sb;
+	const fs = &sb.mp.fs;
 	const cur = match (fd.diter.curr) {
 	case null =>
 		return fs::EOF;
 	case let dent: *lwext4::dir_en =>
 		yield dent;
 	};
-	const nameln = lwext4::dir_en_get_name_len(lwsb, cur);
+	const nameln = lwext4::dir_en_get_name_len(&fs.sb, cur);
 	const name = c::tostrn_unsafe(&cur.name[0], nameln);
 
 	const mode = switch (cur.in.inode_type) {
