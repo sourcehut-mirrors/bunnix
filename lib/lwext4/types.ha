@@ -228,3 +228,96 @@ export type dir_en = struct {
 	in: dir_en_internal,
 	name: [*]c::char,
 };
+
+// ...
+
+export def JBD_MAGIC_NUMBER: u32 = 0xc03b3998;
+
+export def JBD_DESCRIPTOR_BLOCK: u32 = 1;
+export def JBD_COMMIT_BLOCK: u32 = 2;
+export def JBD_SUPERBLOCK: u32 = 3;
+export def JBD_SUPERBLOCK_V2: u32 = 4;
+export def JBD_REVOKE_BLOCK: u32 = 5;
+
+export type jbd_bhdr = struct @packed {
+	magic: u32,
+	blocktype: u32,
+	sequence: u32,
+};
+
+export def JBD_CRC32_CHKSUM: u32 = 1;
+export def JBD_MD5_CHKSUM: u32 = 2;
+export def JBD_SHA1_CHKSUM: u32 = 3;
+export def JBD_CRC32C_CHKSUM: u32 = 4;
+
+export def JBD_CRC32_CHKSUM_SIZE: u32 = 4;
+
+export def JBD_CHECKSUM_BYTES = 32 / size(u32);
+
+export type jbd_commit_header = struct @packed {
+	header: jbd_bhdr,
+	chksum_type: u8,
+	chksum_size: u8,
+	padding: [2]u8,
+	chksum: [JBD_CHECKSUM_BYTES]u8,
+	commit_sec: u64,
+	commit_nsec: u32,
+};
+
+export type jbd_block_tag3 = struct @packed {
+	blocknr: u32,
+	flags: u32,
+	blocknr_high: u32,
+	checksum: u32,
+};
+
+export type jbd_block_tag = struct @packed {
+	blocknr: u32,
+	checksum: u16,
+	flags: u16,
+	blocknr_high: u32,
+};
+
+export def JBD_FLAG_ESCAPE: u16 = 1;
+export def JBD_FLAG_SAME_UUID: u16 = 2;
+export def JBD_FLAG_DELETED: u16 = 4;
+export def JBD_FLAG_LAST_TAG: u16 = 8;
+
+export type jbd_block_tail = struct @packed {
+	checksum: u32,
+};
+
+export type jbd_revoke_header = struct @packed {
+	header: jbd_bhdr,
+	count: u32,
+};
+
+export type jbd_revoke_tail = struct @packed {
+	checksum: u32,
+};
+
+export def JBD_USERS_MAX = 48;
+export def JBD_USERS_SIZE = UUID_SIZE * JBD_USERS_MAX;
+
+export type jbd_sb = struct @packed {
+	header: jbd_bhdr,
+	blocksize: u32,
+	maxlen: u32,
+	first: u32,
+	sequence: u32,
+	start: u32,
+	error_val: i32,
+	feature_compat: u32,
+	feature_incompat: u32,
+	feature_ro_compat: u32,
+	uuid: [UUID_SIZE]u8,
+	nr_users: u32,
+	dynsuper: u32,
+	max_transaction: u32,
+	max_trandata: u32,
+	checksum_type: u8,
+	padding2: [3]u8,
+	padding: [42]u32,
+	checksum: u32,
+	users: [JBD_USERS_SIZE]u8,
+};

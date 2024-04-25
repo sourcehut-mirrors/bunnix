@@ -3,7 +3,10 @@ use types::c;
 
 // See ext4.h
 
-export type mountpoint = opaque;
+export type lock = struct {
+	lock: *fn() void,
+	unlock: *fn() void,
+};
 
 export type file = struct {
 	mp: nullable *mountpoint,

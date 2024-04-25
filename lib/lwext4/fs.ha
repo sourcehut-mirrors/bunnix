@@ -2,10 +2,6 @@
 
 use errors::{errno, error};
 
-export type jbd_fs = opaque;
-export type jbd_journal = opaque;
-export type jbd_trans = opaque;
-
 export type fs = struct {
 	read_only: bool,
 

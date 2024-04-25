@@ -19,15 +19,9 @@ export type bcache = struct {
 	bdev: nullable *blockdev,
 	dont_shake: bool,
 
-	lba_root: struct {
-		rbh_root: nullable *buf,
-	},
-	lru_root: struct {
-		rbh_root: nullable *buf,
-	},
-	dirty_list: struct {
-		slh_first: nullable *buf,
-	},
+	lba_root: rb_head,
+	lru_root: rb_head,
+	dirty_list: slist_head,
 };
 
 export @symbol("ext4_bcache_init_dynamic") fn bcache_init_dynamic(*bcache, u32, u32) errno;
