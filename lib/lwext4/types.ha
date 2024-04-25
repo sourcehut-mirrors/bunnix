@@ -166,3 +166,40 @@ export type inode = struct @packed {
 	crtime_extra: u32,
 	version_hi: u32,
 };
+
+export def EXT4_INODE_MODE_FIFO: uint = 0x1000;
+export def EXT4_INODE_MODE_CHARDEV: uint = 0x2000;
+export def EXT4_INODE_MODE_DIRECTORY: uint = 0x4000;
+export def EXT4_INODE_MODE_BLOCKDEV: uint = 0x6000;
+export def EXT4_INODE_MODE_FILE: uint = 0x8000;
+export def EXT4_INODE_MODE_SOFTLINK: uint = 0xA000;
+export def EXT4_INODE_MODE_SOCKET: uint = 0xC000;
+export def EXT4_INODE_MODE_TYPE_MASK: uint = 0xF000;
+
+export def EXT4_INODE_FLAG_SECRM: uint = 0x00000001;
+export def EXT4_INODE_FLAG_UNRM: uint = 0x00000002;
+export def EXT4_INODE_FLAG_COMPR: uint = 0x00000004;
+export def EXT4_INODE_FLAG_SYNC: uint = 0x00000008;
+export def EXT4_INODE_FLAG_IMMUTABLE: uint = 0x00000010;
+export def EXT4_INODE_FLAG_APPEND: uint = 0x00000020;
+export def EXT4_INODE_FLAG_NODUMP: uint = 0x00000040;
+export def EXT4_INODE_FLAG_NOATIME: uint = 0x00000080;
+
+export def EXT4_INODE_FLAG_DIRTY: uint = 0x00000100;
+export def EXT4_INODE_FLAG_COMPRBLK: uint = 0x00000200;
+export def EXT4_INODE_FLAG_NOCOMPR: uint = 0x00000400;
+export def EXT4_INODE_FLAG_ECOMPR: uint = 0x00000800;
+
+export def EXT4_INODE_FLAG_INDEX: uint = 0x00001000;
+export def EXT4_INODE_FLAG_IMAGIC: uint = 0x00002000;
+export def EXT4_INODE_FLAG_JOURNAL_DATA: uint = 0x00004000;
+export def EXT4_INODE_FLAG_NOTAIL: uint = 0x00008000;
+export def EXT4_INODE_FLAG_DIRSYNC: uint = 0x00010000;
+export def EXT4_INODE_FLAG_TOPDIR: uint = 0x00020000;
+export def EXT4_INODE_FLAG_HUGE_FILE: uint = 0x00040000;
+export def EXT4_INODE_FLAG_EXTENTS: uint = 0x00080000;
+export def EXT4_INODE_FLAG_EA_INODE: uint = 0x00200000;
+export def EXT4_INODE_FLAG_EOFBLOCKS: uint = 0x00400000;
+export def EXT4_INODE_FLAG_RESERVED: uint = 0x80000000;
+
+export def EXT4_INODE_ROOT_INDEX: uint = 2;

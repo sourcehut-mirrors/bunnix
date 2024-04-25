@@ -31,3 +31,6 @@ export type blockdev = struct {
 };
 
 export @symbol("ext4_block_init") fn block_init(*blockdev) errno;
+export @symbol("ext4_block_bind_bcache") fn block_bind_bcache(*blockdev, *bcache) errno;
+// ...
+export @symbol("ext4_block_set_lb_size") fn block_set_lb_size(*blockdev, u32) void;
