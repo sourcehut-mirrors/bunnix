@@ -3,6 +3,7 @@
 //
 // Hare's upstream memory allocator, modified for Bunnix use
 use arch;
+use bytes;
 use errors::{error, errno};
 use rt;
 

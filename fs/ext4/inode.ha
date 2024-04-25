@@ -28,6 +28,7 @@ fn inode_from_ref(sb: *superblock, ref: *lwext4::inode_ref) (*inode | error) = {
 		inode = ref.inode as *lwext4::inode,
 		...
 	});
+	ino.ino = ref.index;
 	ino.mode = lwext4::inode_get_mode(&fs.sb, ino.inode): fs::mode;
 	ino.uid = lwext4::inode_get_uid(ino.inode);
 	ino.gid = lwext4::inode_get_gid(ino.inode);

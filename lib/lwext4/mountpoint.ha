@@ -7,7 +7,7 @@ use types::c;
 
 export type mountpoint = struct {
 	mounted: bool,
-	name: [33]c::char,
+	name: [32 + 1]c::char,
 	os_locks: nullable *lock,
 	fs: fs,
 	jbd_fs: jbd_fs,

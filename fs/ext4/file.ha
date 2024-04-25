@@ -19,9 +19,10 @@ fn mkfile(ino: *inode) (*fs::file | error) = {
 		} else {
 			return errno::NOTSUP;
 		};
-	return alloc(file {
+	const f = alloc(file {
 		impl = impl,
 		inode = ino,
 		...
 	});
+	return f;
 };

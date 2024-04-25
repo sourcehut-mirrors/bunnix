@@ -17,8 +17,11 @@ fs.fat.img:
 	mcopy -i $@ COPYING ::COPYING
 
 fs.ext4.img:
-	mkdir .ext4dir
+	mkdir -p .ext4dir
 	cp COPYING README.md .ext4dir
+	# Copy the source tree into the ext4 system just to have some
+	# interesting files to look at
+	git archive --prefix=bunnix/ HEAD | tar -C .ext4dir/ -x
 	qemu-img create -f raw $@ 48M
 	mkfs.ext4 -d .ext4dir -O^metadata_csum $@
 
