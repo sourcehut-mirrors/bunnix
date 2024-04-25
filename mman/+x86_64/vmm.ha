@@ -7,10 +7,10 @@ use errors::{error, errno};
 def UBRK_INIT: uintptr = 0x400000000000u64: uintptr;
 def GUARD: uintptr = UPAGESIZE * 2;
 
-// TODO: Assign ASID to each vspace
+// TODO: Assign ASID to each vmm
 
 // Virtual address space object (on x86_64, physical address of a PML4).
-export type vspace = struct {
+export type vmm = struct {
 	// Physical address
 	pml4: uintptr,
 	// Heap break
@@ -20,7 +20,7 @@ export type vspace = struct {
 let @symbol("_kernel_brk") kernel_brk: [*]u8;
 
 // Kernel virtual address space.
-export let kernel = vspace {
+export let kernel = vmm {
 	pml4 = 0,
 	brk = 0,
 };
@@ -32,30 +32,30 @@ export let kernel = vspace {
 
 // Initializes a new address space, returning [[errno::NOMEM]] if there is not
 // sufficient memory.
-export fn new_vspace() (*vspace | error) = {
+export fn new_vmm() (*vmm | error) = {
 	const pml4_phys = physalloc(size(x86_64::pml4))?;
 	const pml4 = arch::phys_tokernel(pml4_phys): *x86_64::pml4;
 	arch::map_kernel(pml4);
-	return alloc(vspace {
+	return alloc(vmm {
 		pml4 = pml4_phys,
 		brk = UBRK_INIT,
 	});
 };
 
 // Activates a virtual address space.
-export fn vspace_map(vs: *vspace) void = {
-	x86_64::wrcr3(vs.pml4);
+export fn map_vmm(vmm: *vmm) void = {
+	x86_64::wrcr3(vmm.pml4);
 };
 
 // Returns the physical memory address mapped to this virtual address.
-export fn mmap_phys(vs: *vspace, vaddr: uintptr) uintptr = {
-	const pte = arch::getpte(vs.pml4, vaddr) as *pte;
+export fn mmap_phys(vmm: *vmm, vaddr: uintptr) uintptr = {
+	const pte = arch::getpte(vmm.pml4, vaddr) as *pte;
 	return *pte: uintptr & PADDR_MASK;
 };
 
 // Maps physical pages into a virtual address space.
 export fn mmap(
-	vs: *vspace,
+	vmm: *vmm,
 	paddr: uintptr,
 	vaddr: uintptr,
 	length: size,
@@ -64,7 +64,7 @@ export fn mmap(
 ) (uintptr | error) = {
 	let dobrk = vaddr == 0;
 	if (vaddr == 0) {
-		vaddr = vs.brk;
+		vaddr = vmm.brk;
 	};
 
 	if (flags & flag::ANON != 0) {
@@ -110,20 +110,20 @@ export fn mmap(
 	let i = 0z;
 	for (i < length; i += PAGESIZE) {
 		const phys = paddr + i: uintptr * UPAGESIZE;
-		let ent = map_tables(vs, vaddr + i: uintptr * UPAGESIZE)?;
+		let ent = map_tables(vmm, vaddr + i: uintptr * UPAGESIZE)?;
 		assert(*ent & pte::P == 0, "mmap: double map");
 		*ent = phys | mflag;
 		x86_64::invlpg(vaddr + i);
 	};
 
 	if (dobrk) {
-		vs.brk += i: uintptr + GUARD;
+		vmm.brk += i: uintptr + GUARD;
 	};
 
 	return base;
 };
 
-fn map_tables(vs: *vspace, vaddr: uintptr) (*pte | error) = {
+fn map_tables(vmm: *vmm, vaddr: uintptr) (*pte | error) = {
 	// Mask out higher half addresses
 	def HIGH_MASK: uintptr = ((1 << 48) - 1): uintptr;
 	vaddr = vaddr & HIGH_MASK;
@@ -133,7 +133,7 @@ fn map_tables(vs: *vspace, vaddr: uintptr) (*pte | error) = {
 	const pdi = vaddr >> 21 & 0x1FF;
 	const pti = vaddr >> 12 & 0x1FF;
 
-	let pml4 = arch::phys_tokernel(vs.pml4): *x86_64::pml4;
+	let pml4 = arch::phys_tokernel(vmm.pml4): *x86_64::pml4;
 	if (pml4[pml4i] & pml4e::P == 0) {
 		const pdpt = physalloc(size(x86_64::pdpt))?;
 		pml4[pml4i] = pdpt | pml4e::P | pml4e::U | pml4e::W;
