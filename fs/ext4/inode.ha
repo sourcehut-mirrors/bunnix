@@ -1,7 +1,7 @@
 use errors::{error, errno};
 use fs;
 use lib::lwext4;
-use log;
+use types::c;
 
 export type inode = struct {
 	fs::inode,
@@ -13,15 +13,17 @@ fn get_inode(sb: *superblock, ino: u32) (*inode | error) = {
 	let ref = lwext4::inode_ref { ... };
 	let r = lwext4::fs_get_inode_ref(&sb.lwfs, ino, &ref);
 	if (r != errno::NONE) {
-		log::println(r: uint);
 		return r;
 	};
+	return inode_from_ref(sb, &ref);
+};
 
+fn inode_from_ref(sb: *superblock, ref: *lwext4::inode_ref) (*inode | error) = {
 	let lsb = &sb.lwfs.sb;
 	let ino = alloc(inode {
 		impl = &inode_impl,
 		sb = sb,
-		ref = ref,
+		ref = *ref,
 		inode = ref.inode as *lwext4::inode,
 		...
 	});
@@ -49,7 +51,18 @@ fn ext4_inode_open(ino: *fs::inode) (*fs::file | error) = {
 };
 
 fn ext4_inode_lookup(ino: *fs::inode, name: str) (*fs::inode | error) = {
-	abort(); // TODO
+	const ino = ino: *inode;
+	const sb = ino.sb: *superblock;
+	let result = lwext4::dir_search_result { ... };
+
+	const cname = c::unterminatedstr(name);
+	const nameln = len(name): u32;
+	let r = lwext4::dir_find_entry(&result, &ino.ref, cname, nameln);
+	if (r != errno::NONE) {
+		return r;
+	};
+	const dentry = result.dentry as *lwext4::dir_en;
+	return get_inode(sb, dentry.inode)?;
 };
 
 fn ext4_inode_link(

@@ -1,6 +1,7 @@
 // See ext4_dir.h
 
 use errors::{error, errno};
+use types::c;
 
 export type dir_iter = struct {
 	inode_ref: nullable *inode_ref,
@@ -11,7 +12,7 @@ export type dir_iter = struct {
 
 export type dir_search_result = struct {
 	block: block,
-	dentry: *dir_en,
+	dentry: nullable *dir_en,
 };
 
 export fn dir_en_get_name_len(sb: *sblock, de: *dir_en) u16 = {
@@ -25,6 +26,8 @@ export fn dir_en_get_name_len(sb: *sblock, de: *dir_en) u16 = {
 export @symbol("ext4_dir_iterator_init") fn dir_iterator_init(*dir_iter, *inode_ref, u64) errno;
 export @symbol("ext4_dir_iterator_next") fn dir_iterator_next(*dir_iter) errno;
 export @symbol("ext4_dir_iterator_fini") fn dir_iterator_fini(*dir_iter) errno;
+export @symbol("ext4_dir_find_entry") fn dir_find_entry(*dir_search_result, *inode_ref, const *c::char, u32) errno;
+export @symbol("ext4_dir_destroy_result") fn dir_destroy_result(*inode_ref, *dir_search_result) errno;
 
 //void ext4_dir_write_entry(struct ext4_sblock *sb, struct ext4_dir_en *en, uint16_t entry_len, struct ext4_inode_ref *child, const char *name, size_t name_len);
 //int ext4_dir_add_entry(struct ext4_inode_ref *parent, const char *name, uint32_t name_len, struct ext4_inode_ref *child);
