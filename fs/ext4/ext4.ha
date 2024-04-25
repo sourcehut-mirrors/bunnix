@@ -33,7 +33,6 @@ export fn open(bdev: *block::blockdev) (*fs::superblock | error) = {
 			...
 		},
 	});
-	lwext4::dmask_set(~0);
 
 	const lwbdev = lwext4::mkblockdev(bdev);
 	let r = lwext4::block_init(lwbdev);
@@ -51,7 +50,9 @@ export fn open(bdev: *block::blockdev) (*fs::superblock | error) = {
 
 	// TODO: import time::chrono and date stuff
 	const last_mount = fs.sb.mount_time;
-	log::kprintfln(EXT4, "Last mounted at {}", last_mount);
+	if (last_mount != 0) {
+		log::kprintfln(EXT4, "Last mounted at {}", last_mount);
+	};
 
 	const bsize = lwext4::sb_get_block_size(&fs.sb);
 	lwext4::block_set_lb_size(lwbdev, bsize);
