@@ -8,7 +8,7 @@ bunnixboot.mb:
 	$(HAREBUILD) -T+mb -o $@ boot/mb/
 .PHONY: bunnixboot.mb
 
-all: bunnixboot.mb
+all: bunnixboot.mb bunnix.iso
 
 fs.fat.img:
 	qemu-img create -f raw $@ 48M
