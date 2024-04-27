@@ -15,7 +15,7 @@ fs.fat.img:
 	mcopy -i $@ README.md ::README.md
 	mcopy -i $@ COPYING ::COPYING
 
-fs.ext4.img:
+fs.ext4.img: init
 	mkdir -p .ext4dir
 	# Copy the source tree into the ext4 system just to have some
 	# interesting files to look at

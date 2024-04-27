@@ -1,5 +1,6 @@
 use arch::main;		// link
 use blibc;		// link
+use uapi;		// link
 use arch;
 use boot;
 use dev;
@@ -72,7 +73,7 @@ export fn main(ctx: *boot::context) void = {
 	fs::mount_root(&root, fs);
 
 	// Start /bin/init
-	log::kprintln(KERN, "exec /bin/init");
+	log::kprintfln(KERN, "entering userspace: exec {}", init);
 	const proc = proc::new_proc(&root)!;
 	const node = fs::walk(&root, init)!;
 	const file = fs::inode_open(node)!;

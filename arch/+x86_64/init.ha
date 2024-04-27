@@ -3,6 +3,7 @@ use log;
 
 // Forward declaration
 fn arch::dev::init() void;
+fn syscall() void; // entry.s
 
 const X86_64: str = "x86_64";
 
@@ -55,4 +56,9 @@ export fn earlyinit() void = {
 	init_pic();
 	init_idt();
 	init_cpu(0);
+
+	// Set up MSRs for syscalls etc
+	x86_64::wrmsr(x86_64::MSR_IA32_STAR, 0x08 << 32 | 0x10 << 48);
+	x86_64::wrmsr(x86_64::MSR_IA32_LSTAR, &syscall: uintptr: u64);
+	x86_64::wrmsr(x86_64::MSR_IA32_FMASK, (1 << 8) | (1 << 9)); // Disable interrupts
 };

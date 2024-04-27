@@ -161,3 +161,73 @@ _isr_exit:
 arch.isr_return:
 	mov %rdi, %rax
 	jmp _isr_exit
+
+// TODO: Fix this ABI up a bit
+.globl arch.syscall
+arch.syscall:
+	cli
+
+	movq %r11, -24(%rsp)	/* %rflags */
+	movq %rcx, -40(%rsp)	/* %rip */
+	movq (_kernel_stack_top - 8), %rcx
+	movq %rcx, -16(%rsp)	/* %rsp */
+	movq %ss, %rcx
+	movq %rcx, -8(%rsp)	/* %ss */
+	movq %cs, %rcx
+	movq %rcx, -32(%rsp)	/* %cs */
+	subq $56, %rsp
+
+	swapgs
+	push %rax
+	push %rbx
+	push %rcx
+	push %rdx
+	push %rsi
+	push %rdi
+	push %rbp
+	push %r8
+	push %r9
+	push %r10
+	push %r11
+	push %r12
+	push %r13
+	push %r14
+	push %r15
+
+	// TODO: deal with fs/fsbase
+	push $0
+	push $0
+
+	// ABI fixup
+	movq %r10, %rcx
+	movq %r8, %r9
+	movq %rcx, %r8
+	movq %rdx, %rcx
+	movq %rsi, %rdx
+	movq %rdi, %rsi
+	movq %rax, %rdi
+
+	call uapi.syscall
+
+	// TODO: fs/fsbase
+	pop %r15
+	pop %r15
+
+	pop %r15
+	pop %r14
+	pop %r13
+	pop %r12
+	addq $32, %rsp
+	pop %rbp
+	addq $32, %rsp
+	pop %rbx
+	addq $8, %rsp
+	swapgs
+
+	addq $16, %rsp
+	popq %rcx
+	addq $8, %rsp
+	popq %r11
+	popq %r10
+	movq %r10, %rsp
+	sysretq
