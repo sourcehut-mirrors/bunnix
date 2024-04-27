@@ -1,6 +1,12 @@
 use arch::x86_64;
 
 export type cpu = struct {
+	// Self reference
+	cpu: nullable *cpu,
+
+	// Current task, kernel virtual address
+	task: nullable *opaque,
+
 	tss: x86_64::tss,
 	gdt: [NGDT]u64,
 };
@@ -18,6 +24,7 @@ let cpus: []cpu = [];
 // Initialize the Nth CPU (which must be the CPU calling this function)
 export fn init_cpu(i: size) void = {
 	static append(cpus, cpu { ... });
+	cpus[i].cpu = &cpus[i];
 
 	let cpu = &cpus[len(cpus)-1];
 	init_gdt(cpu);
@@ -28,5 +35,11 @@ export fn init_cpu(i: size) void = {
 	x86_64::lidt(&idt);
 	x86_64::lseg(SEG_KDATA: u16 << 3);
 
-	// TODO: Set gs/gsbase to the CPU local state
+	x86_64::wrmsr(x86_64::MSR_IA32_KERNEL_GS_BASE, cpu: uintptr: u64);
+	x86_64::wrmsr(x86_64::MSR_IA32_GS_BASE, cpu: uintptr: u64);
+};
+
+// Return the current CPU.
+export fn getcpu() *cpu = {
+	return x86_64::rdgs(): uintptr: *cpu;
 };

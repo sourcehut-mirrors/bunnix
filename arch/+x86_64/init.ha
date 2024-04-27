@@ -60,5 +60,7 @@ export fn earlyinit() void = {
 	// Set up MSRs for syscalls etc
 	x86_64::wrmsr(x86_64::MSR_IA32_STAR, 0x08 << 32 | 0x10 << 48);
 	x86_64::wrmsr(x86_64::MSR_IA32_LSTAR, &syscall: uintptr: u64);
-	x86_64::wrmsr(x86_64::MSR_IA32_FMASK, (1 << 8) | (1 << 9)); // Disable interrupts
+	// Disable interrupts during syscalls
+	// XXX: Kernel preemption
+	x86_64::wrmsr(x86_64::MSR_IA32_FMASK, (1 << 8) | (1 << 9));
 };

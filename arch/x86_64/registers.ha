@@ -5,6 +5,7 @@ export fn rdcr3() u64;
 export fn wrcr3(addr: uintptr) void;
 export fn rdcr4() u64;
 export fn wrcr4(val: u64) void;
+export fn rdgs() u64;
 
 export def CR0_PE: u64 = 1 << 0;
 export def CR0_MP: u64 = 1 << 1;

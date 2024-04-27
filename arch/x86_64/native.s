@@ -152,3 +152,12 @@ arch.x86_64.do_cpuid:
 	popq %rdx
 	ret
 
+.global arch.x86_64.swapgs
+arch.x86_64.swapgs:
+	swapgs
+	ret
+
+.global arch.x86_64.rdgs
+arch.x86_64.rdgs:
+	movq %gs:0, %rax
+	ret

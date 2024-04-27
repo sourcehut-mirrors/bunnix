@@ -162,11 +162,12 @@ arch.isr_return:
 	mov %rdi, %rax
 	jmp _isr_exit
 
-// TODO: Fix this ABI up a bit
+// TODO: Fix this up a bit
+// - Only save/restore ABI registers
+// - Use separate kernel stack
+// - Return from syscall/enteruser without _isr_return
 .globl arch.syscall
 arch.syscall:
-	cli
-
 	movq %r11, -24(%rsp)	/* %rflags */
 	movq %rcx, -40(%rsp)	/* %rip */
 	movq (_kernel_stack_top - 8), %rcx
