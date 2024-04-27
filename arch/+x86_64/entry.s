@@ -187,5 +187,7 @@ arch.syscall:
 	movq 32(%r10), %r13
 	movq 24(%r10), %r14
 	movq 16(%r10), %r15
+
+	cli
 	swapgs
 	sysretq
