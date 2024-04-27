@@ -13,3 +13,5 @@ OBJCOPY = x86_64-elf-objcopy
 GDB = x86_64-elf-gdb
 DTC = x86_64-elf-dtc
 CC = x86_64-elf-gcc
+
+SYSLINUX = /usr/share/syslinux
