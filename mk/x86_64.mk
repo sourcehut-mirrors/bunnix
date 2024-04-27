@@ -55,7 +55,7 @@ bunnix.iso: bunnixboot.mb boot/mb/syslinux.cfg bunnix init
 	cp bunnix .isodir/bunnix
 	cp init .isodir/init
 
-	mkisofs -o $@ -b isolinux.bin -c boot.cat \
+	mkisofs -o $@ -b isolinux.bin -c boot.cat -l \
 		-no-emul-boot -boot-load-size 4 -boot-info-table .isodir
 	isohybrid $@
 
