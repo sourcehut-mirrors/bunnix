@@ -30,6 +30,7 @@ fs.ext4.img:
 		.ext4dir/proc \
 		.ext4dir/tmp \
 		.ext4dir/var
+	cp init .ext4dir/bin/
 	qemu-img create -f raw $@ 48M
 	mkfs.ext4 -d .ext4dir -O^metadata_csum $@
 
@@ -60,7 +61,7 @@ bunnix.iso: bunnixboot.mb boot/mb/syslinux.cfg bunnix init
 	isohybrid $@
 
 clean-arch:
-	rm -rf bunnix.iso bunnixboot.mb .isodir
+	rm -rf bunnix.iso bunnixboot.mb .isodir fs.*.img disk.*.img
 .PHONY: arch-clean
 
 QEMUARGS=\

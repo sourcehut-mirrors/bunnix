@@ -3,6 +3,7 @@ use errors::{error, errno};
 
 export type file = struct {
 	fs::file,
+	pos: size,
 };
 
 fn mkfile(ino: *inode) (*fs::file | error) = {

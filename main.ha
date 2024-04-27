@@ -37,34 +37,15 @@ export fn main(ctx: *boot::context) void = {
 	const fs = ext4::open(bdev)!;
 	fs::mount_root(&root, fs);
 
-	log::kprintln(KERN, "Mount /tmp from memfs");
-	const tmpfs = memfs::new();
-	fs::mount_fs(&root, tmpfs, "/tmp")!;
-
-	const dir = fs::walk(&root, "/")!;
-	log::printfln("root inode: {} mode 0{:o} uid/gid {}:{} dev {}",
-		dir, dir.mode: uint, dir.uid, dir.gid, dir.dev);
+	const dir = fs::walk(&root, "/bin")!;
 	listdir(dir);
 
-	log::println("First 128 bytes of /bunnix/config.mk:");
-	const node = fs::walk(&root, "/bunnix/config.mk")!;
+	log::println("First 128 bytes of /bin/init:");
+	const node = fs::walk(&root, "/bin/init")!;
 	const file = fs::inode_open(node)!;
 	let buf: [128]u8 = [0...];
 	const n = fs::file_read(file, buf) as size;
-	log::println(strings::fromutf8_unsafe(buf[..n]));
-
-	log::println("Making test file in /tmp");
-	const tmp = fs::superblock_get_root(tmpfs);
-	const file = fs::inode_create(tmp, "example", 0o644)!;
-	const file = fs::inode_open(file)!;
-	fs::file_write(file, strings::toutf8("Hello world!\n"))!;
-
-	log::println("Contents of /tmp/example:");
-	const node = fs::walk(&root, "/tmp/example")!;
-	const file = fs::inode_open(node)!;
-	let buf: [128]u8 = [0...];
-	const n = fs::file_read(file, buf) as size;
-	log::print(strings::fromutf8_unsafe(buf[..n]));
+	log::dump(buf[..n]);
 
 	log::println("Nothing to do; idling");
 	rt::halt();

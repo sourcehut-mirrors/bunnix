@@ -9,27 +9,30 @@ const file_impl_dir = fs::file_iface {
 	...
 };
 
-fn dir_iter_init(fd: *file) (void | error) = {
+// Returns true if the dir_iter was initialized by this call.
+fn dir_iter_init(fd: *file) (bool | error) = {
 	if (fd.diter.inode_ref != null) {
-		return;
+		return false;
 	};
 	const inode = fd.inode: *inode;
 	let r = lwext4::dir_iterator_init(&fd.diter, &inode.ref, 0);
 	if (r != errno::NONE) {
 		return r;
 	};
+	return true;
 };
 
 fn dir_readdir(fd: *fs::file, dent: *fs::dirent) (void | fs::EOF | error) = {
 	const fd = fd: *file;
-	dir_iter_init(fd)?;
+	const first = dir_iter_init(fd)?;
 
-	if (fd.pos != 0) {
+	if (!first) {
 		let r = lwext4::dir_iterator_next(&fd.diter);
 		if (r != errno::NONE) {
 			return r;
 		};
 	};
+
 	if (fd.diter.curr == null) {
 		lwext4::dir_iterator_fini(&fd.diter);
 		return fs::EOF;
@@ -72,6 +75,4 @@ fn dir_readdir(fd: *fs::file, dent: *fs::dirent) (void | fs::EOF | error) = {
 		mode = mode,
 		ino = cur.inode,
 	};
-
-	fd.pos += 1;
 };

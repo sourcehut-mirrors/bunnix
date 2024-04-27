@@ -5,7 +5,6 @@ use errors::{error, errno};
 export type file = struct {
 	impl: *file_iface,
 	inode: *inode,
-	pos: size,
 };
 
 // Indicates an end-of-file condition.
