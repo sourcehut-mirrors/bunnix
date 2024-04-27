@@ -32,14 +32,14 @@ export let kernel = vmm {
 
 // Initializes a new address space, returning [[errno::NOMEM]] if there is not
 // sufficient memory.
-export fn new_vmm() (*vmm | error) = {
+export fn vmm_init(vm: *vmm) (void | error) = {
 	const pml4_phys = physalloc(size(x86_64::pml4))?;
 	const pml4 = arch::phys_tokernel(pml4_phys): *x86_64::pml4;
 	arch::map_kernel(pml4);
-	return alloc(vmm {
+	*vm = vmm {
 		pml4 = pml4_phys,
 		brk = UBRK_INIT,
-	});
+	};
 };
 
 // Activates a virtual address space.

@@ -8,6 +8,7 @@ use fs;
 use load;
 use log;
 use mman;
+use proc;
 use rt;
 use shlex;
 use strings;
@@ -73,10 +74,10 @@ export fn main(ctx: *boot::context) void = {
 
 	// Start /bin/init
 	log::kprintln(KERN, "exec /bin/init");
-	const vmm = mman::new_vmm()!;
+	const proc = proc::new_proc()!;
 	const node = fs::walk(&root, init)!;
 	const file = fs::inode_open(node)!;
-	const uentry = match (load::load(vmm, file)) {
+	const uentry = match (load::load(&proc.vmm, file)) {
 	case let ptr: uintptr =>
 		yield ptr;
 	case let err: error =>
