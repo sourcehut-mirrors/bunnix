@@ -4,14 +4,15 @@
 ARCH = x86_64
 
 # Sane defaults, feel free to configure:
+TRIPLET = x86_64-elf-
 HARE = hare
 HAREC = harec
 QBE = qbe
-AS = x86_64-elf-as
-LD = x86_64-elf-ld
-OBJCOPY = x86_64-elf-objcopy
-GDB = x86_64-elf-gdb
-DTC = x86_64-elf-dtc
-CC = x86_64-elf-gcc
+AS = $(TRIPLET)as
+LD = $(TRIPLET)ld
+OBJCOPY = $(TRIPLET)objcopy
+GDB = $(TRIPLET)gdb
+DTC = $(TRIPLET)dtc
+CC = $(TRIPLET)gcc
 
 SYSLINUX = /usr/share/syslinux
