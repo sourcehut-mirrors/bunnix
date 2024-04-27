@@ -1,5 +1,7 @@
 use arch::x86_64;
 
+let @symbol("_kernel_stack_top") _kernel_stack_top: [*]u8;
+
 export type cpu = struct {
 	// Self reference
 	cpu: nullable *cpu,		// 0
@@ -37,6 +39,8 @@ export fn init_cpu(i: size) void = {
 
 	x86_64::wrmsr(x86_64::MSR_IA32_KERNEL_GS_BASE, cpu: uintptr: u64);
 	x86_64::swapgs();
+
+	set_kernel_stack(&_kernel_stack_top);
 };
 
 // Return the current CPU.

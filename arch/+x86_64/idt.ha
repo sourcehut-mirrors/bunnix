@@ -3,7 +3,7 @@ use arch::x86_64;
 let idt: x86_64::idt = [x86_64::idt_entry { ... }...];
 
 fn init_idt() void = {
-	const flags: u16 = 1 << 15 | 0xE << 8;
+	const flags: u16 = 1 | 1 << 15 | 0xE << 8;
 	x86_64::idt_set_gate(&idt, 0, &_isr0, SEG_KCODE, flags);
 	x86_64::idt_set_gate(&idt, 1, &_isr1, SEG_KCODE, flags);
 	x86_64::idt_set_gate(&idt, 2, &_isr2, SEG_KCODE, flags);

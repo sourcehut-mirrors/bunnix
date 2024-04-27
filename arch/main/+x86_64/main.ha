@@ -39,6 +39,14 @@ export fn main(ctx: *boot::context) never = {
 	// x86_64 initialization
 	arch::earlyinit();
 
+	arch::install_irq(arch::PIT_IRQ, &pit_irq);
+	arch::pit_setphase(100);
+
 	// Kernel proper
 	kmain(ctx);
+};
+
+fn pit_irq(ctx: *arch::context, irq: u8) void = {
+	// TODO: context switch
+	arch::pic_eoi(arch::PIT_IRQ);
 };

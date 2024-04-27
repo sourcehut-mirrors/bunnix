@@ -102,6 +102,7 @@ arch._isr2:
 .global isr_common
 isr_common:
 	_swapgs
+
 	push %rax
 	push %rbx
 	push %rcx
@@ -165,6 +166,8 @@ arch.isr_return:
 .globl arch.syscall
 arch.syscall:
 	swapgs
+	sti
+
 	movq %gs:8, %rax
 	movq %rsp, 176(%rax)
 	movq %r11, 168(%rax)	/* syscall %rflags */
