@@ -5,7 +5,6 @@ use boot;
 use dev;
 use errors::{error, errno, strerror};
 use fs;
-use load;
 use log;
 use mman;
 use proc;
@@ -74,18 +73,17 @@ export fn main(ctx: *boot::context) void = {
 
 	// Start /bin/init
 	log::kprintln(KERN, "exec /bin/init");
-	const proc = proc::new_proc()!;
+	const proc = proc::new_proc(&root)!;
 	const node = fs::walk(&root, init)!;
 	const file = fs::inode_open(node)!;
-	const uentry = match (load::load(&proc.vmm, file)) {
-	case let ptr: uintptr =>
-		yield ptr;
+
+	match (proc::exec(proc, file, [init])) {
 	case let err: error =>
 		log::kprintfln(KERN, "Error loading {}: {}",
 			init, strerror(err));
 		rt::halt();
+	case void => void;
 	};
 
-	log::println("Nothing to do; idling");
-	rt::halt();
+	abort(); // unreachable
 };
