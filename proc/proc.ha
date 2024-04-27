@@ -4,24 +4,22 @@ use mman;
 use fs;
 use log;
 
-def STACK_SIZE: size = 65536;
-
 // A process in userspace.
 export type proc = struct {
 	vmm: mman::vmm,
-	// TODO: Proper namespace abstraction
-	root: *fs::vfs,
+	root: *fs::vfs, // TODO: Proper namespace abstraction
+
 	// TODO: Multithreading
-	state: arch::context,
+	task: *task,
 };
 
 // Creates a new process.
 export fn new_proc(root: *fs::vfs) (*proc | error) = {
 	let proc = alloc(proc {
 		root = root,
+		task = newtask()?,
 		...
 	});
-	arch_init(&proc.state);
 	return proc;
 };
 
@@ -58,7 +56,9 @@ export fn exec(
 	};
 
 	proc.vmm = new_vmm;
-	arch::context_set_sp(&proc.state, STACK_TOP);
-	arch::context_set_ip(&proc.state, ip);
-	arch::enter_user(&proc.state);
+
+	let task = proc.task;
+	arch::context_set_sp(&task.state, STACK_TOP);
+	arch::context_set_ip(&task.state, ip);
+	arch::enter_user(&task.state);
 };

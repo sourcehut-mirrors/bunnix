@@ -4,7 +4,7 @@ include config.mk
 include mk/$(ARCH).mk
 
 HARECONFIG = -a$(HAREARCH) -T^+$(HAREARCH) -RF
-HAREBUILD=HAREPATH=. $(HARE) build $(HARECONFIG)
+HAREBUILD=ASFLAGS=-g HAREPATH=. $(HARE) build $(HARECONFIG)
 
 include vendor/Makefile
 

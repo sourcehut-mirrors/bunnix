@@ -7,6 +7,7 @@ _start:
 	mov $_kernel_stack_top, %rsp
 	subq $8, %rsp
 	xor %rbp, %rbp
+	movq %rbp, %gs
 	jmp arch.main.main
 
 .type _start, @function
