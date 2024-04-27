@@ -25,6 +25,7 @@ export type errno = enum uint {
 	RANGE,
 	NOTEMPTY,
 	NODATA,
+	NOEXEC,
 };
 
 // Error condition.

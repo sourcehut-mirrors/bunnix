@@ -1,6 +1,5 @@
 PHDRS {
-	headers PT_PHDR PHDRS;
-	text PT_LOAD FILEHDR PHDRS;
+	text PT_LOAD;
 	data PT_LOAD;
 }
 ENTRY(_start);
@@ -10,7 +9,8 @@ SECTIONS {
 		KEEP (*(.text))
 		*(.text.*)
 	} :text
-	. = 0x80000000;
+
+	. = ALIGN(4096);
 	.data : {
 		KEEP (*(.data))
 		*(.data.*)

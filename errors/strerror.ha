@@ -52,5 +52,7 @@ export fn strerror(err: error) str = {
 		return "Directory not empty";
 	case errno::NODATA =>
 		return "No data available";
+	case errno::NOEXEC =>
+		return "Exec format error";
 	};
 };

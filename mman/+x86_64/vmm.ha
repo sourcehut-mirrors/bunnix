@@ -43,7 +43,7 @@ export fn new_vmm() (*vmm | error) = {
 };
 
 // Activates a virtual address space.
-export fn map_vmm(vmm: *vmm) void = {
+export fn vmm_map(vmm: *vmm) void = {
 	x86_64::wrcr3(vmm.pml4);
 };
 
@@ -67,15 +67,6 @@ export fn mmap(
 		vaddr = vmm.brk;
 	};
 
-	if (flags & flag::ANON != 0) {
-		let aflag = mflag::NONE;
-		if (flags & flag::DMA32 != 0) {
-			aflag |= mflag::LOWMEM;
-		};
-
-		paddr = physalloc(length, aflag)?;
-	};
-
 	let base = vaddr;
 	// Sanity test parameters
 	if (base % UPAGESIZE != 0) {
@@ -83,6 +74,18 @@ export fn mmap(
 	};
 	if (length == 0) {
 		return errno::INVAL;
+	};
+	if (length % PAGESIZE != 0) {
+		length += PAGESIZE - length % PAGESIZE;
+	};
+
+	if (flags & flag::ANON != 0) {
+		let aflag = mflag::NONE;
+		if (flags & flag::DMA32 != 0) {
+			aflag |= mflag::LOWMEM;
+		};
+
+		paddr = physalloc(length, aflag)?;
 	};
 
 	const mflag = pte::P;
@@ -109,11 +112,12 @@ export fn mmap(
 	// operation
 	let i = 0z;
 	for (i < length; i += PAGESIZE) {
-		const phys = paddr + i: uintptr * UPAGESIZE;
-		let ent = map_tables(vmm, vaddr + i: uintptr * UPAGESIZE)?;
+		const phys = paddr + i;
+		const virt = vaddr + i;
+		let ent = map_tables(vmm, virt)?;
 		assert(*ent & pte::P == 0, "mmap: double map");
 		*ent = phys | mflag;
-		x86_64::invlpg(vaddr + i);
+		x86_64::invlpg(virt);
 	};
 
 	if (dobrk) {
@@ -121,6 +125,46 @@ export fn mmap(
 	};
 
 	return base;
+};
+
+// Updates the access protection flags for a range of virtual memory addresses.
+export fn mprotect(
+	vmm: *vmm,
+	addr: uintptr,
+	length: size,
+	prot: prot,
+) (void | error) = {
+	if (addr % UPAGESIZE != 0) {
+		return errno::INVAL;
+	};
+	if (length == 0) {
+		return errno::INVAL;
+	};
+	if (length % PAGESIZE != 0) {
+		length += PAGESIZE - length % PAGESIZE;
+	};
+
+	for (let i = 0z; i < length; i += PAGESIZE) {
+		const virt = addr + i: uintptr;
+		if (arch::getpte(vmm.pml4, virt) == null) {
+			return errno::NOMEM;
+		};
+	};
+
+	for (let i = 0z; i < length; i += PAGESIZE) {
+		const virt = addr + i: uintptr;
+		let pte = arch::getpte(vmm.pml4, virt) as *pte;
+		let cur = *pte;
+
+		if (prot & prot::WRITE == 0) {
+			cur &= ~pte::W;
+		} else {
+			cur |= pte::W;
+		};
+		// TODO: Enable/disable XD bit
+
+		*pte = cur;
+	};
 };
 
 fn map_tables(vmm: *vmm, vaddr: uintptr) (*pte | error) = {

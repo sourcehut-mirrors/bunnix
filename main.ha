@@ -72,8 +72,18 @@ export fn main(ctx: *boot::context) void = {
 	fs::mount_root(&root, fs);
 
 	// Start /bin/init
+	log::kprintln(KERN, "exec /bin/init");
+	const vmm = mman::new_vmm()!;
 	const node = fs::walk(&root, init)!;
 	const file = fs::inode_open(node)!;
+	const uentry = match (load::load(vmm, file)) {
+	case let ptr: uintptr =>
+		yield ptr;
+	case let err: error =>
+		log::kprintfln(KERN, "Error loading {}: {}",
+			init, strerror(err));
+		rt::halt();
+	};
 
 	log::println("Nothing to do; idling");
 	rt::halt();
