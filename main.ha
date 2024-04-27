@@ -43,25 +43,11 @@ export fn main(ctx: *boot::context) void = {
 	log::println("First 128 bytes of /bin/init:");
 	const node = fs::walk(&root, "/bin/init")!;
 	const file = fs::inode_open(node)!;
+	fs::file_seek(file, 128, fs::whence::SET)!;
 	let buf: [128]u8 = [0...];
 	const n = fs::file_read(file, buf) as size;
-	log::dump(buf[..n]);
+	log::dump(buf[..n], 128);
 
 	log::println("Nothing to do; idling");
 	rt::halt();
-};
-
-fn listdir(inode: *fs::inode) void = {
-	const dir = fs::inode_open(inode)!;
-	let dent = fs::dirent { ... };
-	for (true) {
-		match (fs::file_readdir(dir, &dent)!) {
-		case void => yield;
-		case fs::EOF => break;
-		};
-		log::printfln("{} {}{}",
-			fs::mode_str(dent.mode),
-			dent.name,
-			if (fs::isdir(dent.mode)) "/" else "");
-	};
 };
