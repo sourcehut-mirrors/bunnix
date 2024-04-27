@@ -31,6 +31,8 @@ export fn main(ctx: *boot::context) never = {
 	log::setcons(&cons);
 	rt::abortcons(&log::write);
 
+	ctx = arch::mmu_init(ctx);
+
 	// Run @init functions
 	rt::do_init();
 

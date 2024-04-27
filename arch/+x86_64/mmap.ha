@@ -1,6 +1,8 @@
 use arch::x86_64;
 use arch::x86_64::{pml4, pml4e, pdpt, pdpte, pd, pde, pt, pte};
 use arch::x86_64::{PADDR_MASK};
+use boot;
+use types;
 
 // Memory map is defined in hare.sc, including kernel page tables
 export def IDENT_PDS: size = 64;
@@ -17,10 +19,15 @@ let kernel_pt: *pt = null: *pt;
 let @symbol("_kernel_start") kernel_start: u8;
 let @symbol("_kernel_end") kernel_end: u8;
 
-@init fn init() void = {
+// Initialize MMU-related data structures.
+export fn mmu_init(bootctx: *boot::context) *boot::context = {
 	// Fetch kernel page tables from bootloader
 	kernel_pml4_phys = x86_64::rdcr3(): uintptr;
 	kernel_pml4 = phys_tokernel(kernel_pml4_phys): *pml4;
+
+	// Unmap lower half
+	const low = getpml4e(kernel_pml4_phys, 0);
+	*low &= ~pml4e::P;
 
 	const pml4e = getpml4e(kernel_pml4_phys, &kernel_start: uintptr);
 	kernel_pdpt_phys = *pml4e: uintptr & PADDR_MASK;
@@ -29,6 +36,22 @@ let @symbol("_kernel_end") kernel_end: u8;
 	const pde = getpde(kernel_pml4_phys, &kernel_start: uintptr) as *pde;
 	const pt_phys = *pde: uintptr & PADDR_MASK;
 	kernel_pt = phys_tokernel(pt_phys): *pt;
+
+	// Move boot context into upper half
+	bootctx = phys_tokernel(bootctx: uintptr): *boot::context;
+	bootctx.dtb = phys_tokernel(bootctx.dtb: uintptr);
+	bootctx.fb = phys_tokernel(bootctx.fb: uintptr): *boot::bootfb;
+
+	let cmdline = &bootctx.cmdline: *types::string;
+	cmdline.data = phys_tokernel(cmdline.data: uintptr): *[*]u8;
+
+	let mmap = &bootctx.mmap: *types::slice;
+	mmap.data = phys_tokernel(mmap.data: uintptr);
+
+	let mods = &bootctx.mods: *types::slice;
+	mods.data = phys_tokernel(mods.data: uintptr);
+
+	return bootctx;
 };
 
 // Maps the kernel in the higher half of the given page table.
