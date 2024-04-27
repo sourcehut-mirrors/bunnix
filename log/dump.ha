@@ -13,8 +13,8 @@ use ascii;
 export fn dump(data: []u8, addr: u64 = 0) void = {
 	let datalen = len(data): u64;
 
-	for (let off = addr; off < datalen; off += 16) {
-		printf("{:.8x}  ", off);
+	for (let off = 0u64; off < datalen; off += 16) {
+		printf("{:.8x}  ", addr + off);
 
 		let toff = 0z;
 		for (let i = 0u64; i < 16 && off + i < datalen; i += 1) {
