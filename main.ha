@@ -3,15 +3,13 @@ use blibc;		// link
 use arch;
 use boot;
 use dev;
+use errors::{error, errno, strerror};
+use fs;
+use load;
 use log;
 use mman;
 use rt;
-// XXX TEMP
-use dev::block;
-use fs;
-use fs::ext4;
-use fs::memfs;
-use path;
+use shlex;
 use strings;
 
 const KERN: str = "kern";
@@ -30,23 +28,52 @@ export fn main(ctx: *boot::context) void = {
 	dev::scan();
 
 	// System startup
-	// (TODO)
+	const args = match (shlex::split(ctx.cmdline)) {
+	case let s: []str =>
+		yield s;
+	case shlex::syntaxerr =>
+		log::kprintln(KERN, "Unable to parse kernel command line");
+		rt::halt();
+	};
+	defer strings::freeall(args);
 
-	log::kprintln(KERN, "Mount root from sata0b as ext4");
-	const bdev = block::open("sata0b")!;
-	const fs = ext4::open(bdev)!;
+	let root_opts = fs::fs_opts {
+		device = "",
+		fstype = "ext4",
+		...
+	};
+	let init = "/bin/init";
+	for (let i = 0z; i < len(args); i += 1) {
+		const (key, val) = strings::cut(args[i], "=");
+		switch (key) {
+		case "root" =>
+			root_opts.device = val;
+		case "rootfstype" =>
+			root_opts.fstype = val;
+		case "ro" =>
+			root_opts.readonly = true;
+		case "init" =>
+			init = val;
+		case => void;
+		};
+	};
+
+	// Mount root
+	log::kprintfln(KERN, "Mount root from {} as {}",
+		root_opts.device, root_opts.fstype);
+	const fs = match (fs::fs_open(&root_opts)) {
+	case let fs: *fs::superblock =>
+		yield fs;
+	case let err: error =>
+		log::kprintfln(KERN, "Error mounting root filesystem: {}",
+			strerror(err));
+		rt::halt();
+	};
 	fs::mount_root(&root, fs);
 
-	const dir = fs::walk(&root, "/bin")!;
-	listdir(dir);
-
-	log::println("First 128 bytes of /bin/init:");
-	const node = fs::walk(&root, "/bin/init")!;
+	// Start /bin/init
+	const node = fs::walk(&root, init)!;
 	const file = fs::inode_open(node)!;
-	fs::file_seek(file, 128, fs::whence::SET)!;
-	let buf: [128]u8 = [0...];
-	const n = fs::file_read(file, buf) as size;
-	log::dump(buf[..n], 128);
 
 	log::println("Nothing to do; idling");
 	rt::halt();

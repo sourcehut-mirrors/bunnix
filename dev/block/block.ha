@@ -38,14 +38,14 @@ export fn open(name: str) (*blockdev | error) = {
 	const result = regex::find(&block_re, name);
 	defer regex::result_free(result);
 	if (len(result) == 0) {
-		return errno::NOENT;
+		return errno::NODEV;
 	};
 	const iface = result[1].content;
 	const serial = strconv::stou(result[2].content)!;
 
 	let part = -1;
 	if (len(result[3].content) > 1) {
-		return errno::NOENT;
+		return errno::NODEV;
 	} else if (len(result[3].content) != 0) {
 		const rn = strings::toutf8(result[3].content)[0];
 		part = (rn - 'a'): int;
@@ -53,7 +53,7 @@ export fn open(name: str) (*blockdev | error) = {
 
 	const iface = str_iface(iface);
 	if (iface == interface::UNKNOWN) {
-		return errno::NOENT;
+		return errno::NODEV;
 	};
 
 	let bdev: nullable *blockdev = null;
@@ -70,7 +70,7 @@ export fn open(name: str) (*blockdev | error) = {
 
 	const bdev = match (bdev) {
 	case null =>
-		return errno::NOENT;
+		return errno::NODEV;
 	case let bdev: *blockdev =>
 		yield bdev;
 	};
@@ -80,7 +80,7 @@ export fn open(name: str) (*blockdev | error) = {
 	};
 
 	if (part: size >= len(bdev.parts)) {
-		return errno::NOENT;
+		return errno::NODEV;
 	};
 
 	return &bdev.parts[part];

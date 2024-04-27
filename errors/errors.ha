@@ -13,7 +13,7 @@ export type errno = enum uint {
 	IO,
 	NXIO,
 	E2BIG,
-	ACCES,
+	ACCESS,
 	FAULT,
 	NODEV,
 	NOTDIR,

@@ -13,9 +13,28 @@ export type superblock = struct {
 	mp: lwext4::mountpoint,
 };
 
+let driver_impl = fs::driver_iface {
+	open = &open,
+};
+
+let driver = fs::driver {
+	name = "ext4",
+	impl = &driver_impl,
+	...
+};
+
+@init fn init() void = {
+	fs::register_driver(&driver);
+};
+
 // Opens a block device as an ext4 filesystem.
-export fn open(bdev: *block::blockdev) (*fs::superblock | error) = {
-	log::kprintfln(EXT4, "Opening ext4 filesystem from {}", block::name(bdev));
+fn open(opts: *fs::fs_opts) (*fs::superblock | error) = {
+	if (opts.device == "") {
+		log::kprintfln(EXT4, "Attempted to open ext4 filesystem from null device");
+		return errno::INVAL: error;
+	};
+
+	const bdev = block::open(opts.device)?;
 
 	// TODO:
 	// - Verify block dev not in use by another filesystem
