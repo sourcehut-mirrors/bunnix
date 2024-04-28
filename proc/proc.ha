@@ -34,6 +34,7 @@ export fn exec(
 ) (void | error) = {
 	let new_vmm = mman::vmm { ... };
 	mman::vmm_init(&new_vmm)?;
+	defer io::unref(file);
 
 	const ip = match (load(&new_vmm, file)) {
 	case let err: error =>

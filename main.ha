@@ -6,6 +6,7 @@ use boot;
 use dev;
 use errors::{error, errno, strerror};
 use fs;
+use io;
 use log;
 use mman;
 use proc;

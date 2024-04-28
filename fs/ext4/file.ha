@@ -27,3 +27,13 @@ fn mkfile(ino: *inode) (*io::file | error) = {
 	});
 	return f;
 };
+
+fn file_finish(fd: *io::file) void = {
+	let file = fd: *file;
+	if (io::isdir(file.inode.mode)) {
+		lwext4::dir_iterator_fini(&file.diter);
+	} else {
+		lwext4::fclose(&file.lwfile);
+	};
+	free(file);
+};

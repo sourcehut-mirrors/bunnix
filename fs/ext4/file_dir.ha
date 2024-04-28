@@ -7,6 +7,7 @@ use types::c;
 
 const file_impl_dir = io::vtable {
 	readdir = &dir_readdir,
+	finish = &file_finish,
 	...
 };
 
@@ -35,7 +36,6 @@ fn dir_readdir(fd: *io::file, dent: *io::dirent) (void | io::EOF | error) = {
 	};
 
 	if (fd.diter.curr == null) {
-		lwext4::dir_iterator_fini(&fd.diter);
 		return io::EOF;
 	};
 

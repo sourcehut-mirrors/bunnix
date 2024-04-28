@@ -7,6 +7,7 @@ const file_impl_reg = io::vtable {
 	read = &file_read,
 	write = &file_write,
 	seek = &file_seek,
+	finish = &file_finish,
 	...
 };
 

@@ -22,3 +22,7 @@ fn mkfile(ino: *inode) (*io::file | error) = {
 		...
 	});
 };
+
+fn file_finish(file: *io::file) void = {
+	free(file);
+};

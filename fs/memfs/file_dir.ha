@@ -4,6 +4,7 @@ use io;
 
 const file_impl_dir = io::vtable {
 	readdir = &dir_readdir,
+	finish = &file_finish,
 	...
 };
 
