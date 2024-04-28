@@ -54,5 +54,9 @@ export fn strerror(err: error) str = {
 		return "No data available";
 	case errno::NOEXEC =>
 		return "Exec format error";
+	case errno::NOSYS =>
+		return "No such syscall";
+	case errno::BADF =>
+		return "No such file descriptor";
 	};
 };

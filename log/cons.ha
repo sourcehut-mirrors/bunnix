@@ -1,6 +1,7 @@
 use io;
 
-let cons: *io::file = &io::static_empty;
+// Global kernel console.
+export let cons: *io::file = &io::static_empty;
 
 // Sets the kernel console driver.
 export fn setcons(to: *io::file) void = {

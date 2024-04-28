@@ -3,12 +3,12 @@ use errors::{error, errno};
 use mman;
 use fs;
 use io;
-use log;
 
 // A process in userspace.
 export type proc = struct {
 	vmm: mman::vmm,
-	root: *fs::vfs, // TODO: Proper namespace abstraction
+	root: *fs::vfs,
+	fds: []nullable *io::file,
 
 	// TODO: Multithreading
 	task: *task,
@@ -21,46 +21,19 @@ export fn new_proc(root: *fs::vfs) (*proc | error) = {
 		task = newtask()?,
 		...
 	});
+	proc.task.proc = proc;
 	return proc;
 };
 
-// Loads an image into a process and executes it.
-//
-// Does not return on success.
-export fn exec(
-	proc: *proc,
-	file: *io::file,
-	args: []str,
-) (void | error) = {
-	let new_vmm = mman::vmm { ... };
-	mman::vmm_init(&new_vmm)?;
-	defer io::unref(file);
+// Appends a file descriptor to this process's file table.
+export fn appendfd(proc: *proc, file: *io::file) int = {
+	append(proc.fds, file);
+	return (len(proc.fds) - 1): int;
+};
 
-	const ip = match (load(&new_vmm, file)) {
-	case let err: error =>
-		mman::vmm_map(&proc.vmm);
-		return err;
-	case let ip: uintptr =>
-		yield ip;
-	};
-
-	match (mman::mmap(
-		&new_vmm, 0,
-		STACK_TOP - STACK_SIZE: uintptr,
-		STACK_SIZE,
-		mman::prot::READ | mman::prot::WRITE,
-		mman::flag::ANON | mman::flag::USER,
-	)) {
-	case let err: error =>
-		mman::vmm_map(&proc.vmm);
-		return err;
-	case uintptr => void;
-	};
-
-	proc.vmm = new_vmm;
-
-	let task = proc.task;
-	arch::context_set_sp(&task.state, STACK_TOP);
-	arch::context_set_ip(&task.state, ip);
-	arch::enter_user(&task.state);
+// Returns the currently active process.
+export fn current() *proc = {
+	const cpu = arch::getcpu();
+	const task = task_fromctx(cpu.task: *arch::context);
+	return task.proc as *proc;
 };

@@ -201,3 +201,30 @@ fn map_tables(vmm: *vmm, vaddr: uintptr) (*pte | error) = {
 	let pt = arch::phys_tokernel(pt_phys): *x86_64::pt;
 	return &pt[pti];
 };
+
+// Returns true if there is a valid mapping for this address.
+export fn isvalid(
+	vmm: *vmm,
+	addr: uintptr,
+	length: size,
+	write: bool,
+) bool = {
+	addr &= (1 << UPAGESIZE) - 1;
+
+	for (let i = 0z; i < length; i += PAGESIZE) {
+		const virt = addr + i: uintptr;
+		match (arch::getpte(vmm.pml4, virt)) {
+		case let p: *pte =>
+			if (*p & pte::P == 0) {
+				return false;
+			};
+			if (write && *p & pte::W == 0) {
+				return false;
+			};
+		case null =>
+			return false;
+		};
+	};
+
+	return true;
+};
