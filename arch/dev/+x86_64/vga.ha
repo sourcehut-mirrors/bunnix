@@ -15,7 +15,7 @@ export def VGA_CELLS: size = VGA_ROWS * VGA_COLS;
 export const VGA_CONSBASE: *[VGA_CELLS]u16 = 0xb8000: uintptr: *[VGA_CELLS]u16;
 
 export type vga_console = struct {
-	vtable: io::stream,
+	vtable: io::file,
 	base: nullable *[VGA_CELLS]u16,
 	row: uint,
 	col: uint,
@@ -53,7 +53,7 @@ export fn vga_init(cons: *vga_console, base: *[VGA_CELLS]u16) void = {
 };
 
 const vga_vtable = io::vtable {
-	writer = &vga_write,
+	write = &vga_write,
 	...
 };
 
@@ -117,7 +117,7 @@ fn vga_putc(cons: *vga_console, rn: u8) void = {
 	};
 };
 
-fn vga_write(cons: *io::stream, buf: const []u8) (size | error) = {
+fn vga_write(cons: *io::file, buf: const []u8) (size | error) = {
 	let cons = cons: *vga_console;
 	assert(cons.vtable == &vga_vtable);
 	for (let i = 0z; i < len(buf); i += 1) {

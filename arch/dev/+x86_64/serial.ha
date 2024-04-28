@@ -8,7 +8,7 @@ export def SERIAL_PORT_C: u16 = 0x3E8;
 export def SERIAL_PORT_D: u16 = 0x2E8;
 
 export type serial_console = struct {
-	vtable: io::stream,
+	vtable: io::file,
 	port: u16,
 };
 
@@ -27,7 +27,7 @@ export fn serial_init(cons: *serial_console, port: u16) void = {
 };
 
 const serial_vtable = io::vtable {
-	writer = &serial_write,
+	write = &serial_write,
 	...
 };
 
@@ -41,7 +41,7 @@ fn serial_putc(cons: *serial_console, val: u8) void = {
 	x86_64::outb(cons.port, val);
 };
 
-fn serial_write(cons: *io::stream, buf: const []u8) (size | error) = {
+fn serial_write(cons: *io::file, buf: const []u8) (size | error) = {
 	let cons = cons: *serial_console;
 	assert(cons.vtable == &serial_vtable);
 	for (let i = 0z; i < len(buf); i += 1) {

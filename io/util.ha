@@ -6,7 +6,7 @@ use errors::{error, errno};
 // Reads an entire buffer, perhaps issuing several [[read]] calls to do so. If
 // EOF is immediately encountered, it is returned; if [[EOF]] is encountered
 // partway through reading the buffer, [[underread]] is returned.
-export fn readall(in: *stream, buf: []u8) (size | EOF | error) = {
+export fn readall(in: *file, buf: []u8) (size | EOF | error) = {
 	let z: size = 0;
 	for (z < len(buf)) {
 		match (read(in, buf[z..])?) {
@@ -25,7 +25,7 @@ export fn readall(in: *stream, buf: []u8) (size | EOF | error) = {
 // Writes an entire buffer, perhaps issuing several [[write]] calls to do so.
 // Aborts on errors after partial writes. Hence it should only be used if it is
 // certain that the underlying writes will not fail after an initial write.
-export fn writeall(out: *stream, buf: const []u8) (size | error) = {
+export fn writeall(out: *file, buf: const []u8) (size | error) = {
 	let z: size = 0;
 	for (z < len(buf)) {
 		z += match (write(out, buf[z..])) {

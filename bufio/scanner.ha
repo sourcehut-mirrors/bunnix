@@ -11,13 +11,13 @@ use types;
 def BUFSZ: size = 4096;
 
 const scanner_vtable = io::vtable {
-	reader = &scan_read,
+	read = &scan_read,
 	...
 };
 
 export type scanner = struct {
-	stream: io::stream,
-	src: *io::stream,
+	file: io::file,
+	src: *io::file,
 	buffer: []u8,
 	// Number of bytes available in buffer
 	pending: size,
@@ -36,11 +36,11 @@ export type scanner = struct {
 // Reads from the scanner will return [[errno::OVERFLOW]] if maxread is
 // reached.
 export fn newscanner(
-	src: *io::stream,
+	src: *io::file,
 	maxread: size = types::SIZE_MAX,
 ) scanner = {
 	return scanner {
-		stream = &scanner_vtable,
+		file = &scanner_vtable,
 		src = src,
 		buffer = alloc([0...], BUFSZ),
 		maxread = maxread,
@@ -53,9 +53,9 @@ export fn newscanner(
 // return [[errno::OVERFLOW]] if the buffer length is reached, but will not
 // perform any allocations. The user should not call [[finish]] after use unless
 // they wish to free the underlying buffer through bufio.
-export fn newscanner_static(src: *io::stream, buffer: []u8) scanner = {
+export fn newscanner_static(src: *io::file, buffer: []u8) scanner = {
 	return scanner {
-		stream = &scanner_vtable,
+		file = &scanner_vtable,
 		src = src,
 		buffer = buffer,
 		maxread = len(buffer),
@@ -65,12 +65,12 @@ export fn newscanner_static(src: *io::stream, buffer: []u8) scanner = {
 };
 
 // Frees resources associated associated with a [[scanner]]. Does not close the
-// underlying I/O stream.
+// underlying I/O file.
 export fn finish(scan: *scanner) void = {
 	free(scan.buffer);
 };
 
-fn scan_read(s: *io::stream, buf: []u8) (size | io::EOF | error) = {
+fn scan_read(s: *io::file, buf: []u8) (size | io::EOF | error) = {
 	let scan = s: *scanner;
 
 	// Consume previous read, if any
@@ -89,9 +89,9 @@ fn scan_read(s: *io::stream, buf: []u8) (size | io::EOF | error) = {
 	return n;
 };
 
-// Fills up the scanner buffer with data from the underlying I/O stream. If no
+// Fills up the scanner buffer with data from the underlying I/O file. If no
 // space remains in the read buffer, it is expanded by BUFSZ (up to maxread).
-// Then, one read from the underlying I/O stream is performed and scan.pending
+// Then, one read from the underlying I/O file is performed and scan.pending
 // is updated accordingly. Returns the number of bytes which had been available
 // prior to the call.
 fn scan_readahead(scan: *scanner) (size | io::EOF | error) = {
@@ -152,7 +152,7 @@ export fn scan_byte(scan: *scanner) (u8 | io::EOF | error) = {
 };
 
 // Reads the next token from a [[scanner]], delimited by delim. The delimiter is
-// read from the source stream but not included in the returned slice. The
+// read from the source file but not included in the returned slice. The
 // return value is borrowed from the internal scanner buffer, which is
 // invalidated during subsequent operations which use this scanner.
 export fn scan_bytes(
@@ -231,7 +231,7 @@ export fn scan_rune(
 };
 
 // Scans a string of text from a [[scanner]] up to some delimiter. The delimiter
-// is read from the source stream but not included in the returned string. The
+// is read from the source file but not included in the returned string. The
 // return value is borrowed from the internal scanner buffer, which is
 // invalidated during subsequent operations which use this scanner.
 export fn scan_string(
@@ -281,8 +281,8 @@ fn scan_unread(scan: *scanner, buf: []u8) void = {
 	};
 };
 
-// Reads a single byte from an [[io::stream]].
-export fn read_byte(file: *io::stream) (u8 | io::EOF | error) = {
+// Reads a single byte from an [[io::file]].
+export fn read_byte(file: *io::file) (u8 | io::EOF | error) = {
 	let buf: [1]u8 = [0...];
 
 	match (io::readall(file, buf)?) {
@@ -295,7 +295,7 @@ export fn read_byte(file: *io::stream) (u8 | io::EOF | error) = {
 
 // Reads a slice of bytes until the delimiter. Delimiter is not included but
 // it is read from the file. The return value must be freed by the caller.
-export fn read_tok(file: *io::stream, delim: u8...) ([]u8 | io::EOF | error) = {
+export fn read_tok(file: *io::file, delim: u8...) ([]u8 | io::EOF | error) = {
 	let buf: []u8 = [];
 
 	for (true) {
@@ -319,12 +319,12 @@ export fn read_tok(file: *io::stream, delim: u8...) ([]u8 | io::EOF | error) = {
 // Reads a slice of bytes until a newline character (\n, 0x0A). Newline itself
 // is not included but it is read from the file. The return value must be
 // freed by the caller.
-export fn read_line(file: *io::stream) ([]u8 | io::EOF | error) =
+export fn read_line(file: *io::file) ([]u8 | io::EOF | error) =
 	read_tok(file, '\n');
 
-// Reads a rune from a UTF-8 stream.
+// Reads a rune from a UTF-8 file.
 export fn read_rune(
-	file: *io::stream,
+	file: *io::file,
 ) (rune | utf8::invalid | io::EOF | error) = {
 	let b: [4]u8 = [0...];
 	match (io::readall(file, b[..1])?) {

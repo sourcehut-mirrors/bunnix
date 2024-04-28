@@ -1,17 +1,17 @@
 use bytes;
 use errors::{error, errno};
 use format::elf;
-use fs;
+use io;
 use mman;
 use log;
 
 // Loads an ELF executable into a virtual memory manager, returning the entry
 // point address.
-export fn load(vmm: *mman::vmm, image: *fs::file) (uintptr | error) = {
+export fn load(vmm: *mman::vmm, image: *io::file) (uintptr | error) = {
 	mman::vmm_map(vmm);
 
 	let buf: [size(elf::header64)]u8 = [0...];
-	const n = fs::file_read(image, buf) as size;
+	const n = io::read(image, buf) as size;
 	assert(n == len(buf));
 	const hdr = &buf[0]: *elf::header64;
 
@@ -27,10 +27,10 @@ export fn load(vmm: *mman::vmm, image: *fs::file) (uintptr | error) = {
 
 	for (let i = 0u16; i < hdr.e_phnum; i += 1) {
 		const offs = hdr.e_phoff + i * hdr.e_phentsize;
-		fs::file_seek(image, offs: i64, fs::whence::SET)?;
+		io::seek(image, offs: i64, io::whence::SET)?;
 
 		let buf: [size(elf::phdr64)]u8 = [0...];
-		const n = fs::file_read(image, buf) as size;
+		const n = io::read(image, buf) as size;
 		const phdr = &buf[0]: *elf::phdr64;
 		if (phdr.p_type != elf::pt::LOAD) {
 			continue;
@@ -44,7 +44,7 @@ export fn load(vmm: *mman::vmm, image: *fs::file) (uintptr | error) = {
 
 fn phdr_load(
 	vmm: *mman::vmm,
-	image: *fs::file,
+	image: *io::file,
 	phdr: *elf::phdr64,
 ) (void | error) = {
 	// TODO: some more validation
@@ -66,8 +66,8 @@ fn phdr_load(
 		prot,
 		mman::flag::ANON | mman::flag::USER)?;
 	let data = base: *[*]u8;
-	fs::file_seek(image, phdr.p_offset: i64, fs::whence::SET)?;
-	fs::file_read(image, data[..phdr.p_filesz])?;
+	io::seek(image, phdr.p_offset: i64, io::whence::SET)?;
+	io::read(image, data[..phdr.p_filesz])?;
 
 	if (phdr.p_flags & elf::pf::W == 0) {
 		prot &= ~mman::prot::WRITE;

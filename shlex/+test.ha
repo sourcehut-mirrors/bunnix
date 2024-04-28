@@ -64,7 +64,7 @@ use strings;
 	assert(split(`unterminated\ backslash \`) is syntaxerr);
 };
 
-fn testquote(sink: *memio::stream, s: str, expected: str) void = {
+fn testquote(sink: *memio::file, s: str, expected: str) void = {
 	assert(quote(sink, s)! == len(expected));
 	assert(memio::string(sink)! == expected);
 	memio::reset(sink);

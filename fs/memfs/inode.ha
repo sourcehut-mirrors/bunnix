@@ -1,5 +1,6 @@
 use errors::{error, errno};
 use fs;
+use io;
 use sort;
 use strings;
 
@@ -25,7 +26,7 @@ fn dent_cmp(a: const *opaque, b: const *opaque) int = {
 // Finds and returns the dirent associated with this name in the given directory
 // inode, or returns null if there is no such object.
 fn dir_findchild(parent: *inode, name: str) nullable *dirent = {
-	assert(fs::isdir(parent.mode));
+	assert(io::isdir(parent.mode));
 	const model = dirent {
 		name = name,
 		inode = null: *inode,
@@ -38,7 +39,7 @@ fn dir_findchild(parent: *inode, name: str) nullable *dirent = {
 	};
 };
 
-fn mkinode(sb: *superblock, ino: uint, mode: fs::mode) inode = {
+fn mkinode(sb: *superblock, ino: uint, mode: io::mode) inode = {
 	return inode {
 		impl = &inode_dir_impl,
 		sb = sb,
@@ -56,7 +57,7 @@ const inode_dir_impl = fs::inode_iface {
 	...
 };
 
-fn inode_open(ino: *fs::inode) (*fs::file | error) = {
+fn inode_open(ino: *fs::inode) (*io::file | error) = {
 	return mkfile(ino: *inode);
 };
 
@@ -70,9 +71,9 @@ fn inode_lookup(ino: *fs::inode, name: str) (*fs::inode | error) = {
 	};
 };
 
-fn inode_mkchild(ino: *fs::inode, name: str, mode: fs::mode) (*fs::inode | error) = {
+fn inode_mkchild(ino: *fs::inode, name: str, mode: io::mode) (*fs::inode | error) = {
 	const parent = ino: *inode;
-	assert(fs::isdir(parent.mode));
+	assert(io::isdir(parent.mode));
 	if (dir_findchild(parent, name) != null) {
 		return errno::EXIST;
 	};
@@ -93,15 +94,15 @@ fn inode_mkchild(ino: *fs::inode, name: str, mode: fs::mode) (*fs::inode | error
 fn inode_create(
 	ino: *fs::inode,
 	name: str,
-	mode: fs::mode,
+	mode: io::mode,
 ) (*fs::inode | error) = {
-	return inode_mkchild(ino, name, mode | fs::mode::REG);
+	return inode_mkchild(ino, name, mode | io::mode::REG);
 };
 
 fn inode_mkdir(
 	ino: *fs::inode,
 	name: str,
-	mode: fs::mode,
+	mode: io::mode,
 ) (*fs::inode | error) = {
-	return inode_mkchild(ino, name, mode | fs::mode::DIR);
+	return inode_mkchild(ino, name, mode | io::mode::DIR);
 };

@@ -1,20 +1,21 @@
-use fs;
+use io;
 use errors::{error, errno};
 use lib::lwext4;
 
 export type file = struct {
-	fs::file,
+	impl: io::file,
+	inode: *inode,
 	union {
 		diter: lwext4::dir_iter,
 		lwfile: lwext4::file,
 	},
 };
 
-fn mkfile(ino: *inode) (*fs::file | error) = {
+fn mkfile(ino: *inode) (*io::file | error) = {
 	const impl =
-		if (fs::isfile(ino.mode)) {
+		if (io::isfile(ino.mode)) {
 			yield &file_impl_reg;
-		} else if (fs::isdir(ino.mode)) {
+		} else if (io::isdir(ino.mode)) {
 			yield &file_impl_dir;
 		} else {
 			return errno::NOTSUP;

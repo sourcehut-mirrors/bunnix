@@ -656,7 +656,7 @@ fn run_thread(
 fn search(
 	re: *regex,
 	string: str,
-	handle: *io::stream,
+	handle: *io::file,
 	need_captures: bool
 ) (void | []capture) = {
 	let threads: []thread = alloc([
@@ -833,7 +833,7 @@ export fn findall(re: *regex, string: str) []result = {
 				str_bytesize += encoding::utf8::utf8sz(
 					str_bytes[str_bytesize])!;
 			};
-			io::seek(&strm, str_bytesize: io::off,
+			io::seek(&strm, str_bytesize: i64,
 				io::whence::SET)!;
 		case void => break;
 		};

@@ -8,78 +8,78 @@ use errors;
 use io;
 use strings;
 
-export type stream = struct {
-	stream: io::stream,
+export type file = struct {
+	file: io::file,
 	buf: []u8,
 	pos: size,
 };
 
 const fixed_vt: io::vtable = io::vtable {
-	seeker = &seek,
-	reader = &read,
-	writer = &fixed_write,
+	read = &read,
+	write = &fixed_write,
+	seek = &seek,
 	...
 };
 
 const dynamic_vt: io::vtable = io::vtable {
-	seeker = &seek,
-	reader = &read,
-	writer = &dynamic_write,
-	closer = &dynamic_close,
+	read = &read,
+	write = &dynamic_write,
+	seek = &seek,
+	close = &dynamic_close,
 	...
 };
 
-// Creates a stream for a fixed, caller-supplied buffer. Seeking a stream will
+// Creates a file for a fixed, caller-supplied buffer. Seeking a file will
 // cause subsequent writes to overwrite existing contents of the buffer.
 // Writes return an error if they would exceed the buffer's capacity. The
-// stream doesn't have to be closed.
-export fn fixed(in: []u8) stream = stream {
-	stream = &fixed_vt,
+// file doesn't have to be closed.
+export fn fixed(in: []u8) file = file {
+	file = &fixed_vt,
 	buf = in,
 	pos = 0,
 };
 
-// Creates an [[io::stream]] which dynamically allocates a buffer to store
-// writes into. Seeking the stream and reading will read the written data.
-// Calling [[io::close]] on this stream will free the buffer. If a stream's
-// data is referenced via [[buffer]], the stream shouldn't be closed as
+// Creates an [[io::file]] which dynamically allocates a buffer to store
+// writes into. Seeking the file and reading will read the written data.
+// Calling [[io::close]] on this file will free the buffer. If a file's
+// data is referenced via [[buffer]], the file shouldn't be closed as
 // long as the data is used.
-export fn dynamic() stream = dynamic_from([]);
+export fn dynamic() file = dynamic_from([]);
 
 // Like [[dynamic]], but takes an existing slice as input. Writes will
 // overwrite the buffer and reads consume bytes from the initial buffer.
-// Ownership of the provided slice is transferred to the returned [[stream]].
+// Ownership of the provided slice is transferred to the returned [[file]].
 // Calling [[io::close]] will free the buffer.
-export fn dynamic_from(in: []u8) stream = stream {
-	stream = &dynamic_vt,
+export fn dynamic_from(in: []u8) file = file {
+	file = &dynamic_vt,
 	buf = in,
 	pos = 0,
 };
 
-// Returns a stream's buffer, up to the current cursor position.
+// Returns a file's buffer, up to the current cursor position.
 // [[io::seek]] to the end first in order to return the entire buffer.
 // The return value is borrowed from the input.
-export fn buffer(in: *stream) []u8 = {
+export fn buffer(in: *file) []u8 = {
 	return in.buf[..in.pos];
 };
 
-// Returns a stream's buffer, up to the current cursor position, as a string.
+// Returns a file's buffer, up to the current cursor position, as a string.
 // [[io::seek]] to the end first in order to return the entire buffer.
 // The return value is borrowed from the input.
-export fn string(in: *stream) (str | utf8::invalid) = {
+export fn string(in: *file) (str | utf8::invalid) = {
 	return strings::fromutf8(in.buf[..in.pos]);
 };
 
 // A convenience function that sets the read-write cursor to zero, so that
 // the buffer can be overwritten and reused.
-export fn reset(in: *stream) void = {
+export fn reset(in: *file) void = {
 	in.pos = 0;
 	in.buf = in.buf[..0];
 };
 
-// Reads data from a [[dynamic]] or [[fixed]] stream and returns a slice
+// Reads data from a [[dynamic]] or [[fixed]] file and returns a slice
 // borrowed from the internal buffer.
-export fn borrowedread(st: *stream, amt: size) ([]u8 | io::EOF) = {
+export fn borrowedread(st: *file, amt: size) ([]u8 | io::EOF) = {
 	if (len(st.buf) - st.pos < amt) {
 		return io::EOF;
 	};
@@ -88,8 +88,8 @@ export fn borrowedread(st: *stream, amt: size) ([]u8 | io::EOF) = {
 	return buf;
 };
 
-fn read(s: *io::stream, buf: []u8) (size | io::EOF | error) = {
-	let s = s: *stream;
+fn read(s: *io::file, buf: []u8) (size | io::EOF | error) = {
+	let s = s: *file;
 	if (len(s.buf) == s.pos) {
 		return io::EOF;
 	};
@@ -105,11 +105,11 @@ fn read(s: *io::stream, buf: []u8) (size | io::EOF | error) = {
 };
 
 fn seek(
-	s: *io::stream,
-	off: io::off,
+	s: *io::file,
+	off: i64,
 	w: io::whence
-) (io::off | error) = {
-	let s = s: *stream;
+) (i64 | error) = {
+	let s = s: *file;
 	let start = switch (w) {
 	case io::whence::SET => yield 0z;
 	case io::whence::CUR => yield s.pos;
@@ -125,14 +125,14 @@ fn seek(
 		};
 	};
 	s.pos = start + off: size;
-	return s.pos: io::off;
+	return s.pos: i64;
 };
 
-fn fixed_write(s: *io::stream, buf: const []u8) (size | error) = {
+fn fixed_write(s: *io::file, buf: const []u8) (size | error) = {
 	if (len(buf) == 0) {
 		return 0z;
 	};
-	let s = s: *stream;
+	let s = s: *file;
 	if (s.pos >= len(s.buf)) {
 		return errno::OVERFLOW: error;
 	};
@@ -146,8 +146,8 @@ fn fixed_write(s: *io::stream, buf: const []u8) (size | error) = {
 	return n;
 };
 
-fn dynamic_write(s: *io::stream, buf: const []u8) (size | error) = {
-	let s = s: *stream;
+fn dynamic_write(s: *io::file, buf: const []u8) (size | error) = {
+	let s = s: *file;
 	let spare = len(s.buf) - s.pos;
 	let bufend = if (spare < len(buf)) spare else len(buf);
 	s.buf[s.pos..s.pos+bufend] = buf[..bufend];
@@ -159,8 +159,8 @@ fn dynamic_write(s: *io::stream, buf: const []u8) (size | error) = {
 	return len(buf);
 };
 
-fn dynamic_close(s: *io::stream) (void | error) = {
-	const s = s: *stream;
+fn dynamic_close(s: *io::file) (void | error) = {
+	const s = s: *file;
 	free(s.buf);
 	s.buf = [];
 	s.pos = 0;

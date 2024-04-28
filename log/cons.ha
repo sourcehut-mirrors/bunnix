@@ -1,9 +1,9 @@
 use io;
 
-let cons: *io::stream = &io::static_empty;
+let cons: *io::file = &io::static_empty;
 
 // Sets the kernel console driver.
-export fn setcons(to: *io::stream) void = {
+export fn setcons(to: *io::file) void = {
 	cons = to;
 };
 

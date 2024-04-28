@@ -1,4 +1,5 @@
 use fs;
+use io;
 
 def ROOT_INODE: uint = 1;
 
@@ -16,7 +17,7 @@ export fn new() *fs::superblock = {
 		root = mkinode(
 			null: *superblock,
 			ROOT_INODE,
-			fs::mode::DIR | 0o755,
+			io::mode::DIR | 0o755,
 		),
 	});
 	sb.root.sb = sb;

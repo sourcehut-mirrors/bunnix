@@ -1,16 +1,17 @@
-use fs;
+use io;
 use errors::{error, errno};
 
 export type file = struct {
-	fs::file,
+	impl: io::file,
+	inode: *inode,
 	pos: size,
 };
 
-fn mkfile(ino: *inode) (*fs::file | error) = {
+fn mkfile(ino: *inode) (*io::file | error) = {
 	const impl =
-		if (fs::isfile(ino.mode)) {
+		if (io::isfile(ino.mode)) {
 			yield &file_impl_reg;
-		} else if (fs::isdir(ino.mode)) {
+		} else if (io::isdir(ino.mode)) {
 			yield &file_impl_dir;
 		} else {
 			return errno::NOTSUP;

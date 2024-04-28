@@ -1,5 +1,6 @@
 use errors::{error, errno};
 use fs;
+use io;
 use lib::lwext4;
 use types::c;
 
@@ -29,7 +30,7 @@ fn inode_from_ref(sb: *superblock, ref: *lwext4::inode_ref) (*inode | error) = {
 		...
 	});
 	ino.ino = ref.index;
-	ino.mode = lwext4::inode_get_mode(&fs.sb, ino.inode): fs::mode;
+	ino.mode = lwext4::inode_get_mode(&fs.sb, ino.inode): io::mode;
 	ino.uid = lwext4::inode_get_uid(ino.inode);
 	ino.gid = lwext4::inode_get_gid(ino.inode);
 	ino.dev = lwext4::inode_get_dev(ino.inode);
@@ -48,7 +49,7 @@ const inode_impl = fs::inode_iface {
 	...
 };
 
-fn ext4_inode_open(ino: *fs::inode) (*fs::file | error) = {
+fn ext4_inode_open(ino: *fs::inode) (*io::file | error) = {
 	return mkfile(ino: *inode);
 };
 
@@ -82,7 +83,7 @@ fn ext4_inode_unlink(ino: *fs::inode, name: str) (void | error) = {
 fn ext4_inode_create(
 	ino: *fs::inode,
 	name: str,
-	mode: fs::mode,
+	mode: io::mode,
 ) (*fs::inode | error) = {
 	abort(); // TODO
 };
@@ -90,7 +91,7 @@ fn ext4_inode_create(
 fn ext4_inode_mkdir(
 	ino: *fs::inode,
 	name: str,
-	mode: fs::mode,
+	mode: io::mode,
 ) (*fs::inode | error) = {
 	abort(); // TODO
 };

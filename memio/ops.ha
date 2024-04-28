@@ -5,6 +5,6 @@ use encoding::utf8;
 use io;
 use errors::{error, errno};
 
-// Appends a rune to a stream.
-export fn appendrune(out: *io::stream, r: rune) (size | error) =
+// Appends a rune to a file.
+export fn appendrune(out: *io::file, r: rune) (size | error) =
 	io::writeall(out, utf8::encoderune(r));

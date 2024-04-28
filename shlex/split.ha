@@ -62,7 +62,7 @@ export fn split(in: const str) ([]str | syntaxerr) = {
 	return slice;
 };
 
-fn scan_backslash(out: *io::stream, in: *strings::iterator) (void | syntaxerr) = {
+fn scan_backslash(out: *io::file, in: *strings::iterator) (void | syntaxerr) = {
 	const r = match (strings::next(in)) {
 	case let r: rune =>
 		yield r;
@@ -81,7 +81,7 @@ fn scan_backslash(out: *io::stream, in: *strings::iterator) (void | syntaxerr) =
 	memio::appendrune(out, r)!;
 };
 
-fn scan_double(out: *io::stream, in: *strings::iterator) (void | syntaxerr) = {
+fn scan_double(out: *io::file, in: *strings::iterator) (void | syntaxerr) = {
 	for (true) {
 		const r = match (strings::next(in)) {
 		case let r: rune =>
@@ -101,7 +101,7 @@ fn scan_double(out: *io::stream, in: *strings::iterator) (void | syntaxerr) = {
 	};
 };
 
-fn scan_single(out: *io::stream, in: *strings::iterator) (void | syntaxerr) = {
+fn scan_single(out: *io::file, in: *strings::iterator) (void | syntaxerr) = {
 	for (true) {
 		const r = match (strings::next(in)) {
 		case let r: rune =>

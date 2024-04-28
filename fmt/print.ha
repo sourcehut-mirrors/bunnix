@@ -10,8 +10,8 @@ use strings;
 use types;
 
 // Formats values for printing using the default format modifiers and writes
-// them to an [[io::stream]] separated by spaces.
-export fn fprint(h: *io::stream, args: formattable...) (error | size) = {
+// them to an [[io::file]] separated by spaces.
+export fn fprint(h: *io::file, args: formattable...) (error | size) = {
 	let mod = mods { ... };
 	let n = 0z;
 	for (let i = 0z; i < len(args); i += 1) {
@@ -23,9 +23,9 @@ export fn fprint(h: *io::stream, args: formattable...) (error | size) = {
 	return n;
 };
 
-// Formats text for printing and writes it to an [[io::stream]].
+// Formats text for printing and writes it to an [[io::file]].
 export fn fprintf(
-	h: *io::stream,
+	h: *io::file,
 	fmt: str,
 	args: field...
 ) (error | size) = {
@@ -44,7 +44,7 @@ export fn fprintf(
 };
 
 fn format(
-	out: *io::stream,
+	out: *io::file,
 	arg: formattable,
 	mod: *mods,
 ) (size | error) = {
@@ -75,7 +75,7 @@ fn format(
 };
 
 fn format_raw(
-	out: *io::stream,
+	out: *io::file,
 	arg: formattable,
 	mod: *mods,
 ) (size | error) = match (arg) {

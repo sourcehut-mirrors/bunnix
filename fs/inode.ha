@@ -1,4 +1,5 @@
 use errors::{error, errno};
+use io;
 
 // Generic inode data structure, generally embedded in a filesystem-specific
 // structure.
@@ -7,7 +8,7 @@ export type inode = struct {
 	sb: const *superblock,
 	ino: uint,
 	dev: uint,
-	mode: mode,
+	mode: io::mode,
 	uid: uint,
 	gid: uint,
 	blocks: size,
@@ -16,7 +17,7 @@ export type inode = struct {
 };
 
 // Opens an inode file.
-export type fn_inode_open = fn(ino: *inode) (*file | error);
+export type fn_inode_open = fn(ino: *inode) (*io::file | error);
 
 // Looks up a child of this inode.
 export type fn_inode_lookup = fn(ino: *inode, name: str) (*inode | error);
@@ -28,10 +29,10 @@ export type fn_inode_link = fn(ino: *inode, child: *inode, name: str) (void | er
 export type fn_inode_unlink = fn(ino: *inode, name: str) (void | error);
 
 // Creates a new file as a child of this inode.
-export type fn_inode_create = fn(ino: *inode, name: str, mode: mode) (*inode | error);
+export type fn_inode_create = fn(ino: *inode, name: str, mode: io::mode) (*inode | error);
 
 // Makes a new directory in this inode.
-export type fn_inode_mkdir = fn(ino: *inode, name: str, mode: mode) (*inode | error);
+export type fn_inode_mkdir = fn(ino: *inode, name: str, mode: io::mode) (*inode | error);
 
 // Removes a directory from this inode.
 export type fn_inode_rmdir = fn(ino: *inode, name: str) (void | error);
@@ -48,7 +49,7 @@ export type inode_iface = struct {
 };
 
 // Opens an inode as a file.
-export fn inode_open(ino: *inode) (*file | error) = {
+export fn inode_open(ino: *inode) (*io::file | error) = {
 	match (ino.impl.open) {
 	case let func: *fn_inode_open =>
 		return func(ino);
@@ -68,7 +69,7 @@ export fn inode_lookup(ino: *inode, name: str) (*inode | error) = {
 };
 
 // Creates a new file as a child of this inode.
-export fn inode_create(ino: *inode, name: str, mode: mode) (*inode | error) = {
+export fn inode_create(ino: *inode, name: str, mode: io::mode) (*inode | error) = {
 	match (ino.impl.create) {
 	case let func: *fn_inode_create =>
 		return func(ino, name, mode);
@@ -78,7 +79,7 @@ export fn inode_create(ino: *inode, name: str, mode: mode) (*inode | error) = {
 };
 
 // Makes a new directory in this inode.
-export fn inode_mkdir(ino: *inode, name: str, mode: mode) (*inode | error) = {
+export fn inode_mkdir(ino: *inode, name: str, mode: io::mode) (*inode | error) = {
 	match (ino.impl.mkdir) {
 	case let func: *fn_inode_mkdir =>
 		return func(ino, name, mode);

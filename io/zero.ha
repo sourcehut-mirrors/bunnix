@@ -5,17 +5,17 @@ use bytes;
 use errors::{error, errno};
 
 const _zero_vt: vtable = vtable {
-	reader = &zero_read,
-	writer = &empty_write,
+	read = &zero_read,
+	write = &empty_write,
 	...
 };
 
-const _zero: stream = &_zero_vt;
+const _zero: file = &_zero_vt;
 
-// A [[stream]] which always reads zeroes and discards any writes.
-export const zero: *stream = &_zero;
+// A [[file]] which always reads zeroes and discards any writes.
+export const zero: *file = &_zero;
 
-fn zero_read(s: *stream, buf: []u8) (size | EOF | error) = {
+fn zero_read(f: *file, buf: []u8) (size | EOF | error) = {
 	bytes::zero(buf);
 	return len(buf);
 };

@@ -3,20 +3,21 @@
 // (c) Hare authors <https://harelang.org>
 
 use errors::{error, errno};
+use io;
 use fs;
 
-const file_impl_reg = fs::file_iface {
+const file_impl_reg = io::vtable {
 	read = &file_read,
 	write = &file_write,
 	seek = &file_seek,
 	...
 };
 
-fn file_read(fd: *fs::file, buf: []u8) (size | fs::EOF | error) = {
+fn file_read(fd: *io::file, buf: []u8) (size | io::EOF | error) = {
 	let fd = fd: *file;
 	let inode = fd.inode: *inode;
 	if (len(inode.data) == fd.pos) {
-		return fs::EOF;
+		return io::EOF;
 	};
 	const n = if (len(inode.data) - fd.pos < len(buf)) {
 		yield len(inode.data) - fd.pos;
@@ -29,7 +30,7 @@ fn file_read(fd: *fs::file, buf: []u8) (size | fs::EOF | error) = {
 	return n;
 };
 
-fn file_write(fd: *fs::file, buf: []u8) (size | error) = {
+fn file_write(fd: *io::file, buf: const []u8) (size | error) = {
 	let fd = fd: *file;
 	let inode = fd.inode: *inode;
 	let spare = len(inode.data) - fd.pos;
@@ -43,13 +44,13 @@ fn file_write(fd: *fs::file, buf: []u8) (size | error) = {
 	return len(buf);
 };
 
-fn file_seek(fd: *fs::file, offs: i64, w: fs::whence) (size | error) = {
+fn file_seek(fd: *io::file, offs: i64, w: io::whence) (i64 | error) = {
 	let fd = fd: *file;
 	let inode = fd.inode: *inode;
 	let start = switch (w) {
-	case fs::whence::SET => yield 0z;
-	case fs::whence::CUR => yield fd.pos;
-	case fs::whence::END => yield len(inode.data);
+	case io::whence::SET => yield 0z;
+	case io::whence::CUR => yield fd.pos;
+	case io::whence::END => yield len(inode.data);
 	};
 	if (offs < 0) {
 		if (start < (-offs): size) {
@@ -61,5 +62,5 @@ fn file_seek(fd: *fs::file, offs: i64, w: fs::whence) (size | error) = {
 		};
 	};
 	fd.pos = start + offs: size;
-	return fd.pos;
+	return fd.pos: i64;
 };

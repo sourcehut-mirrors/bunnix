@@ -1,8 +1,9 @@
 use errors::{error, errno};
 use fs;
+use io;
 use lib::lwext4;
 
-const file_impl_reg = fs::file_iface {
+const file_impl_reg = io::vtable {
 	read = &file_read,
 	write = &file_write,
 	seek = &file_seek,
@@ -28,7 +29,7 @@ fn file_init(file: *file) (void | error) = {
 	};
 };
 
-fn file_read(fd: *fs::file, buf: []u8) (size | fs::EOF | error) = {
+fn file_read(fd: *io::file, buf: []u8) (size | io::EOF | error) = {
 	const fd = fd: *file;
 	file_init(fd)?;
 
@@ -37,11 +38,14 @@ fn file_read(fd: *fs::file, buf: []u8) (size | fs::EOF | error) = {
 	if (r != errno::NONE) {
 		return r: error;
 	};
+	if (n == 0) {
+		return io::EOF;
+	};
 
 	return n;
 };
 
-fn file_write(fd: *fs::file, buf: []u8) (size | error) = {
+fn file_write(fd: *io::file, buf: const []u8) (size | error) = {
 	const fd = fd: *file;
 	file_init(fd)?;
 
@@ -54,10 +58,10 @@ fn file_write(fd: *fs::file, buf: []u8) (size | error) = {
 	return n;
 };
 
-fn file_seek(fd: *fs::file, offs: i64, w: fs::whence) (size | error) = {
-	static assert(fs::whence::SET: u32 == lwext4::SEEK_SET);
-	static assert(fs::whence::CUR: u32 == lwext4::SEEK_CUR);
-	static assert(fs::whence::END: u32 == lwext4::SEEK_END);
+fn file_seek(fd: *io::file, offs: i64, w: io::whence) (i64 | error) = {
+	static assert(io::whence::SET: u32 == lwext4::SEEK_SET);
+	static assert(io::whence::CUR: u32 == lwext4::SEEK_CUR);
+	static assert(io::whence::END: u32 == lwext4::SEEK_END);
 
 	const fd = fd: *file;
 	file_init(fd)?;
@@ -67,5 +71,5 @@ fn file_seek(fd: *fs::file, offs: i64, w: fs::whence) (size | error) = {
 		return r: error;
 	};
 
-	return fd.lwfile.fpos;
+	return fd.lwfile.fpos: i64;
 };

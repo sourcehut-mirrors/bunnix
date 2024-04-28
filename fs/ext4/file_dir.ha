@@ -1,10 +1,11 @@
 use errors::{error, errno};
 use fs;
+use io;
 use lib::lwext4;
 use log;
 use types::c;
 
-const file_impl_dir = fs::file_iface {
+const file_impl_dir = io::vtable {
 	readdir = &dir_readdir,
 	...
 };
@@ -22,7 +23,7 @@ fn dir_iter_init(fd: *file) (bool | error) = {
 	return true;
 };
 
-fn dir_readdir(fd: *fs::file, dent: *fs::dirent) (void | fs::EOF | error) = {
+fn dir_readdir(fd: *io::file, dent: *io::dirent) (void | io::EOF | error) = {
 	const fd = fd: *file;
 	const first = dir_iter_init(fd)?;
 
@@ -35,7 +36,7 @@ fn dir_readdir(fd: *fs::file, dent: *fs::dirent) (void | fs::EOF | error) = {
 
 	if (fd.diter.curr == null) {
 		lwext4::dir_iterator_fini(&fd.diter);
-		return fs::EOF;
+		return io::EOF;
 	};
 
 	const inode = fd.inode: *inode;
@@ -43,7 +44,7 @@ fn dir_readdir(fd: *fs::file, dent: *fs::dirent) (void | fs::EOF | error) = {
 	const fs = &sb.mp.fs;
 	const cur = match (fd.diter.curr) {
 	case null =>
-		return fs::EOF;
+		return io::EOF;
 	case let dent: *lwext4::dir_en =>
 		yield dent;
 	};
@@ -52,25 +53,25 @@ fn dir_readdir(fd: *fs::file, dent: *fs::dirent) (void | fs::EOF | error) = {
 
 	const mode = switch (cur.in.inode_type) {
 	case lwext4::EXT4_DE_UNKNOWN =>
-		yield fs::mode::UNKNOWN;
+		yield io::mode::UNKNOWN;
 	case lwext4::EXT4_DE_REG_FILE =>
-		yield fs::mode::REG;
+		yield io::mode::REG;
 	case lwext4::EXT4_DE_DIR =>
-		yield fs::mode::DIR;
+		yield io::mode::DIR;
 	case lwext4::EXT4_DE_CHRDEV =>
-		yield fs::mode::CHR;
+		yield io::mode::CHR;
 	case lwext4::EXT4_DE_BLKDEV =>
-		yield fs::mode::BLK;
+		yield io::mode::BLK;
 	case lwext4::EXT4_DE_FIFO =>
-		yield fs::mode::FIFO;
+		yield io::mode::FIFO;
 	case lwext4::EXT4_DE_SOCK =>
-		yield fs::mode::SOCK;
+		yield io::mode::SOCK;
 	case lwext4::EXT4_DE_SYMLIN =>
-		yield fs::mode::LINK;
+		yield io::mode::LINK;
 	case => abort();
 	};
 
-	*dent = fs::dirent {
+	*dent = io::dirent {
 		name = name,
 		mode = mode,
 		ino = cur.inode,

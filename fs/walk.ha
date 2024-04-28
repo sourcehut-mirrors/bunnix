@@ -1,4 +1,5 @@
 use errors::{error, errno};
+use io;
 use path;
 
 // Flags that apply to a [[walk]] operation.
@@ -27,10 +28,10 @@ export fn inode_walk(
 			return cur;
 		};
 
-		if (islink(cur.mode)) {
+		if (io::islink(cur.mode)) {
 			return errno::NOTSUP; // TODO
 		};
-		if (!isdir(cur.mode)) {
+		if (!io::isdir(cur.mode)) {
 			return errno::NOENT;
 		};
 

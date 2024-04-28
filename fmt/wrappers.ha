@@ -23,10 +23,10 @@ export fn bsprintf(buf: []u8, fmt: str, args: field...) str = {
 	return strings::fromutf8_unsafe(buf[..l]);
 };
 
-// Formats text for printing and writes it to an [[io::stream]], followed by a
+// Formats text for printing and writes it to an [[io::file]], followed by a
 // line feed.
 export fn fprintfln(
-	h: *io::stream,
+	h: *io::file,
 	fmt: str,
 	args: field...
 ) (error | size) = fprintf(h, fmt, args...)? + io::write(h, ['\n'])?;
@@ -51,6 +51,6 @@ export fn bsprint(buf: []u8, args: formattable...) str = {
 };
 
 // Formats values for printing using the default format modifiers and writes
-// them to an [[io::stream]] separated by spaces and followed by a line feed.
-export fn fprintln(h: *io::stream, args: formattable...) (error | size) =
+// them to an [[io::file]] separated by spaces and followed by a line feed.
+export fn fprintln(h: *io::file, args: formattable...) (error | size) =
 	fprint(h, args...)? + io::write(h, ['\n'])?;

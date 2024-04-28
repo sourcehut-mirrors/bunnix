@@ -2,6 +2,7 @@ use arch;
 use errors::{error, errno};
 use mman;
 use fs;
+use io;
 use log;
 
 // A process in userspace.
@@ -28,7 +29,7 @@ export fn new_proc(root: *fs::vfs) (*proc | error) = {
 // Does not return on success.
 export fn exec(
 	proc: *proc,
-	file: *fs::file,
+	file: *io::file,
 	args: []str,
 ) (void | error) = {
 	let new_vmm = mman::vmm { ... };
