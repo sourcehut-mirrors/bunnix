@@ -23,9 +23,10 @@ export fn main(ctx: *boot::context) never = {
 	dev::serial_init(&serialcons, dev::SERIAL_PORT_A);
 
 	static let cons = io::teefile {
-		vtable = null: io::file,
-		f = null: *io::file,
-		sink = null: *io::file,
+		vtable = null: *io::vtable,
+		primary = null: *io::file,
+		secondary = null: *io::file,
+		...
 	};
 	cons = io::tee(&vgacons, &serialcons);
 	log::setcons(&cons);

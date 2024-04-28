@@ -3,7 +3,7 @@ use errors::{error, errno};
 use lib::lwext4;
 
 export type file = struct {
-	impl: io::file,
+	io::file,
 	inode: *inode,
 	union {
 		diter: lwext4::dir_iter,
@@ -21,7 +21,7 @@ fn mkfile(ino: *inode) (*io::file | error) = {
 			return errno::NOTSUP;
 		};
 	const f = alloc(file {
-		impl = impl,
+		vtable = impl,
 		inode = ino,
 		...
 	});

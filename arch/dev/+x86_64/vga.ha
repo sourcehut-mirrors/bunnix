@@ -15,7 +15,7 @@ export def VGA_CELLS: size = VGA_ROWS * VGA_COLS;
 export const VGA_CONSBASE: *[VGA_CELLS]u16 = 0xb8000: uintptr: *[VGA_CELLS]u16;
 
 export type vga_console = struct {
-	vtable: io::file,
+	io::file,
 	base: nullable *[VGA_CELLS]u16,
 	row: uint,
 	col: uint,

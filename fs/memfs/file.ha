@@ -2,7 +2,7 @@ use io;
 use errors::{error, errno};
 
 export type file = struct {
-	impl: io::file,
+	io::file,
 	inode: *inode,
 	pos: size,
 };
@@ -17,7 +17,7 @@ fn mkfile(ino: *inode) (*io::file | error) = {
 			return errno::NOTSUP;
 		};
 	return alloc(file {
-		impl = impl,
+		vtable = impl,
 		inode = ino,
 		...
 	});

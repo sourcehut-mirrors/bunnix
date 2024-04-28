@@ -9,7 +9,7 @@ use io;
 use strings;
 
 export type file = struct {
-	file: io::file,
+	io::file,
 	buf: []u8,
 	pos: size,
 };
@@ -25,7 +25,7 @@ const dynamic_vt: io::vtable = io::vtable {
 	read = &read,
 	write = &dynamic_write,
 	seek = &seek,
-	close = &dynamic_close,
+	finish = &dynamic_finish,
 	...
 };
 
@@ -34,9 +34,9 @@ const dynamic_vt: io::vtable = io::vtable {
 // Writes return an error if they would exceed the buffer's capacity. The
 // file doesn't have to be closed.
 export fn fixed(in: []u8) file = file {
-	file = &fixed_vt,
+	vtable = &fixed_vt,
 	buf = in,
-	pos = 0,
+	...
 };
 
 // Creates an [[io::file]] which dynamically allocates a buffer to store
@@ -51,9 +51,9 @@ export fn dynamic() file = dynamic_from([]);
 // Ownership of the provided slice is transferred to the returned [[file]].
 // Calling [[io::close]] will free the buffer.
 export fn dynamic_from(in: []u8) file = file {
-	file = &dynamic_vt,
+	vtable = &dynamic_vt,
 	buf = in,
-	pos = 0,
+	...
 };
 
 // Returns a file's buffer, up to the current cursor position.
@@ -159,7 +159,7 @@ fn dynamic_write(s: *io::file, buf: const []u8) (size | error) = {
 	return len(buf);
 };
 
-fn dynamic_close(s: *io::file) (void | error) = {
+fn dynamic_finish(s: *io::file) void = {
 	const s = s: *file;
 	free(s.buf);
 	s.buf = [];

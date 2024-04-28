@@ -10,7 +10,10 @@ const _zero_vt: vtable = vtable {
 	...
 };
 
-const _zero: file = &_zero_vt;
+const _zero: file = file {
+	vtable = &_zero_vt,
+	...
+};
 
 // A [[file]] which always reads zeroes and discards any writes.
 export const zero: *file = &_zero;

@@ -6,7 +6,12 @@ use errors::{error, errno};
 // A file is a pointer to a [[vtable]] which allows for user-defined I/O
 // abstractions to implement some subset of read, write, seek, close, and other
 // I/O functionality in userspace.
-export type file = *vtable;
+export type file = struct {
+	vtable: *vtable,
+	// Note: refs is zero when there is one reference held, it will be
+	// finished when unrefed
+	refs: uint,
+};
 
 // Indicates an end-of-file condition.
 export type EOF = done;
@@ -24,7 +29,7 @@ export type vtable = struct {
 	write: nullable *fn_file_write,
 	seek: nullable *fn_file_seek,
 	readdir: nullable *fn_file_readdir,
-	close: nullable *fn_file_close,
+	finish: nullable *fn_file_finish,
 };
 
 // Performs a read on a [[file]]. The provided buffer is not checked for
@@ -35,8 +40,8 @@ export type fn_file_read = fn(s: *file, buf: []u8) (size | EOF | error);
 // validity within the current address space by the implementation.
 export type fn_file_write = fn(s: *file, buf: const []u8) (size | error);
 
-// Closes a file and frees resources associated with it.
-export type fn_file_close = fn(s: *file) (void | error);
+// Frees all resources associated with a file.
+export type fn_file_finish = fn(s: *file) void;
 
 // Seeks a file to the requested offset, returning the new offset.
 export type fn_file_seek = fn(s: *file, off: i64, w: whence) (i64 | error);
@@ -47,7 +52,7 @@ export type fn_file_readdir = fn(fd: *file, dent: *dirent) (void | EOF | error);
 // Performs a read on a [[file]]. The provided buffer is not checked for
 // validity within the current address space by the implementation.
 export fn read(file: *file, buf: []u8) (size | EOF | error) = {
-	match (file.read) {
+	match (file.vtable.read) {
 	case let func: *fn_file_read =>
 		return func(file, buf);
 	case null =>
@@ -58,7 +63,7 @@ export fn read(file: *file, buf: []u8) (size | EOF | error) = {
 // Performs a write on a [[file]]. The provided buffer is not checked for
 // validity within the current address space by the implementation.
 export fn write(file: *file, buf: []u8) (size | error) = {
-	match (file.write) {
+	match (file.vtable.write) {
 	case let func: *fn_file_write =>
 		return func(file, buf);
 	case null =>
@@ -68,7 +73,7 @@ export fn write(file: *file, buf: []u8) (size | error) = {
 
 // Seeks a file to the requested offset, returning the new offset.
 export fn seek(file: *file, offs: i64, w: whence) (i64 | error) = {
-	match (file.seek) {
+	match (file.vtable.seek) {
 	case let func: *fn_file_seek =>
 		return func(file, offs, w);
 	case null =>
@@ -83,7 +88,7 @@ export fn tell(f: *file) (i64 | error) = {
 
 // Reads the next directory from a file descriptor.
 export fn readdir(file: *file, dent: *dirent) (void | EOF | error) = {
-	match (file.readdir) {
+	match (file.vtable.readdir) {
 	case let func: *fn_file_readdir =>
 		return func(file, dent);
 	case null =>
@@ -91,12 +96,18 @@ export fn readdir(file: *file, dent: *dirent) (void | EOF | error) = {
 	};
 };
 
-// Closes a [[file]]. No further operations against this file are permitted
-// after calling this function.
-export fn close(s: *file) (void | error) = {
-	match (s.close) {
-	case null => void;
-	case let c: *fn_file_close =>
-		c(s)?;
+export fn ref(file: *file) void = {
+	file.refs += 1;
+};
+
+export fn unref(file: *file) void = {
+	if (file.refs == 0) {
+		match (file.vtable.finish) {
+		case let func: *fn_file_finish =>
+			func(file);
+		case null => void;
+		};
+	} else {
+		file.refs -= 1;
 	};
 };

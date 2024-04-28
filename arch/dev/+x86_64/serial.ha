@@ -8,7 +8,7 @@ export def SERIAL_PORT_C: u16 = 0x3E8;
 export def SERIAL_PORT_D: u16 = 0x2E8;
 
 export type serial_console = struct {
-	vtable: io::file,
+	io::file,
 	port: u16,
 };
 
@@ -17,6 +17,7 @@ export fn serial_init(cons: *serial_console, port: u16) void = {
 	*cons = serial_console {
 		vtable = &serial_vtable,
 		port = port,
+		...
 	};
 	x86_64::outb(port + 1, 0x00); // Disable interrupts
 	x86_64::outb(port + 3, 0x80); // Enable divisor mode

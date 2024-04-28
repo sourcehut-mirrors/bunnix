@@ -10,7 +10,10 @@ const _empty_vt: vtable = vtable {
 };
 
 // Static global [[io::empty]].
-export const static_empty: file = &_empty_vt;
+export const static_empty = file {
+	vtable = &_empty_vt,
+	...
+};
 
 // A [[file]] which always reads EOF and discards any writes.
 export const empty: *file = &static_empty;

@@ -4,9 +4,9 @@
 use errors::{error, errno};
 
 export type teefile = struct {
-	vtable: file,
-	f: *file,
-	sink: *file,
+	file,
+	primary: *file,
+	secondary: *file,
 };
 
 const tee_vtable: vtable = vtable {
@@ -21,27 +21,27 @@ const tee_vtable: vtable = vtable {
 export fn tee(f: *file, sink: *file) teefile = {
 	return teefile {
 		vtable = &tee_vtable,
-		f = f,
-		sink = sink,
+		primary = f,
+		secondary = sink,
 		...
 	};
 };
 
 fn tee_read(f: *file, buf: []u8) (size | EOF | error) = {
 	let f = f: *teefile;
-	let z = match (read(f.f, buf)?) {
+	let z = match (read(f.primary, buf)?) {
 	case EOF =>
 		return EOF;
 	case let z: size =>
 		yield z;
 	};
-	writeall(f.sink, buf[..z])?;
+	writeall(f.secondary, buf[..z])?;
 	return z;
 };
 
 fn tee_write(f: *file, buf: const []u8) (size | error) = {
 	let f = f: *teefile;
-	const z = write(f.f, buf)?;
-	writeall(f.sink, buf[..z])?;
+	const z = write(f.primary, buf)?;
+	writeall(f.secondary, buf[..z])?;
 	return z;
 };

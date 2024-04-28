@@ -17,7 +17,7 @@ export fn split(in: const str) ([]str | syntaxerr) = {
 	let iter = strings::iter(in);
 
 	let s = memio::dynamic();
-	defer io::close(&s)!;
+	defer io::unref(&s);
 
 	let slice: []str = [];
 	let first = true;

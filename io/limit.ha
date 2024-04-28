@@ -4,7 +4,7 @@
 use errors::{error, errno};
 
 export type limitfile = struct {
-	vtable: file,
+	file,
 	source: *file,
 	limit: size,
 };
@@ -28,6 +28,7 @@ export fn limitreader(source: *file, limit: size) limitfile = {
 		vtable = &limit_vtable_reader,
 		source = source,
 		limit = limit,
+		...
 	};
 };
 
@@ -40,6 +41,7 @@ export fn limitwriter(source: *file, limit: size) limitfile = {
 		vtable = &limit_vtable_writer,
 		source = source,
 		limit = limit,
+		...
 	};
 };
 
