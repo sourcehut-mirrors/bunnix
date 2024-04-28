@@ -209,7 +209,9 @@ export fn isvalid(
 	length: size,
 	write: bool,
 ) bool = {
-	addr &= (1 << UPAGESIZE) - 1;
+	const aligned = addr & ~(UPAGESIZE - 1);
+	length += (addr - aligned): size;
+	addr = aligned;
 
 	for (let i = 0z; i < length; i += PAGESIZE) {
 		const virt = addr + i: uintptr;

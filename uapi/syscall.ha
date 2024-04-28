@@ -1,7 +1,5 @@
 use errors::{error, errno};
 
-const UAPI: str = "uapi";
-
 export fn syscall(
 	sysno: u64,
 	a1: u64,
@@ -21,3 +19,19 @@ export fn syscall(
 		return (errno::NONE, u);
 	};
 };
+
+export type sys = enum u64 {
+	READV,
+	WRITEV,
+	LSEEK,
+	CLOSE,
+};
+
+export type syscall_handler = fn(...) (u64 | error);
+
+let systab: [_]*opaque = [
+	&sys_readv,
+	&sys_writev,
+	&sys_lseek,
+	&sys_close,
+];

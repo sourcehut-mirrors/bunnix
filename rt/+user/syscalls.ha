@@ -1,6 +1,17 @@
-fn syscall(sysno: u64, ...) u64;
+fn syscall(sysno: u64, ...) (u64, u64);
 
-// Test syscall
-export fn test(a: u64, b: u64, c: u64) void = {
-	syscall(SYS_test, a, b, c);
+fn syswrap(ret: (u64, u64)) (u64 | error) = {
+	const (status, result) = ret;
+	if (status == errno::NONE) {
+		return result;
+	};
+	return status: errno: error;
+};
+
+export fn readv(fd: i64, vec: vector...) (size | error) = {
+	return syswrap(syscall(sys::READV, fd, &vec[0], len(vec)))?: size;
+};
+
+export fn writev(fd: i64, vec: vector...) (size | error) = {
+	return syswrap(syscall(sys::WRITEV, fd, &vec[0], len(vec)))?: size;
 };

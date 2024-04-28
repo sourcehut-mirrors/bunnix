@@ -1,7 +1,11 @@
+use strings;
 use rt;
 
 export fn main() void = {
-	for (let i = 0u64; i < 5; i += 1) {
-		rt::test(i, i + 1, i + 2);
+	const data = strings::toutf8("Hello from userspace!\n");
+	const vec = rt::vector {
+		base = &data[0],
+		count = len(data),
 	};
+	rt::writev(1, vec)!;
 };

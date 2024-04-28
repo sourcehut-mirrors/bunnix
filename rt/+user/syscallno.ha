@@ -1,1 +1,6 @@
-export def SYS_test: uint = 0;
+export type sys = enum u64 {
+	READV,
+	WRITEV,
+	LSEEK,
+	CLOSE,
+};

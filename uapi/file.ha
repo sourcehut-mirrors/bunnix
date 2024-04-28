@@ -22,41 +22,39 @@ fn sys_readv(fd: i64, vecs: *[*]vector, nvec: u64) (u64 | error) = {
 	const vecs = vecs[..nvec];
 	const file = validate_file(fd)?;
 
-	abort(); // TODO
+	let sum = 0z;
+	for (let vec .. vecs) {
+		const buf = (vec.base: *[*]u8)[..vec.count];
+		match (io::read(file, buf)?) {
+		case let n: size =>
+			sum += n;
+			if (n < vec.count) {
+				break;
+			};
+		case io::EOF =>
+			break;
+		};
+	};
+
+	return sum;
 };
 
-fn sys_preadv(
-	fd: i64,
-	off: i64,
-	vecs: *[*]vector,
-	nvec: u64,
-) (u64 | error) = {
-	validate_vectors(vecs, nvec, false)?;
-	const vecs = vecs[..nvec];
-	const file = validate_file(fd)?;
-
-	abort(); // TODO
-};
-
-fn sys_writev(fd: int, vecs: *[*]vector, nvec: u64) (u64 | error) = {
+fn sys_writev(fd: i64, vecs: *[*]vector, nvec: u64) (u64 | error) = {
 	validate_vectors(vecs, nvec, true)?;
 	const vecs = vecs[..nvec];
 	const file = validate_file(fd)?;
 
-	abort(); // TODO
-};
+	let sum = 0z;
+	for (let vec .. vecs) {
+		const buf = (vec.base: *[*]u8)[..vec.count];
+		const n = io::write(file, buf)?;
+		sum += n;
+		if (n < vec.count) {
+			break;
+		};
+	};
 
-fn sys_pwritev(
-	fd: i64,
-	off: i64,
-	vecs: *[*]vector,
-	nvec: u64,
-) (u64 | error) = {
-	validate_vectors(vecs, nvec, true)?;
-	const vecs = vecs[..nvec];
-	const file = validate_file(fd)?;
-
-	abort(); // TODO
+	return sum;
 };
 
 fn sys_lseek(
