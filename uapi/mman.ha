@@ -1,30 +1,13 @@
-use arch;
 use errors::{error, errno};
-use proc;
-use mman;
 
-// Validates an address from userspace.
-fn validate_user_addr(
-	addr: *opaque,
-	bytes: size,
-	write: bool,
-	error: errno = errno::FAULT,
-) (void | error) = {
-	const vmm = &proc::current().vmm;
-	if (!mman::isvalid(vmm, addr: uintptr, bytes, write)) {
-		return error;
-	};
+fn sys_mmap(options: *mmap_options) (u64 | error) = {
+	abort(); // TODO
 };
 
-fn validate_vectors(
-	vec: *[*]vector,
-	nvec: u64,
-	write: bool,
-	error: errno = errno::FAULT,
-) (void | error) = {
-	validate_user_addr(vec, size(vector) * nvec: size, false, error)?;
+fn sys_munmap(addr: *opaque, length: size) (u64 | error) = {
+	abort(); // TODO
+};
 
-	for (let v .. vec[..nvec]) {
-		validate_user_addr(v.base, v.count, write, error)?;
-	};
+fn sys_mprotect(addr: *opaque, length: size, prot: int) (u64 | error) = {
+	abort(); // TODO
 };

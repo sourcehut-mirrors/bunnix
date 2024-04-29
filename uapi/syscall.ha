@@ -28,6 +28,9 @@ export type sys = enum u64 {
 	GETPID,
 	KILL,
 	EXIT,
+	MMAP,
+	MUNMAP,
+	MPROTECT,
 };
 
 export type syscall_handler = fn(...) (u64 | error);
@@ -40,4 +43,7 @@ let systab: [_]*opaque = [
 	&sys_getpid,
 	&sys_kill,
 	&sys_exit,
+	&sys_mmap,
+	&sys_munmap,
+	&sys_mprotect,
 ];
