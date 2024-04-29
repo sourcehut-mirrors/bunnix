@@ -17,7 +17,12 @@ export type prot = enum uint {
 // Flags for [[mmap]] operations.
 export type flag = enum uint {
 	NONE = 0,
-	ANON = 1 << 0,
+	ANON	= 1 << 0,
+	PRIVATE	= 1 << 1,
+	SHARED  = 1 << 2,
+	FIXED	= 1 << 3,
+
+	USER_MASK = (1 << 24) - 1,
 
 	// == Kernel flags
 

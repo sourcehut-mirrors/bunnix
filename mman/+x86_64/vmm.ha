@@ -127,6 +127,33 @@ export fn mmap(
 	return base;
 };
 
+// Unmaps pages of memory.
+export fn munmap(
+	vmm: *vmm,
+	addr: uintptr,
+	length: size,
+) (void | error) = {
+	if (addr % UPAGESIZE != 0) {
+		return errno::INVAL;
+	};
+	if (length == 0) {
+		return errno::INVAL;
+	};
+	if (length % PAGESIZE != 0) {
+		length += PAGESIZE - length % PAGESIZE;
+	};
+
+	for (let i = 0z; i < length; i += PAGESIZE) {
+		const virt = addr + i;
+		// TODO: Handle null pte here
+		let pte = arch::getpte(vmm.pml4, virt) as *pte;
+		const phys = *pte & PADDR_MASK;
+		unref(phys: uintptr, PAGESIZE);
+		*pte &= ~pte::P;
+		x86_64::invlpg(virt);
+	};
+};
+
 // Updates the access protection flags for a range of virtual memory addresses.
 export fn mprotect(
 	vmm: *vmm,

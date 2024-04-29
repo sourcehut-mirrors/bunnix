@@ -4,10 +4,10 @@ export type vector = struct {
 };
 
 export type mmap_options = struct {
-	addr: *opaque,
+	addr: nullable *opaque,
 	length: size,
 	prot: int,
 	flags: int,
 	fd: int,
-	offs: u64,
+	offs: i64,
 };
