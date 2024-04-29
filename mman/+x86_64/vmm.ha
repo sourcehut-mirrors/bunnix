@@ -217,7 +217,7 @@ export fn isvalid(
 		const virt = addr + i: uintptr;
 		match (arch::getpte(vmm.pml4, virt)) {
 		case let p: *pte =>
-			if (*p & pte::P == 0) {
+			if (*p & pte::P == 0 || *p & pte::U == 0) {
 				return false;
 			};
 			if (write && *p & pte::W == 0) {
