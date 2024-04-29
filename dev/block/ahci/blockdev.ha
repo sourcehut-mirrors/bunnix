@@ -19,20 +19,26 @@ fn bdev_readsectors(
 	const buffer = getbuffer(hba.pool, len(buf))!;
 	defer releasebuffer(hba.pool, &buffer);
 
-	// TODO: kick back to caller? transparently do multiple reads?
 	const nbyte = len(buf);
-	assert(nbyte < buffer.prdt.1);
+	for (let nread = 0z; nread < len(buf)) {
+		let amt = len(buf) - nread;
+		if (amt > buffer.prdt.1) {
+			amt = buffer.prdt.1;
+		};
+		defer nread += amt;
 
-	let cmd = prep_read_dma_ext(bdev, lba, buffer.prdt)!;
-	port_wait(bdev);
-	port_submitcmd(bdev, cmd);
-	port_waitcmd(bdev, cmd);
+		let cmd = prep_read_dma_ext(bdev, lba, buffer.prdt)!;
+		port_wait(bdev);
+		port_submitcmd(bdev, cmd);
+		port_waitcmd(bdev, cmd);
 
-	const _is = bdev.port._is;
-	bdev.port._is = _is;
-	assert(_is & HBA_PxIS_TFES == 0);
+		const _is = bdev.port._is;
+		bdev.port._is = _is;
+		// TODO: Handle read errors
+		assert(_is & HBA_PxIS_TFES == 0);
 
-	buf[..nbyte] = buffer.data[..nbyte];
+		buf[nread..nread+amt] = buffer.data[..amt];
+	};
 };
 
 fn bdev_writesectors(
