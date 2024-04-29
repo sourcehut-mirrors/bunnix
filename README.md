@@ -6,6 +6,7 @@ A simple monolithic Unix-like operating system.
 
 You need the following:
 
+* GNU make
 * An up-to-date [Hare](https://harelang.org) toolchain. Bunnix tracks Hare
   master, not the latest stable release.
 * binutils and gcc configured for an x86_64-elf target
@@ -14,14 +15,14 @@ You need the following:
 * sfdisk
 * syslinux
 * xorriso
-* qemu-system-x86_64 and qemu-img
+* qemu-system-x86\_64 and qemu-img
 
-Consider editing config.mk to taste before moving on.
+Copy conf/x86\_64.mk to config.mk and to taste before moving on.
 
 Use `make` to compile Bunnix. The following targets are available:
 
-* make: builds bunnix.iso, which can be written to storage media and booted on
-  real hardware
+* make: builds target/bunnix.iso, which can be written to storage media and
+  booted on real hardware
 * make nographic: build and run Bunnix in qemu with the serial console connected
   to stdin/out
 * make run: build and run Bunnix in qemu with the SDL backend
