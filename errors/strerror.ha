@@ -28,7 +28,7 @@ export fn strerror(err: error) str = {
 		return "No such device or address";
 	case errno::E2BIG =>
 		return "Argument list too long";
-	case errno::ACCESS =>
+	case errno::ACCES =>
 		return "Permission denied";
 	case errno::FAULT =>
 		return "Bad address";
@@ -58,5 +58,15 @@ export fn strerror(err: error) str = {
 		return "No such syscall";
 	case errno::BADF =>
 		return "No such file descriptor";
+	case errno::CONNREFUSED =>
+		return "Connection refused";
+	case errno::CANCELED =>
+		return "Operation canceled";
+	case errno::TIMEDOUT =>
+		return "Operation timed out";
+	case errno::INTR =>
+		return "Interrupted system call";
+	case errno::AGAIN =>
+		return "Resource temporarily unavailalbe";
 	};
 };

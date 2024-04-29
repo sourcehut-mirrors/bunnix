@@ -13,7 +13,7 @@ export type errno = enum uint {
 	IO,
 	NXIO,
 	E2BIG,
-	ACCESS,
+	ACCES,
 	FAULT,
 	NODEV,
 	NOTDIR,
@@ -28,6 +28,11 @@ export type errno = enum uint {
 	NOEXEC,
 	NOSYS,
 	BADF,
+	CONNREFUSED,
+	CANCELED,
+	TIMEDOUT,
+	INTR,
+	AGAIN,
 };
 
 // Error condition.
