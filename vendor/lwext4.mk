@@ -1,4 +1,4 @@
-LWEXT4_DIR=vendor/lwext4/src
+LWEXT4_DIR=$(ROOT)vendor/lwext4/src
 LWEXT4_OBJ=\
 	$(LWEXT4_DIR)/ext4.o \
 	$(LWEXT4_DIR)/ext4_balloc.o \
@@ -22,18 +22,15 @@ LWEXT4_OBJ=\
 	$(LWEXT4_DIR)/ext4_trans.o \
 	$(LWEXT4_DIR)/ext4_xattr.o
 
-CFLAGS+=-Ivendor/lwext4/include/ -DCONFIG_USE_DEFAULT_CFG
+CFLAGS+=-I$(ROOT)vendor/lwext4/include/ -DCONFIG_USE_DEFAULT_CFG
 
-lib/lwext4/liblwext4.a: $(LWEXT4_OBJ)
+$(ROOT)sys/lib/lwext4/liblwext4.a: $(LWEXT4_OBJ)
 	$(AR) -crv $@ $(LWEXT4_OBJ)
 
-CTARGETS+=lib/lwext4/liblwext4.a
-LIBS+=-Llib/lwext4/ -llwext4
+LIB_LWEXT4_TARGET=$(ROOT)sys/lib/lwext4/liblwext4.a
+LIB_LWEXT4=-L$(ROOT)sys/lib/lwext4/ -llwext4
 
 clean-lwext4:
-	rm -f $(LWEXT4_OBJ) lib/lwext4/liblwext4.a
+	rm -f $(LWEXT4_OBJ) $(ROOT)lib/lwext4/liblwext4.a
 
-clean-vendor: clean-lwext4
-vendor: lib/lwext4/liblwext4.a
-
-.PHONY: clean-lwext4
+clean: clean-lwext4

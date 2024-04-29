@@ -1,5 +1,6 @@
-.PHONY: clean-vendor vendor
+ROOT=../
+include $(ROOT)mk/conf.mk
 
-CFLAGS+=-Iblibc/include -fPIC -mgeneral-regs-only -g
+include $(ROOT)vendor/lwext4.mk
 
-include vendor/lwext4.mk
+.PHONY: clean clean-lwext4

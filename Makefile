@@ -1,20 +1,25 @@
-all: bunnix init
+all:
 
-include config.mk
+ROOT=./
+include mk/conf.mk
 include mk/$(ARCH).mk
 
-HARECONFIG = -a$(HAREARCH) -T^+$(HAREARCH) -RF
-HAREBUILD=ASFLAGS=-g HAREPATH=. $(HARE) build $(HARECONFIG)
+sys/bunnix:
+	make -C sys
 
-include vendor/Makefile
+.PHONY: sys/bunnix
 
-bunnix: $(CTARGETS)
-	$(HAREBUILD) $(LIBS) -T+bunnix -o $@
-.PHONY: bunnix
+clean-bin:
+	make -C bin clean
 
-init:
-	$(HAREBUILD) -T+user -o $@ cmd/init/
-.PHONY: init
+clean-sys:
+	make -C sys clean
 
-clean: clean-arch clean-vendor
-	rm -f bunnix init
+clean-vendor:
+	make -C vendor clean
+
+.PHONY: clean-bin
+.PHONY: clean-sys
+.PHONY: clean-vendor
+
+clean: clean-bin clean-sys clean-vendor

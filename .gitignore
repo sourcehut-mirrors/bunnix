@@ -5,5 +5,8 @@
 *.mb
 *.o
 *.a
-/bunnix
-/init
+
+config.mk
+
+/sys/bunnix
+/target
