@@ -10,3 +10,7 @@ config.mk
 
 /sys/bunnix
 /target
+
+# Binaries in /bin
+# TODO: Can I be made more general please
+/bin/init/init

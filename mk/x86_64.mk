@@ -36,7 +36,7 @@ target/fs.ext4.img:
 	do mkdir -p target/root/$$d; \
 	done
 
-	make -C bin install DESTDIR=target/root
+	make -C bin install DESTDIR=../target/root
 	git archive HEAD | tar -C target/root/src -x
 
 	qemu-img create -f raw $@ 48M
