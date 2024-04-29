@@ -25,6 +25,9 @@ export type sys = enum u64 {
 	WRITEV,
 	LSEEK,
 	CLOSE,
+	GETPID,
+	KILL,
+	EXIT,
 };
 
 export type syscall_handler = fn(...) (u64 | error);
@@ -34,4 +37,7 @@ let systab: [_]*opaque = [
 	&sys_writev,
 	&sys_lseek,
 	&sys_close,
+	&sys_getpid,
+	&sys_kill,
+	&sys_exit,
 ];
