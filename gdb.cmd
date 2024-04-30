@@ -1,2 +1,2 @@
 target remote localhost:1234
-file bunnix
+file sys/bunnix
