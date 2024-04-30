@@ -438,6 +438,12 @@ export fn dirfdopen(fd: io::file) *fs::fs = {
 	return fs;
 };
 
+// Opens a directory as a filesystem.
+export fn diropen(path: str) (*fs::fs | fs::error) = {
+	const file = open(path, fs::flag::DIRECTORY | fs::flag::RDONLY)?;
+	return dirfdopen(file);
+};
+
 fn static_dirfdopen(fd: io::file, filesystem: *os_filesystem) *fs::fs = {
 	*filesystem = os_filesystem {
 		fs = fs::fs {

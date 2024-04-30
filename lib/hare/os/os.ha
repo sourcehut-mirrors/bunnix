@@ -134,9 +134,3 @@ export fn create(
 // statically allocated by [[fs::realpath]]. Thus, calls to this function or to
 // [[fs::realpath]] will overwrite the return value of either function.
 export fn realpath(path: str) (str | fs::error) = fs::realpath(cwd, path);
-
-// Opens a directory as a filesystem.
-export fn diropen(path: str) (*fs::fs | fs::error) = {
-	const file = open(path, fs::flag::DIRECTORY | fs::flag::RDONLY)?;
-	return dirfdopen(file);
-};
