@@ -1,8 +1,9 @@
 use arch;
 use errors::{error, errno};
-use mman;
 use fs;
 use io;
+use mman;
+use sched;
 
 let procs: []*proc = [];
 
@@ -14,7 +15,7 @@ export type proc = struct {
 	pid: int,
 
 	// TODO: Multithreading
-	tasks: []*task,
+	tasks: []*sched::task,
 };
 
 // Creates a new process.
@@ -34,11 +35,6 @@ export fn new_proc(root: *fs::vfs) (*proc | error) = {
 	return proc;
 };
 
-export fn new_task(proc: *proc) (*task | errno) = {
-	append(proc.tasks, newtask(proc)?);
-	return proc.tasks[len(proc.tasks)-1];
-};
-
 // Appends a file descriptor to this process's file table.
 export fn appendfd(proc: *proc, file: *io::file) int = {
 	append(proc.fds, file);
@@ -47,7 +43,5 @@ export fn appendfd(proc: *proc, file: *io::file) int = {
 
 // Returns the currently active process.
 export fn current() *proc = {
-	const cpu = arch::getcpu();
-	const task = task_fromctx(cpu.task: *arch::context);
-	return task.proc as *proc;
+	return sched::current().user: *proc;
 };

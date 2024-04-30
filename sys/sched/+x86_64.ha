@@ -1,0 +1,7 @@
+use arch;
+
+fn arch_init(ctx: *arch::context) void = {
+	ctx.cs = 0x23;
+	ctx.ss = 0x1b;
+	ctx.rflags = (1 << 21) | (1 << 9);
+};

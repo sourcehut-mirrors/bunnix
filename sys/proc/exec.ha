@@ -2,6 +2,7 @@ use arch;
 use errors::{error, errno};
 use mman;
 use io;
+use sched;
 
 // Loads an image into a process and executes it.
 //
@@ -41,8 +42,9 @@ export fn exec(
 	// TODO: Clean up old tasks
 	delete(proc.tasks[..]);
 
-	let task = newtask(proc)!;
-	arch::context_set_sp(&task.state, STACK_TOP);
-	arch::context_set_ip(&task.state, ip);
-	arch::enter_user(&task.state);
+	let task = sched::newtask(proc)!;
+	append(proc.tasks, task);
+	arch::context_set_sp(&task.ctx, STACK_TOP);
+	arch::context_set_ip(&task.ctx, ip);
+	arch::enter_user(&task.ctx);
 };
