@@ -85,7 +85,7 @@ export fn main(ctx: *boot::context) void = {
 
 	const file = fs::inode_open(node)!;
 
-	match (proc::exec(proc, file, [init])) {
+	match (proc::exec(proc, file, [init], [])) {
 	case let err: error =>
 		log::kprintfln(KERN, "Error loading {}: {}",
 			init, strerror(err));

@@ -2,9 +2,8 @@
 // (c) Hare authors <https://harelang.org>
 
 export fn start_bunnix(iv: *[*]uintptr) never = {
-	// TODO: System-V ABI
-	//argc = iv[0]: size;
-	//argv = &iv[1]: *[*]*u8;
-	//envp = &argv[argc + 1]: *[*]nullable *u8;
+	argc = iv[0]: size;
+	argv = &iv[1]: *[*]*u8;
+	envp = &argv[argc + 1]: *[*]nullable *u8;
 	start_ha();
 };
