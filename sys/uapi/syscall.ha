@@ -12,7 +12,7 @@ export fn syscall(
 		return (errno::NOSYS, 0);
 	};
 	const func = systab[sysno]: *syscall_handler;
-	match (func(a1, a2, a3, a4)) {
+	match (func(a1, a2, a3, a4, a5)) {
 	case let e: error =>
 		return (e: errno, 0);
 	case let u: u64 =>
@@ -35,19 +35,19 @@ export type sys = enum u64 {
 	EXEC,
 };
 
-export type syscall_handler = fn(...) (u64 | error);
+export type syscall_handler = fn(u64, u64, u64, u64, u64) (u64 | error);
 
 let systab: [_]*opaque = [
-	&sys_readv,
-	&sys_writev,
-	&sys_lseek,
-	&sys_close,
-	&sys_getpid,
-	&sys_kill,
-	&sys_exit,
-	&sys_mmap,
-	&sys_munmap,
-	&sys_mprotect,
-	&sys_fork,
-	&sys_exec,
+	&sys_readv: *syscall_handler,
+	&sys_writev: *syscall_handler,
+	&sys_lseek: *syscall_handler,
+	&sys_close: *syscall_handler,
+	&sys_getpid: *syscall_handler,
+	&sys_kill: *syscall_handler,
+	&sys_exit: *syscall_handler,
+	&sys_mmap: *syscall_handler,
+	&sys_munmap: *syscall_handler,
+	&sys_mprotect: *syscall_handler,
+	&sys_fork: *syscall_handler,
+	&sys_exec: *syscall_handler,
 ];
