@@ -257,3 +257,29 @@ export fn isvalid(
 
 	return true;
 };
+
+// Returns true if there is a valid mapping for this address which is readable
+// by the kernel.
+export fn kisreadable(
+	addr: uintptr,
+	length: size,
+) bool = {
+	const aligned = addr & ~(UPAGESIZE - 1);
+	length += (addr - aligned): size;
+	addr = aligned;
+
+	const pml4 = x86_64::rdcr3(): uintptr;
+	for (let i = 0z; i < length; i += PAGESIZE) {
+		const virt = addr + i: uintptr;
+		match (arch::getpte(pml4, virt)) {
+		case let p: *pte =>
+			if (*p & pte::P == 0) {
+				return false;
+			};
+		case null =>
+			return false;
+		};
+	};
+
+	return true;
+};
