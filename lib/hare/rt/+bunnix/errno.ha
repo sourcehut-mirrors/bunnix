@@ -40,7 +40,7 @@ export fn strerror(err: errno) str = {
 		return "No such device or address";
 	case E2BIG =>
 		return "Argument list too long";
-	case EACCESS =>
+	case EACCES =>
 		return "Permission denied";
 	case EFAULT =>
 		return "Bad address";
@@ -70,6 +70,16 @@ export fn strerror(err: errno) str = {
 		return "No such syscall";
 	case EBADF =>
 		return "No such file descriptor";
+	case ECONNREFUSED =>
+		return "Connection refused";
+	case ECANCELED =>
+		return "Operation canceled";
+	case ETIMEDOUT =>
+		return "Operation timed out";
+	case EINTR =>
+		return "Interrupted system call";
+	case EAGAIN =>
+		return "Resource temporarily unavailable";
 	case =>
 		return unknown_errno(err);
 	};
@@ -103,8 +113,8 @@ export fn errname(err: errno) str = {
 		return "ENXIO";
 	case E2BIG =>
 		return "E2BIG";
-	case EACCESS =>
-		return "EACCESS";
+	case EACCES =>
+		return "EACCES";
 	case EFAULT =>
 		return "EFAULT";
 	case ENODEV =>
@@ -133,6 +143,16 @@ export fn errname(err: errno) str = {
 		return "ENOSYS";
 	case EBADF =>
 		return "EBADF";
+	case ECONNREFUSED =>
+		return "ECONNREFUSED";
+	case ECANCELED =>
+		return "ECANCELED";
+	case ETIMEDOUT =>
+		return "ETIMEDOUT";
+	case EINTR =>
+		return "EINTR";
+	case EAGAIN =>
+		return "EAGAIN";
 	case =>
 		return unknown_errno(err);
 	};
@@ -150,7 +170,7 @@ export def EPERM: errno = 9;
 export def EIO: errno = 10;
 export def ENXIO: errno = 11;
 export def E2BIG: errno = 12;
-export def EACCESS: errno = 13;
+export def EACCES: errno = 13;
 export def EFAULT: errno = 14;
 export def ENODEV: errno = 15;
 export def ENOTDIR: errno = 16;
@@ -165,3 +185,8 @@ export def ENODATA: errno = 24;
 export def ENOEXEC: errno = 25;
 export def ENOSYS: errno = 26;
 export def EBADF: errno = 27;
+export def ECONNREFUSED: errno = 28;
+export def ECANCELED: errno = 29;
+export def ETIMEDOUT: errno = 30;
+export def EINTR: errno = 31;
+export def EAGAIN: errno = 32;
