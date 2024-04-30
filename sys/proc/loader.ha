@@ -3,7 +3,6 @@ use errors::{error, errno};
 use format::elf;
 use io;
 use mman;
-use log;
 
 // Loads an ELF executable into a virtual memory manager, returning the entry
 // point address.
@@ -67,7 +66,7 @@ fn phdr_load(
 		mman::flag::ANON | mman::flag::USER)?;
 	let data = base: *[*]u8;
 	io::seek(image, phdr.p_offset: i64, io::whence::SET)?;
-	io::read(image, data[..phdr.p_filesz])?;
+	io::readall(image, data[..phdr.p_filesz])?;
 
 	if (phdr.p_flags & elf::pf::W == 0) {
 		prot &= ~mman::prot::WRITE;

@@ -26,6 +26,7 @@ fn bdev_readsectors(
 			amt = buffer.prdt.1;
 		};
 		defer nread += amt;
+		defer lba += amt / SECTORSZ;
 
 		let cmd = prep_read_dma_ext(bdev, lba, buffer.prdt)!;
 		port_wait(bdev);
