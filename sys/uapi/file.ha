@@ -62,11 +62,15 @@ fn sys_lseek(
 	off: i64,
 	whence: io::whence,
 ) (u64 | error) = {
-	abort(); // TODO
+	const file = validate_file(fd)?;
+	return io::seek(file, off, whence)?: u64;
 };
 
 fn sys_close(
 	fd: i64,
 ) (u64 | error) = {
-	abort(); // TODO
+	const file = validate_file(fd)?;
+	io::unref(file);
+	proc::current().fds[fd] = null;
+	return 0u64;
 };
