@@ -27,5 +27,8 @@ fn sys_munmap(addr: *opaque, length: size) (u64 | error) = {
 };
 
 fn sys_mprotect(addr: *opaque, length: size, prot: int) (u64 | error) = {
-	abort(); // TODO
+	const vmm = &proc::current().vmm;
+	// TODO: validate address is in lower half
+	mman::mprotect(vmm, addr: uintptr, length, prot: mman::prot)?;
+	return 0u64;
 };
