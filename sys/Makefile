@@ -13,7 +13,7 @@ BUNNIX_TARGETS=\
 BUNNIX_LIBS=\
 	$(LIB_LWEXT4)
 
-BUNNIX_SRCS=$(call rwildcard,sys,*.ha *.s *.sc)
+BUNNIX_SRCS=$(call rwildcard,.,*.ha *.s *.sc)
 
 bunnix: $(BUNNIX_TARGETS) $(BUNNIX_SRCS)
 	$(KHAREBUILD) $(BUNNIX_LIBS) -o $@
