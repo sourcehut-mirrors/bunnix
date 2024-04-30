@@ -33,7 +33,7 @@ export fn write(fd: int, buf: *opaque, count: size) (size | errno) = {
 	return writev(fd, &vec, 1);
 };
 
-export fn lseek(fd: int, off: i64, whence: int) (i64 | errno) = {
+export fn lseek(fd: int, off: off_t, whence: int) (i64 | errno) = {
 	return syswrap(syscall(sys::LSEEK, fd: i64, off, whence: i64))?: i64;
 };
 
@@ -52,7 +52,7 @@ export fn mmap(
 	prot: uint,
 	flags: uint,
 	fd: int,
-	offs: size
+	offs: off_t
 ) (*opaque | errno) = {
 	const opts = mmap_options {
 		addr = addr,
@@ -60,7 +60,7 @@ export fn mmap(
 		prot = prot: int,
 		flags = flags: int,
 		fd = fd,
-		offs = offs: i64,
+		offs = offs,
 	};
 	const r = syswrap(syscall(sys::MMAP, &opts))?;
 	return r: uintptr: *opaque;
@@ -68,4 +68,8 @@ export fn mmap(
 
 export fn munmap(addr: *opaque, length: size) (void | errno) = {
 	syswrap(syscall(sys::MUNMAP, addr, length))?;
+};
+
+export fn fork() (pid_t | errno) = {
+	return syswrap(syscall(sys::FORK))?: pid_t;
 };

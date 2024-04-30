@@ -37,12 +37,13 @@ export fn exec(
 	case uintptr => void;
 	};
 
+	// TODO: Clean up old vmm
 	proc.vmm = new_vmm;
 
 	// TODO: Clean up old tasks
 	delete(proc.tasks[..]);
 
-	let task = sched::newtask(proc)!;
+	let task = sched::newtask(&proc.vmm, proc)!;
 	append(proc.tasks, task);
 	arch::context_set_sp(&task.ctx, STACK_TOP);
 	arch::context_set_ip(&task.ctx, ip);

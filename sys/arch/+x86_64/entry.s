@@ -166,12 +166,12 @@ arch.isr_return:
 .globl arch.syscall
 arch.syscall:
 	swapgs
-	sti
 
 	movq %gs:8, %rax
 	movq %rsp, 176(%rax)
 	movq %r11, 168(%rax)	/* syscall %rflags */
 	movq %rcx, 152(%rax)	/* syscall %rip */
+	movq %rbx, 120(%rax)
 	movq %rbp, 80(%rax)
 	movq %r12, 40(%rax)
 	movq %r13, 32(%rax)
@@ -185,6 +185,7 @@ arch.syscall:
 	movq 176(%r10), %rsp
 	movq 152(%r10), %rcx	/* sysret %rip */
 	movq 168(%r10), %r11	/* sysret %rflags */
+	movq 120(%r10), %rbx
 	movq 80(%r10), %rbp
 	movq 40(%r10), %r12
 	movq 32(%r10), %r13

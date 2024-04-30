@@ -12,4 +12,6 @@ export type sys = enum u64 {
 	MMAP,
 	MUNMAP,
 	MPROTECT,
+	FORK,
+	EXEC,
 };

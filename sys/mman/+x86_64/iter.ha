@@ -2,6 +2,7 @@
 use arch;
 use arch::x86_64::{pml4, pml4e, pdpt, pdpte, pd, pde, pt, pte};
 use arch::x86_64::{PADDR_MASK};
+use log;
 
 // Callback for [[vmm_enum]].
 export type vmm_enum_fn = fn(pte: *pte, vaddr: uintptr, user: nullable *opaque) void;

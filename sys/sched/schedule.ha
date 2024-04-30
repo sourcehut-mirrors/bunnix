@@ -1,7 +1,8 @@
 use arch;
+use mman;
 
 // Switches to the next available task.
-export fn schedule() never = {
+export fn schedule() void = {
 	const next = match (task_next()) {
 	case let t: *task =>
 		yield t;
@@ -9,6 +10,6 @@ export fn schedule() never = {
 		abort(); // TODO: idle
 	};
 
-	// TODO: Don't enter user just yet?
-	arch::enter_user(&next.ctx);
+	mman::vmm_map(next.vmm);
+	arch::switch_user(&next.ctx);
 };

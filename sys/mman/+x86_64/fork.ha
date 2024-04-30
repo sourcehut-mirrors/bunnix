@@ -14,21 +14,19 @@ fn fork_iter(ent: *pte, vaddr: uintptr, user: nullable *opaque) void = {
 	let new_vmm = user: *vmm;
 	const phys = *ent: uintptr & PADDR_MASK;
 
-	let prot = prot::WRITE | prot::EXEC;
+	let prot = prot::READ | prot::WRITE | prot::EXEC;
 	if (*ent & pte::XD != 0) {
 		prot &= ~prot::EXEC;
 	};
 
-	let flags = flag::USER | flag::ANON;
-
-	mmap(new_vmm, phys, vaddr, PAGESIZE, prot, flags)!;
+	mmap(new_vmm, phys, vaddr, PAGESIZE, prot, flag::USER | flag::ANON)!;
 	const new_phys = mmap_phys(new_vmm, vaddr);
 
 	let src = arch::phys_tokernel(phys): *[PAGESIZE]u8;
 	let dst = arch::phys_tokernel(new_phys): *[PAGESIZE]u8;
 	dst[..] = src[..];
 
-	if (*ent & pte::W != 0) {
+	if (*ent & pte::W == 0) {
 		prot &= ~prot::WRITE;
 		mprotect(new_vmm, vaddr, PAGESIZE, prot)!;
 	};

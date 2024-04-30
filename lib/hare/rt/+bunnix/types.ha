@@ -1,3 +1,13 @@
+export type off_t = i64;
+export type dev_t = u64;
+export type ino_t = u64;
+export type nlink_t = u64;
+export type mode_t = uint;
+export type id_t = uint;
+export type uid_t = uint;
+export type gid_t = uint;
+export type pid_t = int;
+
 export def STDIN_FILENO: int = 0;
 export def STDOUT_FILENO: int = 1;
 export def STDERR_FILENO: int = 2;
@@ -13,7 +23,7 @@ export type mmap_options = struct {
 	prot: int,
 	flags: int,
 	fd: int,
-	offs: i64,
+	offs: off_t,
 };
 
 export def PROT_NONE: uint	= 0;
