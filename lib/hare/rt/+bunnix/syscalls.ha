@@ -73,3 +73,13 @@ export fn munmap(addr: *opaque, length: size) (void | errno) = {
 export fn fork() (pid_t | errno) = {
 	return syswrap(syscall(sys::FORK))?: pid_t;
 };
+
+export fn execve(path: str, args: []str, env: []str) (void | errno) = {
+	const opts = exec_options {
+		flags = exec_flag::NONE,
+		path = path,
+		args = args,
+		environ = env,
+	};
+	return syswrap(syscall(sys::EXECVE, &opts))?: pid_t;
+};

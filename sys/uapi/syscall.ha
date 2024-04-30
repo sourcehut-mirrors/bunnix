@@ -1,5 +1,7 @@
 use errors::{error, errno};
 
+const UAPI: str = "uapi";
+
 export fn syscall(
 	sysno: u64,
 	a1: u64,
@@ -32,7 +34,7 @@ export type sys = enum u64 {
 	MUNMAP,
 	MPROTECT,
 	FORK,
-	EXEC,
+	EXECVE,
 };
 
 export type syscall_handler = fn(u64, u64, u64, u64, u64) (u64 | error);
@@ -49,5 +51,5 @@ let systab: [_]*opaque = [
 	&sys_munmap: *syscall_handler,
 	&sys_mprotect: *syscall_handler,
 	&sys_fork: *syscall_handler,
-	&sys_exec: *syscall_handler,
+	&sys_execve: *syscall_handler,
 ];

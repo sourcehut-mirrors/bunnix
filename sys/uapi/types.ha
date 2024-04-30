@@ -13,27 +13,20 @@ export type mmap_options = struct {
 };
 
 export type exec_flag = enum uint {
+	NONE = 0,
 	FEXECVE = 1 << 0,
 };
 
 export type exec_options = struct {
+	// Flags for the operation
 	flags: exec_flag,
+	// Executable to execute
 	union {
-		struct {
-			// Path to executable
-			path: *[*]u8,
-			pathlen: size,
-		},
+		path: str,
 		fd: int,
 	},
 	// List of argument strings
-	args: *[*]struct {
-		arg: *[*]u8,
-		arglen: size,
-	},
+	args: []str,
 	// List of KEY=VALUE strings
-	environ: *[*]struct {
-		env: *[*]u8,
-		envlen: size,
-	},
+	environ: []str,
 };

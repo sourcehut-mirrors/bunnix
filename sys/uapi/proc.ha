@@ -1,4 +1,5 @@
 use errors::{error, errno};
+use fs;
 use proc;
 
 fn sys_getpid(status: int) (u64 | error) = {
@@ -17,6 +18,27 @@ fn sys_fork() (u64 | error) = {
 	return proc::fork()?: u64;
 };
 
-fn sys_exec(opts: *exec_options) (u64 | error) = {
-	abort(); // TODO
+fn sys_execve(opts: *exec_options) (u64 | error) = {
+	assert(opts.flags == 0); // TODO
+
+	validate_user_addr(opts, size(exec_options), false)?;
+	validate_user_string(opts.path)?;
+	validate_user_slice(opts.args, size(str))?;
+	validate_user_slice(opts.environ, size(str))?;
+	for (let arg .. opts.args) {
+		validate_user_string(arg)?;
+	};
+	for (let env .. opts.environ) {
+		validate_user_string(env)?;
+	};
+
+	// TODO:
+	// - Check for +x mode
+	// - Free/unref inode from walk
+	const current = proc::current();
+	const target = fs::walk(current.root, opts.path)?;
+	const file = fs::inode_open(target)!;
+	proc::exec(current, file, opts.args, opts.environ)?;
+
+	abort(); // Unreachable
 };

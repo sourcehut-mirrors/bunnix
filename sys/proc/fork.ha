@@ -10,6 +10,7 @@ export fn fork() (int | error) = {
 
 	const child = new_proc(parent.root)?;
 	const ctask = sched::newtask(&child.vmm, child)?;
+	append(child.tasks, ctask);
 	mman::fork(&parent.vmm, &child.vmm)?;
 
 	child.fds = alloc([null...], len(parent.fds));

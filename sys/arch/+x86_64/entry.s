@@ -177,6 +177,7 @@ arch.syscall:
 	movq %r13, 32(%rax)
 	movq %r14, 24(%rax)
 	movq %r15, 16(%rax)
+	movq %rax, %rsp
 
 	movq %r10, %rcx		/* System-V ABI patch */
 	call uapi.syscall

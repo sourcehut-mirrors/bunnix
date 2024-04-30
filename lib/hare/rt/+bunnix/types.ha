@@ -35,3 +35,22 @@ export def MAP_ANON: uint		= 1 << 0;
 export def MAP_PRIVATE: uint		= 1 << 1;
 export def MAP_SHARED: uint		= 1 << 2;
 export def MAP_FIXED: uint		= 1 << 3;
+
+export type exec_flag = enum uint {
+	NONE = 0,
+	FEXECVE = 1 << 0,
+};
+
+export type exec_options = struct {
+	// Flags for the operation
+	flags: exec_flag,
+	// Executable to execute
+	union {
+		path: str,
+		fd: int,
+	},
+	// List of argument strings
+	args: []str,
+	// List of KEY=VALUE strings
+	environ: []str,
+};

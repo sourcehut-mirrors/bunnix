@@ -2,6 +2,7 @@ use arch;
 use arch::x86_64;
 use arch::x86_64::{pml4e, pdpte, pde, pte};
 use arch::x86_64::{PAGESIZE, UPAGESIZE, PADDR_MASK};
+use bytes;
 use errors::{error, errno};
 
 def UBRK_INIT: uintptr = 0x400000000000u64: uintptr;
@@ -45,6 +46,26 @@ export fn vmm_init(vm: *vmm) (void | error) = {
 // Activates a virtual address space.
 export fn vmm_map(vmm: *vmm) void = {
 	x86_64::wrcr3(vmm.pml4);
+};
+
+// Unmaps all memory from this vmm and returns the page tables to the physical
+// allocator.
+export fn vmm_finish(vmm: *vmm) void = {
+	if (x86_64::rdcr3(): uintptr == vmm.pml4) {
+		x86_64::wrcr3(kernel.pml4: uintptr);
+	};
+
+	// TODO: Free intermediate page tables
+	vmm_enum(vmm, &finish_iter, null);
+	let pml4 = arch::phys_tokernel(vmm.pml4): *[*]u8;
+	bytes::zero(pml4[..PAGESIZE]);
+	unref(vmm.pml4, PAGESIZE);
+};
+
+fn finish_iter(ent: *pte, vaddr: uintptr, user: nullable *opaque) void = {
+	const phys = *ent: uintptr & PADDR_MASK;
+	unref(phys, PAGESIZE);
+	*ent &= ~pte::P;
 };
 
 // Returns the physical memory address mapped to this virtual address.

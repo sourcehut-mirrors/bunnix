@@ -15,9 +15,18 @@ export fn exec(
 	args: []str,
 	env: []str,
 ) (void | error) = {
+	defer io::unref(file);
+
+	// Stash these in the kernel heap before switching vmms
+	// XXX: This is probably avoidable if we were clever
+	const args = strings::dupall(args);
+	defer free(args);
+	const env = strings::dupall(env);
+	defer free(env);
+
 	let new_vmm = mman::vmm { ... };
 	mman::vmm_init(&new_vmm)?;
-	defer io::unref(file);
+	mman::vmm_map(&new_vmm);
 
 	const ip = match (load(&new_vmm, file)) {
 	case let err: error =>
@@ -27,29 +36,33 @@ export fn exec(
 		yield ip;
 	};
 
-	match (mman::mmap(
+	mman::mmap(
 		&new_vmm, 0,
 		STACK_TOP - STACK_SIZE: uintptr,
 		STACK_SIZE,
 		mman::prot::READ | mman::prot::WRITE,
 		mman::flag::ANON | mman::flag::USER,
-	)) {
-	case let err: error =>
-		mman::vmm_map(&proc.vmm);
-		return err;
-	case uintptr => void;
-	};
+	)?;
 
 	populate_argv(&new_vmm, args, env)?;
 
-	// TODO: Clean up old vmm
+	if (len(proc.tasks) == 0) {
+		let task = sched::newtask(&proc.vmm, proc)?;
+		append(proc.tasks, task);
+	};
+
+	// Note: exec cannot fail beyond this point
+
+	mman::vmm_finish(&proc.vmm);
 	proc.vmm = new_vmm;
 
-	// TODO: Clean up old tasks
-	delete(proc.tasks[..]);
+	// Clear out old threads
+	for (len(proc.tasks) > 1) {
+		sched::task_unlink(proc.tasks[1]);
+		delete(proc.tasks[1]);
+	};
 
-	let task = sched::newtask(&proc.vmm, proc)!;
-	append(proc.tasks, task);
+	let task = proc.tasks[0];
 	arch::context_set_sp(&task.ctx, STACK_TOP);
 	arch::context_set_ip(&task.ctx, ip);
 	arch::enter_user(&task.ctx);

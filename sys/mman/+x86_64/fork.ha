@@ -19,7 +19,7 @@ fn fork_iter(ent: *pte, vaddr: uintptr, user: nullable *opaque) void = {
 		prot &= ~prot::EXEC;
 	};
 
-	mmap(new_vmm, phys, vaddr, PAGESIZE, prot, flag::USER | flag::ANON)!;
+	mmap(new_vmm, 0, vaddr, PAGESIZE, prot, flag::USER | flag::ANON)!;
 	const new_phys = mmap_phys(new_vmm, vaddr);
 
 	let src = arch::phys_tokernel(phys): *[PAGESIZE]u8;

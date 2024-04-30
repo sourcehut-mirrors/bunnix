@@ -24,6 +24,7 @@ export type taskstate = struct {
 	vmm: *mman::vmm,
 	state: task_state,
 	next: nullable *task,
+	prev: nullable *task,
 	user: nullable *opaque,
 };
 
@@ -41,7 +42,7 @@ export fn newtask(vmm: *mman::vmm, user: *opaque) (*task | error) = {
 	task.state = task_state::RUNNING;
 	task.vmm = vmm;
 	arch_init(&task.ctx);
-	task_insert(task);
+	task_link(task);
 	return task;
 };
 
