@@ -31,6 +31,8 @@ export type sys = enum u64 {
 	MMAP,
 	MUNMAP,
 	MPROTECT,
+	FORK,
+	EXEC,
 };
 
 export type syscall_handler = fn(...) (u64 | error);
@@ -46,4 +48,6 @@ let systab: [_]*opaque = [
 	&sys_mmap,
 	&sys_munmap,
 	&sys_mprotect,
+	&sys_fork,
+	&sys_exec,
 ];
