@@ -33,6 +33,14 @@ export fn write(fd: int, buf: *opaque, count: size) (size | errno) = {
 	return writev(fd, &vec, 1);
 };
 
+export fn lseek(fd: int, off: i64, whence: int) (i64 | errno) = {
+	return syswrap(syscall(sys::LSEEK, fd: i64, off, whence: i64))?: i64;
+};
+
+export fn close(fd: int) (void | errno) = {
+	syswrap(syscall(sys::CLOSE, fd: i64))?;
+};
+
 export fn exit(status: int) never = {
 	syscall(sys::EXIT, status: u64);
 	abort();
