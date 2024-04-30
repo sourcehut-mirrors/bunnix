@@ -28,6 +28,7 @@ export fn new_proc(root: *fs::vfs) (*proc | error) = {
 		pid = nextpid,
 		...
 	});
+	mman::vmm_init(&proc.vmm)?;
 
 	append(procs, proc);
 	return proc;
