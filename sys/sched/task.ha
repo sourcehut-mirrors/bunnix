@@ -3,12 +3,11 @@ use errors::{error, errno};
 use mman;
 
 def KSTACK_SIZE: size = 65536;
-def OVERHEAD = size(arch::context) + size(taskstate);
 
 // Stack alignment requirements
-static assert((KSTACK_SIZE - OVERHEAD) % 8 == 0);
+static assert((KSTACK_SIZE) % 8 == 0);
 
-export type kstack = [KSTACK_SIZE - OVERHEAD]u8;
+export type kstack = [KSTACK_SIZE]u8;
 
 export type task_state = enum {
 	RUNNING,
@@ -22,8 +21,9 @@ export type task = struct {
 };
 
 export type taskstate = struct {
-	user: nullable *opaque,
 	state: task_state,
+	next: nullable *task,
+	user: nullable *opaque,
 };
 
 // Allocates a new schedulable task.
@@ -37,6 +37,7 @@ export fn newtask(user: *opaque) (*task | error) = {
 	task.user = user;
 	task.state = task_state::RUNNING;
 	arch_init(&task.ctx);
+	task_insert(task);
 	return task;
 };
 

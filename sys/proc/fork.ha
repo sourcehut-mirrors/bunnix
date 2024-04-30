@@ -11,7 +11,7 @@ export fn fork() (int | error) = {
 	const ctask = sched::newtask(child)?;
 	mman::fork(&parent.vmm, &child.vmm)?;
 
-	ctask.state = ptask.state;
-	arch::context_set_rval(&ctask.ctx, 0);
+	ctask.ctx = ptask.ctx;
+	arch::context_set_rval(&ctask.ctx, 0, 0);
 	return child.pid;
 };

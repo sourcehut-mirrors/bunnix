@@ -4,6 +4,7 @@ use boot;
 use io;
 use log;
 use rt;
+use sched;
 
 @symbol("main") fn kmain(ctx: *boot::context) never;
 
@@ -48,6 +49,6 @@ export fn main(ctx: *boot::context) never = {
 };
 
 fn pit_irq(ctx: *arch::context, irq: u8) void = {
-	// TODO: context switch
 	arch::pic_eoi(arch::PIT_IRQ);
+	sched::schedule();
 };

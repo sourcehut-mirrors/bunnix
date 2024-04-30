@@ -27,6 +27,7 @@ export fn context_set_abi(ctx: *context, regs: u64...) void = {
 };
 
 // Sets the ABI return value in a [[context]].
-export fn context_set_rval(ctx: *context, val: u64) void = {
-	ctx.rax = val;
+export fn context_set_rval(ctx: *context, r1: u64, r2: u64) void = {
+	ctx.rax = r1;
+	ctx.rdx = r2;
 };
