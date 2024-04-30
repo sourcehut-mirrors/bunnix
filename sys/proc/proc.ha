@@ -4,6 +4,8 @@ use mman;
 use fs;
 use io;
 
+let procs: []*proc = [];
+
 // A process in userspace.
 export type proc = struct {
 	vmm: mman::vmm,
@@ -12,7 +14,7 @@ export type proc = struct {
 	pid: int,
 
 	// TODO: Multithreading
-	task: *task,
+	tasks: []*task,
 };
 
 // Creates a new process.
@@ -23,13 +25,17 @@ export fn new_proc(root: *fs::vfs) (*proc | error) = {
 
 	let proc = alloc(proc {
 		root = root,
-		task = newtask()?,
 		pid = nextpid,
 		...
 	});
 
-	proc.task.proc = proc;
+	append(procs, proc);
 	return proc;
+};
+
+export fn new_task(proc: *proc) (*task | errno) = {
+	append(proc.tasks, newtask(proc)?);
+	return proc.tasks[len(proc.tasks)-1];
 };
 
 // Appends a file descriptor to this process's file table.

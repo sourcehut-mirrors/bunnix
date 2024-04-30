@@ -38,7 +38,10 @@ export fn exec(
 
 	proc.vmm = new_vmm;
 
-	let task = proc.task;
+	// TODO: Clean up old tasks
+	delete(proc.tasks[..]);
+
+	let task = newtask(proc)!;
 	arch::context_set_sp(&task.state, STACK_TOP);
 	arch::context_set_ip(&task.state, ip);
 	arch::enter_user(&task.state);

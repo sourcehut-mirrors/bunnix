@@ -1,7 +1,16 @@
 use rt;
-use strings;
+use fmt;
 
 export fn main() void = {
-	const data = strings::toutf8("Hello from userspace!\n");
-	rt::write(1, &data[0], len(data))!;
+	fmt::println("Hello from userspace!")!;
+
+	fmt::println("calling fork...")!;
+	let pid = rt::fork()!;
+	if (pid == 0) {
+		fmt::println("Hello from the child process")!;
+	} else {
+		fmt::println("Hello from the parent process")!;
+	};
+
+	for (true) void;
 };

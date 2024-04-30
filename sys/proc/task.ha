@@ -21,14 +21,16 @@ export type taskstate = struct {
 };
 
 // Allocates a new task.
-fn newtask() (*task | error) = {
+fn newtask(proc: *proc) (*task | error) = {
 	const base = mman::mmap(
 		&mman::kernel, 0, 0,
 		size(task),
 		mman::prot::READ | mman::prot::WRITE,
 		mman::flag::ANON)?;
 	let task = base: *task;
+	task.proc = proc;
 	arch_init(&task.state);
+	append(proc.tasks, task);
 	return task;
 };
 
