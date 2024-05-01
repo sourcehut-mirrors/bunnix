@@ -41,6 +41,10 @@ export fn close(fd: int) (void | errno) = {
 	syswrap(syscall(sys::CLOSE, fd: i64))?;
 };
 
+export fn getpid() pid_t = {
+	return syswrap(syscall(sys::GETPID))!: pid_t;
+};
+
 export fn exit(status: int) never = {
 	syscall(sys::EXIT, status: u64);
 	abort();
