@@ -49,8 +49,8 @@ fn irq_handler_dispatch(ctx: *context, irq: u8) void = {
 	for (cur != null; cur = (cur: *irq_handler).next) {
 		const cur = cur: *irq_handler;
 		const func = cur.func as *irq_handler_func;
-		func(cur.user);
 		pic_eoi(irq);
+		func(cur.user);
 	};
 };
 

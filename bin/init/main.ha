@@ -27,7 +27,5 @@ export fn main() void = {
 			pid: int)!;
 	};
 
-	for (true) {
-		fmt::println("[parent] busy loop")!;
-	};
+	for (true) void;
 };

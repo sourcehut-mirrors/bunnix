@@ -3,6 +3,7 @@ use errors::{error, errno};
 use mman;
 use sched;
 use io;
+use log;
 
 export fn fork() (int | error) = {
 	const parent = current();
