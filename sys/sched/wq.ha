@@ -5,7 +5,7 @@ export type wq_func = fn(link: *wq_link) void;
 export type wq_link = struct {
 	next: nullable *wq_link,
 	user: nullable *opaque,
-	func: *wq_func,
+	func: nullable *wq_func,
 };
 
 export type wq_head = struct {
@@ -32,7 +32,6 @@ export fn wait(
 		func = &default_wake;
 		user = task;
 	};
-	const func = func: *wq_func;
 
 	task.state = task_state::WAIT;
 	link.func = func;
@@ -40,6 +39,7 @@ export fn wait(
 
 	link.next = head.head;
 	head.head = link;
+	schedule();
 };
 
 // Wakes all threads on this wait queue.
@@ -49,7 +49,8 @@ export fn wake(head: *wq_head) void = {
 		let cur = cur: *wq_link;
 		next = cur.next;
 		cur.next = null;
-		cur.func(cur);
+		const func = cur.func as *wq_func;
+		func(cur);
 	};
 	head.head = null;
 };

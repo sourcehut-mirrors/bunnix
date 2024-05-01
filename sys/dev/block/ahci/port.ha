@@ -13,6 +13,7 @@ type ahci_port = struct {
 	port: *hba_port,
 	devtype: devtype,
 	mmio: *ahci_port_mmio,
+	wq: sched::wq_head,
 };
 
 type ahci_port_mmio = struct {
@@ -184,9 +185,9 @@ fn port_getslot(port: *ahci_port) (u32 | error) = {
 // Waits until the port is ready to accept a new command.
 fn port_wait(port: *ahci_port) void = {
 	const busy = PORT_TFD_STS_DRQ | PORT_TFD_STS_BSY;
-	// TODO: Add a waitqueue here
+	let link = sched::wq_link { ... };
 	for (port.port.tfd & busy != 0) {
-		sched::schedule();
+		sched::wait(&port.wq, &link);
 	};
 };
 
@@ -233,5 +234,8 @@ fn port_submitcmd(port: *ahci_port, cmd: *hba_cmd_table) void = {
 fn port_waitcmd(port: *ahci_port, cmd: *hba_cmd_table) void = {
 	const slot = ((cmd: uintptr - &port.mmio.cmdtable: uintptr): size
 		/ size(hba_cmd_table)): u32;
-	for (port.port.ci & (1 << slot) != 0) arch::pause();
+	let link = sched::wq_link { ... };
+	for (port.port.ci & (1 << slot) != 0) {
+		sched::wait(&port.wq, &link);
+	};
 };

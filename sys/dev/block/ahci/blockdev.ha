@@ -1,4 +1,3 @@
-// TODO: async block API
 use errors::{error, errno};
 use dev::block;
 

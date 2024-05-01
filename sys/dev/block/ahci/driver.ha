@@ -1,6 +1,8 @@
+use arch;
 use dev::pci;
 use log;
 use mman;
+use sched;
 
 const AHCI: str = "ahci";
 
@@ -19,6 +21,7 @@ type ahci_controller = struct {
 	pool: *buffer_pool,
 	ports: [32]nullable *ahci_port,
 	slots: u32,
+	irq: arch::irq_handler,
 };
 
 @init fn register() void = {
@@ -37,13 +40,34 @@ fn ahci_probe(info: *pci::probe_info) nullable *pci::pcidev = {
 
 	const pool = buffer_pool_init();
 
-	let controller = alloc(ahci_controller {
+	let cont = alloc(ahci_controller {
 		driver = &ahci_driver,
 		pool = pool,
 		bus = info.bus,
+		device = info.device,
 		hba = ghc,
 		...
 	});
-	hba_init(controller);
-	return controller;
+	pci::install_irq(cont, &cont.irq, &ahci_irq, cont);
+	hba_init(cont);
+	return cont;
+};
+
+fn ahci_irq(user: nullable *opaque) void = {
+	let cont = user: *ahci_controller;
+	let hba = cont.hba;
+	const _is = hba._is;
+	for (let i = 0u32; i < 32; i += 1) {
+		if (_is & (1 << i) == 0) {
+			continue;
+		};
+		match (cont.ports[i]) {
+		case let port: *ahci_port =>
+			sched::wake(&port.wq);
+		case null =>
+			log::kprintfln(AHCI, "Warning: received IRQ for disabled port");
+			continue;
+		};
+	};
+	hba._is = ~0;
 };
