@@ -14,6 +14,7 @@ export fn main() void = {
 	let pid = rt::fork()!;
 	if (pid == 0) {
 		fmt::println("[child] Hello from the child process!")!;
+		fmt::printfln("[child] I have pid {}", rt::getpid(): int)!;
 		fmt::println("[child] execve(2) into /bin/echo")!;
 		rt::execve("/bin/echo", [
 			"/bin/echo",
