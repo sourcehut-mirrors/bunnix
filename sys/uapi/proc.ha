@@ -40,8 +40,8 @@ fn sys_execve(opts: *exec_options) (u64 | error) = {
 	// - Check for +x mode
 	// - Free/unref inode from walk
 	const current = proc::current();
-	const target = fs::walk(current.root, opts.path)?;
-	const file = fs::inode_open(target)!;
+	const (inode, _) = fs::walk(current.root, opts.path)?;
+	const file = fs::inode_open(inode)!;
 	proc::exec(current, file, opts.args, opts.environ)?;
 
 	abort(); // Unreachable

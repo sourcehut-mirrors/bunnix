@@ -16,23 +16,28 @@ export fn inode_walk(
 	root: *inode,
 	iter: *path::iterator,
 	flag: walkflag = walkflag::NONE,
-) (*inode | error) = {
-	assert(flag & walkflag::PARENT == 0); // TODO
-
+) ((*inode, str) | error) = {
 	let cur = root;
+	let last_name = "";
 	for (true) {
 		const name = match (path::nextiter(iter)) {
 		case let n: str =>
 			yield n;
 		case done =>
-			return cur;
+			return (cur, "");
 		};
+		defer last_name = name;
 
 		if (io::islink(cur.mode)) {
 			return errno::NOTSUP; // TODO
 		};
 		if (!io::isdir(cur.mode)) {
 			return errno::NOENT;
+		};
+
+		const final = path::peekiter(iter) is void;
+		if (final && flag & walkflag::PARENT != 0) {
+			return (cur, name);
 		};
 
 		match (cur.impl.lookup) {
@@ -49,7 +54,7 @@ export fn walk(
 	root: *vfs,
 	path: str,
 	flag: walkflag = walkflag::NONE,
-) (*inode | error) = {
+) ((*inode, str) | error) = {
 	const p = path::init(path)!;
 	const iter = path::iter(&p);
 	const mp = find_mountpoint(root, &iter)?;

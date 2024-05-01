@@ -13,6 +13,8 @@ use proc;
 use rt;
 use shlex;
 use strings;
+// XXX TEMP
+use path;
 
 const KERN: str = "kern";
 
@@ -76,14 +78,14 @@ export fn main(ctx: *boot::context) void = {
 	// Start /bin/init
 	log::kprintfln(KERN, "entering userspace: exec {}", init);
 	const proc = proc::new_proc(&root, null)!;
-	const node = fs::walk(&root, init)!;
+	const (inode, _) = fs::walk(&root, init)!;
 
 	// TODO: Implement console device properly, i.e. /dev/cons
 	proc::appendfd(proc, log::cons);	// stdin
 	proc::appendfd(proc, log::cons);	// stdout
 	proc::appendfd(proc, log::cons);	// stderr
 
-	const file = fs::inode_open(node)!;
+	const file = fs::inode_open(inode)!;
 
 	match (proc::exec(proc, file, [init], [])) {
 	case let err: error =>
