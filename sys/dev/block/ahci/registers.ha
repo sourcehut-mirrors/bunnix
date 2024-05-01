@@ -160,7 +160,7 @@ def HBA_PxIS_DSS: u32 = 1 << 2;
 def HBA_PxIS_SDBS: u32 = 1 << 3;
 def HBA_PxIS_UFS: u32 = 1 << 4;
 def HBA_PxIS_DPS: u32 = 1 << 5;
-def HBA_PxIS_PGS: u32 = 1 << 6;
+def HBA_PxIS_PCS: u32 = 1 << 6;
 def HBA_PxIS_DPMS: u32 = 1 << 7;
 def HBA_PxIS_PRCS: u32 = 1 << 22;
 def HBA_PxIS_IPMS: u32 = 1 << 23;
@@ -171,6 +171,30 @@ def HBA_PxIS_HBDS: u32 = 1 << 28;
 def HBA_PxIS_HBFS: u32 = 1 << 29;
 def HBA_PxIS_TFES: u32 = 1 << 30;
 def HBA_PxIS_CPDS: u32 = 1 << 31;
+
+def HBA_PxIE_DHRE: u32 = 1 << 0;
+def HBA_PxIE_PSE: u32 = 1 << 1;
+def HBA_PxIE_DSE: u32 = 1 << 2;
+def HBA_PxIE_SDBE: u32 = 1 << 3;
+def HBA_PxIE_UFE: u32 = 1 << 4;
+def HBA_PxIE_DPE: u32 = 1 << 5;
+def HBA_PxIE_PCE: u32 = 1 << 6;
+def HBA_PxIE_DPME: u32 = 1 << 7;
+def HBA_PxIE_PRCE: u32 = 1 << 22;
+def HBA_PxIE_IPME: u32 = 1 << 23;
+def HBA_PxIE_OFE: u32 = 1 << 24;
+def HBA_PxIE_INFE: u32 = 1 << 26;
+def HBA_PxIE_IFE: u32 = 1 << 27;
+def HBA_PxIE_HBDE: u32 = 1 << 28;
+def HBA_PxIE_HBFE: u32 = 1 << 29;
+def HBA_PxIE_TFEE: u32 = 1 << 30;
+def HBA_PxIE_CPDE: u32 = 1 << 31;
+
+// Interrupts enabled mask
+// TODO: Add more interrupts
+def HBA_PxIE_IEM: u32 =
+	HBA_PxIE_UFE |
+	HBA_PxIE_DHRE;
 
 def PORT_SSTS_DET_MASK: u32 = 0b1111;
 def PORT_SSTS_DET_NODEV: u32 = 0;

@@ -41,14 +41,16 @@ export fn main(ctx: *boot::context) never = {
 	// x86_64 initialization
 	arch::earlyinit();
 
-	arch::install_irq(arch::PIT_IRQ, &pit_irq);
+	// TODO: Does this belong in arch::main?
+	static let pit_irq = arch::irq_handler { ... };
+	arch::install_irq(&pit_irq, &handle_pit_irq, arch::PIT_IRQ);
 	arch::pit_setphase(100);
 
 	// Kernel proper
 	kmain(ctx);
 };
 
-fn pit_irq(ctx: *arch::context, irq: u8) void = {
+fn handle_pit_irq(ctx: *arch::context, irq: u8, user: nullable *opaque) void = {
 	arch::pic_eoi(arch::PIT_IRQ);
 	sched::schedule();
 };

@@ -57,6 +57,8 @@ fn hba_init(dev: *ahci_controller) void = {
 			i, id.model, id.serial, id.sectors);
 		block::register(port);
 	};
+
+	hba_enable_irq(hba);
 };
 
 // Enable AHCI support.

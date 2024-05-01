@@ -4,6 +4,7 @@ use errors::{error, errno};
 use log;
 use mman;
 use rt;
+use sched;
 use time;
 
 type ahci_port = struct {
@@ -141,6 +142,8 @@ fn port_start(port: *hba_port) void = {
 	for (port.cmd & HBA_PxCMD_CR != 0) arch::pause();
 	port.cmd |= HBA_PxCMD_FRE;
 	port.cmd |= HBA_PxCMD_ST;
+	port._is = ~0;
+	port.ie |= HBA_PxIE_IEM;
 };
 
 fn port_devtype(port: *hba_port) devtype = {
@@ -181,7 +184,10 @@ fn port_getslot(port: *ahci_port) (u32 | error) = {
 // Waits until the port is ready to accept a new command.
 fn port_wait(port: *ahci_port) void = {
 	const busy = PORT_TFD_STS_DRQ | PORT_TFD_STS_BSY;
-	for (port.port.tfd & busy != 0) arch::pause();
+	// TODO: Add a waitqueue here
+	for (port.port.tfd & busy != 0) {
+		sched::schedule();
+	};
 };
 
 // Prepares a command for an HBA port.
@@ -210,7 +216,7 @@ fn port_prepcmd(
 		cmd.prdt[i].dbau = (phys >> 32): u32;
 		assert(ln <= 4194304); // 4 MiB max
 		assert(ln % 2 == 0);
-		cmd.prdt[i].dbci = (ln - 1): u32 | 1;
+		cmd.prdt[i].dbci = (ln - 1): u32 | 1 | (1 << 31);
 	};
 
 	return cmd;
