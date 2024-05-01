@@ -31,9 +31,13 @@ fn mkfile(ino: *inode) (*io::file | error) = {
 fn file_finish(fd: *io::file) void = {
 	let file = fd: *file;
 	if (io::isdir(file.inode.mode)) {
-		lwext4::dir_iterator_fini(&file.diter);
+		if (file.diter.inode_ref != null) {
+			lwext4::dir_iterator_fini(&file.diter);
+		};
 	} else {
-		lwext4::fclose(&file.lwfile);
+		if (file.lwfile.mp != null) {
+			lwext4::fclose(&file.lwfile);
+		};
 	};
 	free(file);
 };
