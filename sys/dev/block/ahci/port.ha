@@ -1,9 +1,9 @@
+use arch;
 use dev::block;
 use errors::{error, errno};
 use log;
 use mman;
 use rt;
-use sched;
 use time;
 
 type ahci_port = struct {
@@ -128,17 +128,17 @@ fn port_idle(port: *hba_port) void = {
 
 	if (port.cmd & HBA_PxCMD_ST != 0) {
 		port.cmd &= ~HBA_PxCMD_ST;
-		for (port.cmd & HBA_PxCMD_CR != 0) sched::yieldtask();
+		for (port.cmd & HBA_PxCMD_CR != 0) arch::pause();
 	};
 
 	if (port.cmd & HBA_PxCMD_FRE != 0) {
 		port.cmd &= ~HBA_PxCMD_FRE;
-		for (port.cmd & HBA_PxCMD_FR != 0) sched::yieldtask();
+		for (port.cmd & HBA_PxCMD_FR != 0) arch::pause();
 	};
 };
 
 fn port_start(port: *hba_port) void = {
-	for (port.cmd & HBA_PxCMD_CR != 0) sched::yieldtask();
+	for (port.cmd & HBA_PxCMD_CR != 0) arch::pause();
 	port.cmd |= HBA_PxCMD_FRE;
 	port.cmd |= HBA_PxCMD_ST;
 };
@@ -181,7 +181,7 @@ fn port_getslot(port: *ahci_port) (u32 | error) = {
 // Waits until the port is ready to accept a new command.
 fn port_wait(port: *ahci_port) void = {
 	const busy = PORT_TFD_STS_DRQ | PORT_TFD_STS_BSY;
-	for (port.port.tfd & busy != 0) sched::yieldtask();
+	for (port.port.tfd & busy != 0) arch::pause();
 };
 
 // Prepares a command for an HBA port.
@@ -227,5 +227,5 @@ fn port_submitcmd(port: *ahci_port, cmd: *hba_cmd_table) void = {
 fn port_waitcmd(port: *ahci_port, cmd: *hba_cmd_table) void = {
 	const slot = ((cmd: uintptr - &port.mmio.cmdtable: uintptr): size
 		/ size(hba_cmd_table)): u32;
-	for (port.port.ci & (1 << slot) != 0) sched::yieldtask();
+	for (port.port.ci & (1 << slot) != 0) arch::pause();
 };

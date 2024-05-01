@@ -1,5 +1,6 @@
 use arch;
 use mman;
+use log;
 
 // Switches to the next available task.
 export fn schedule() void = {

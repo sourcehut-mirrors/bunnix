@@ -27,6 +27,7 @@ export fn fork() (int | error) = {
 	ctask.ctx = ptask.ctx;
 	arch::context_set_rval(&ctask.ctx, 0, 0);
 	arch::set_restore_point(&ctask.restore, &arch::sysret: uintptr);
+	sched::task_activate(ctask);
 
 	// Return to parent
 	return child.pid;

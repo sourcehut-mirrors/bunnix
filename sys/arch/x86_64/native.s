@@ -127,11 +127,6 @@ arch.x86_64.wrcr4:
 	mov %rdi, %cr4
 	ret
 
-.global arch.x86_64.pause
-arch.x86_64.pause:
-	hlt
-	jmp arch.x86_64.pause
-
 .global arch.x86_64.do_cpuid
 .type arch.x86_64.do_cpuid,@function
 arch.x86_64.do_cpuid:

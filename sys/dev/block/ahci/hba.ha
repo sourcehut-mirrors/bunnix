@@ -1,7 +1,7 @@
+use arch;
 use ata;
 use dev::block;
 use log;
-use sched;
 use time;
 
 // Resets and initializes the HBA.
@@ -69,7 +69,7 @@ fn hba_reset(hba: *hba_ghc) void = {
 	log::kprintln(AHCI, "AHCI controller reset");
 	hba.ghc |= HBA_GHC_HR;
 	for (hba.ghc & HBA_GHC_HR != 0) {
-		sched::yieldtask();
+		arch::pause();
 	};
 };
 
@@ -81,7 +81,7 @@ fn hba_do_bios_handoff(hba: *hba_ghc) void = {
 	};
 	hba.bohc |= HBA_BOHC_OOS;
 	for (hba.bohc & HBA_BOHC_BOS != 0) {
-		sched::yieldtask();
+		arch::pause();
 	};
 };
 

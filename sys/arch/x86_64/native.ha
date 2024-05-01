@@ -14,6 +14,3 @@ export fn inl(port: u16) u32;
 export fn cli() void;
 export fn sti() void;
 export fn swapgs() void;
-
-// Waits indefinitely.
-export fn pause() never;

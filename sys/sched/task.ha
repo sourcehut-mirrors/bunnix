@@ -10,6 +10,7 @@ static assert((KSTACK_SIZE) % 8 == 0);
 export type kstack = [KSTACK_SIZE]u8;
 
 export type task_state = enum {
+	STARTUP,
 	RUNNING,
 	BLOCKED,
 };
@@ -38,13 +39,15 @@ export fn newtask(vmm: *mman::vmm, user: *opaque) (*task | error) = {
 		mman::flag::ANON)?;
 	let task = base: *task;
 	task.user = user;
-	// TODO: Start in an undefined state until the caller finishes preparing
-	// it? Necessary before we implement kernel preemption
-	task.state = task_state::RUNNING;
+	task.state = task_state::STARTUP;
 	task.vmm = vmm;
 	arch_init(&task.ctx);
 	task_link(task);
 	return task;
+};
+
+export fn task_activate(task: *task) void = {
+	task.state = task_state::RUNNING;
 };
 
 fn task_fromctx(ctx: *arch::context) *task = {
