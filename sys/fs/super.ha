@@ -1,4 +1,5 @@
 use dev::block;
+use io;
 
 // Superblock, i.e. a reference to a single filesystem
 export type superblock = struct {
@@ -6,13 +7,13 @@ export type superblock = struct {
 };
 
 // Returns the root inode in a [[superblock]].
-export type sb_get_root_func = fn(sb: *superblock) *inode;
+export type sb_get_root_func = fn(sb: *superblock) *io::inode;
 
 // Superblock interface
 export type superblock_iface = struct {
 	get_root: *sb_get_root_func,
 };
 
-export fn superblock_get_root(sb: *superblock) *inode = {
+export fn superblock_get_root(sb: *superblock) *io::inode = {
 	return sb.impl.get_root(sb);
 };

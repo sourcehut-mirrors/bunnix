@@ -13,8 +13,6 @@ use proc;
 use rt;
 use shlex;
 use strings;
-// XXX TEMP
-use path;
 
 const KERN: str = "kern";
 
@@ -85,7 +83,7 @@ export fn main(ctx: *boot::context) void = {
 	proc::appendfd(proc, log::cons);	// stdout
 	proc::appendfd(proc, log::cons);	// stderr
 
-	const file = fs::inode_open(inode)!;
+	const file = io::inode_open(inode)!;
 
 	match (proc::exec(proc, file, [init], [])) {
 	case let err: error =>

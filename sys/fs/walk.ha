@@ -13,10 +13,10 @@ export type walkflag = enum uint {
 // Walks a single filesystem (i.e. does not perform a mountpoint lookup) to
 // return the indicated inode.
 export fn inode_walk(
-	root: *inode,
+	root: *io::inode,
 	iter: *path::iterator,
 	flag: walkflag = walkflag::NONE,
-) ((*inode, str) | error) = {
+) ((*io::inode, str) | error) = {
 	let cur = root;
 	let last_name = "";
 	for (true) {
@@ -40,12 +40,7 @@ export fn inode_walk(
 			return (cur, name);
 		};
 
-		match (cur.impl.lookup) {
-		case let func: *fn_inode_lookup =>
-			cur = func(cur, name)?;
-		case null =>
-			return errno::NOENT;
-		};
+		cur = io::inode_lookup(cur, name)?;
 	};
 };
 
@@ -54,7 +49,7 @@ export fn walk(
 	root: *vfs,
 	path: str,
 	flag: walkflag = walkflag::NONE,
-) ((*inode, str) | error) = {
+) ((*io::inode, str) | error) = {
 	const p = path::init(path)!;
 	const iter = path::iter(&p);
 	const mp = find_mountpoint(root, &iter)?;

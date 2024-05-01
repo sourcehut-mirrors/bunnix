@@ -5,7 +5,8 @@ use lib::lwext4;
 use types::c;
 
 export type inode = struct {
-	fs::inode,
+	io::inode,
+	sb: *superblock,
 	ref: lwext4::inode_ref,
 	inode: *lwext4::inode,
 };
@@ -39,7 +40,7 @@ fn inode_from_ref(sb: *superblock, ref: *lwext4::inode_ref) (*inode | error) = {
 	return ino;
 };
 
-const inode_impl = fs::inode_iface {
+const inode_impl = io::inode_iface {
 	open = &ext4_inode_open,
 	lookup = &ext4_inode_lookup,
 	link = &ext4_inode_link,
@@ -49,11 +50,11 @@ const inode_impl = fs::inode_iface {
 	...
 };
 
-fn ext4_inode_open(ino: *fs::inode) (*io::file | error) = {
+fn ext4_inode_open(ino: *io::inode) (*io::file | error) = {
 	return mkfile(ino: *inode);
 };
 
-fn ext4_inode_lookup(ino: *fs::inode, name: str) (*fs::inode | error) = {
+fn ext4_inode_lookup(ino: *io::inode, name: str) (*io::inode | error) = {
 	const ino = ino: *inode;
 	const sb = ino.sb: *superblock;
 	let result = lwext4::dir_search_result { ... };
@@ -69,33 +70,33 @@ fn ext4_inode_lookup(ino: *fs::inode, name: str) (*fs::inode | error) = {
 };
 
 fn ext4_inode_link(
-	ino: *fs::inode,
-	child: *fs::inode,
+	ino: *io::inode,
+	child: *io::inode,
 	name: str,
 ) (void | error) = {
 	abort(); // TODO
 };
 
-fn ext4_inode_unlink(ino: *fs::inode, name: str) (void | error) = {
+fn ext4_inode_unlink(ino: *io::inode, name: str) (void | error) = {
 	abort(); // TODO
 };
 
 fn ext4_inode_create(
-	ino: *fs::inode,
+	ino: *io::inode,
 	name: str,
 	mode: io::mode,
-) (*fs::inode | error) = {
+) (*io::inode | error) = {
 	abort(); // TODO
 };
 
 fn ext4_inode_mkdir(
-	ino: *fs::inode,
+	ino: *io::inode,
 	name: str,
 	mode: io::mode,
-) (*fs::inode | error) = {
+) (*io::inode | error) = {
 	abort(); // TODO
 };
 
-fn ext4_inode_rmdir(ino: *fs::inode, name: str) (void | error) = {
+fn ext4_inode_rmdir(ino: *io::inode, name: str) (void | error) = {
 	abort(); // TODO
 };

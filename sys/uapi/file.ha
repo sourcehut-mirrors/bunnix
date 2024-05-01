@@ -84,7 +84,7 @@ fn sys_openat(opts: *openat_options) (u64 | error) = {
 	// TODO: free/unref inode from walk
 	const current = proc::current();
 	const (inode, _) = fs::walk(current.root, opts.path)?;
-	const file = fs::inode_open(inode)?;
+	const file = io::inode_open(inode)?;
 	const fd = proc::appendfd(current, file);
 	return fd: u64;
 };

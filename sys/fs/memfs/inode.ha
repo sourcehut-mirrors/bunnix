@@ -5,7 +5,8 @@ use sort;
 use strings;
 
 export type inode = struct {
-	fs::inode,
+	io::inode,
+	sb: *superblock,
 	union {
 		data: []u8,
 		entries: []dirent,
@@ -49,7 +50,7 @@ fn mkinode(sb: *superblock, ino: uint, mode: io::mode) inode = {
 	};
 };
 
-const inode_dir_impl = fs::inode_iface {
+const inode_dir_impl = io::inode_iface {
 	open = &inode_open,
 	lookup = &inode_lookup,
 	create = &inode_create,
@@ -57,11 +58,11 @@ const inode_dir_impl = fs::inode_iface {
 	...
 };
 
-fn inode_open(ino: *fs::inode) (*io::file | error) = {
+fn inode_open(ino: *io::inode) (*io::file | error) = {
 	return mkfile(ino: *inode);
 };
 
-fn inode_lookup(ino: *fs::inode, name: str) (*fs::inode | error) = {
+fn inode_lookup(ino: *io::inode, name: str) (*io::inode | error) = {
 	const ino = ino: *inode;
 	match (dir_findchild(ino, name)) {
 	case null =>
@@ -71,14 +72,14 @@ fn inode_lookup(ino: *fs::inode, name: str) (*fs::inode | error) = {
 	};
 };
 
-fn inode_mkchild(ino: *fs::inode, name: str, mode: io::mode) (*fs::inode | error) = {
+fn inode_mkchild(ino: *io::inode, name: str, mode: io::mode) (*io::inode | error) = {
 	const parent = ino: *inode;
 	assert(io::isdir(parent.mode));
 	if (dir_findchild(parent, name) != null) {
 		return errno::EXIST;
 	};
 
-	const sb = parent.sb: *superblock;
+	const sb = parent.sb;
 	const ino = sb_get_ino(sb);
 	const child = alloc(mkinode(sb, ino, mode));
 	const dent = dirent {
@@ -92,17 +93,17 @@ fn inode_mkchild(ino: *fs::inode, name: str, mode: io::mode) (*fs::inode | error
 };
 
 fn inode_create(
-	ino: *fs::inode,
+	ino: *io::inode,
 	name: str,
 	mode: io::mode,
-) (*fs::inode | error) = {
+) (*io::inode | error) = {
 	return inode_mkchild(ino, name, mode | io::mode::REG);
 };
 
 fn inode_mkdir(
-	ino: *fs::inode,
+	ino: *io::inode,
 	name: str,
 	mode: io::mode,
-) (*fs::inode | error) = {
+) (*io::inode | error) = {
 	return inode_mkchild(ino, name, mode | io::mode::DIR);
 };

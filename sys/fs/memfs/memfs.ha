@@ -28,7 +28,7 @@ const super_impl = fs::superblock_iface {
 	get_root = &sb_get_root,
 };
 
-fn sb_get_root(sb: *fs::superblock) *fs::inode = {
+fn sb_get_root(sb: *fs::superblock) *io::inode = {
 	const sb = sb: *superblock;
 	return &sb.root;
 };

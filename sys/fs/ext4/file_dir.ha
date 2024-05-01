@@ -40,7 +40,7 @@ fn dir_readdir(fd: *io::file, dent: *io::dirent) (void | io::EOF | error) = {
 	};
 
 	const inode = fd.inode: *inode;
-	const sb = inode.sb: *superblock;
+	const sb = inode.sb;
 	const fs = &sb.mp.fs;
 	const cur = match (fd.diter.curr) {
 	case null =>

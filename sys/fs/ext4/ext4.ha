@@ -1,6 +1,7 @@
 use dev::block;
 use errors::{error, errno};
 use fs;
+use io;
 use lib::lwext4;
 use log;
 use strings;
@@ -96,7 +97,7 @@ const ext4_impl = fs::superblock_iface {
 	get_root = &ext4_get_root,
 };
 
-fn ext4_get_root(sb: *fs::superblock) *fs::inode = {
+fn ext4_get_root(sb: *fs::superblock) *io::inode = {
 	const sb = sb: *superblock;
 	return get_inode(sb, lwext4::EXT4_INODE_ROOT_INDEX)!;
 };
