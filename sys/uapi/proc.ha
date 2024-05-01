@@ -3,7 +3,7 @@ use fs;
 use proc;
 
 fn sys_getpid(status: int) (u64 | error) = {
-	abort(); // TODO
+	return proc::current().pid: u64;
 };
 
 fn sys_kill(status: int) (u64 | error) = {
