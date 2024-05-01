@@ -43,14 +43,13 @@ export fn main(ctx: *boot::context) never = {
 
 	// TODO: Does this belong in arch::main?
 	static let pit_irq = arch::irq_handler { ... };
-	arch::install_irq(&pit_irq, &handle_pit_irq, arch::PIT_IRQ);
+	arch::install_irq(&pit_irq, arch::PIT_IRQ, &handle_pit_irq);
 	arch::pit_setphase(100);
 
 	// Kernel proper
 	kmain(ctx);
 };
 
-fn handle_pit_irq(ctx: *arch::context, irq: u8, user: nullable *opaque) void = {
-	arch::pic_eoi(arch::PIT_IRQ);
+fn handle_pit_irq(user: nullable *opaque) void = {
 	sched::schedule();
 };

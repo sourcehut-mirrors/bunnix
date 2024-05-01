@@ -7,8 +7,6 @@ let irq_handlers: [256]nullable *irq_handler = [null...];
 // An IRQ handler can be registered with [[install_irq]] to be called upon
 // receiving a matching IRQ.
 export type irq_handler_func = fn(
-	ctx: *context,
-	irq: u8,
 	user: nullable *opaque,
 ) void;
 
@@ -21,8 +19,8 @@ export type irq_handler = struct {
 // Installs an IRQ handler for the given IRQ.
 export fn install_irq(
 	handler: *irq_handler,
-	func: *irq_handler_func,
 	irq: u8,
+	func: *irq_handler_func,
 	user: nullable *opaque = null,
 ) void = {
 	pic_unmask(irq);
@@ -34,8 +32,14 @@ export fn install_irq(
 };
 
 fn irq_handler_dispatch(ctx: *context, irq: u8) void = {
-	// TODO: Deal with spurious IRQs
-	let cur = irq_handlers[0];
+	if (irq == 7 || irq == 15) {
+		// Spurious IRQ
+		// TODO: handle these properly (check the PIC's ISR)
+		pic_eoi(irq);
+		return;
+	};
+
+	let cur = irq_handlers[irq];
 	if (cur == null) {
 		log::printfln("unhandled IRQ {}", irq);
 		pic_eoi(irq);
@@ -45,7 +49,8 @@ fn irq_handler_dispatch(ctx: *context, irq: u8) void = {
 	for (cur != null; cur = (cur: *irq_handler).next) {
 		const cur = cur: *irq_handler;
 		const func = cur.func as *irq_handler_func;
-		func(ctx, irq, cur.user);
+		func(cur.user);
+		pic_eoi(irq);
 	};
 };
 
