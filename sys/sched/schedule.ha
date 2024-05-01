@@ -1,19 +1,20 @@
 use arch;
 use mman;
-use log;
 
-// Switches to the next available task.
-export fn schedule() void = {
-	match (current()) {
+// Switches to the next available task. Returns true if we context switched as a
+// result of the call.
+export fn schedule() bool = {
+	const prev = match (current()) {
 	case let prev: *task =>
 		if (arch::save(&prev.restore)) {
 			// Return from context switch
-			return;
+			return true;
 		};
+		yield prev;
 	case null =>
 		// Scheduler invoked during system initialization; there are no
 		// tasks to wake up so just return here.
-		return;
+		return false;
 	};
 
 	const next = match (task_next()) {
@@ -23,11 +24,15 @@ export fn schedule() void = {
 		abort(); // TODO: idle
 	};
 
+	if (next == prev) {
+		return false;
+	};
+
 	switch_task(next);
 };
 
 // Switches to the given task.
-fn switch_task(task: *task) void = {
+fn switch_task(task: *task) never = {
 	let cpu = arch::getcpu();
 	cpu.task = &task.ctx;
 

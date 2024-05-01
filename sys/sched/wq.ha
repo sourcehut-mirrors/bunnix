@@ -12,18 +12,19 @@ export type wq_head = struct {
 	head: nullable *wq_link,
 };
 
-// Waits until the given waitqueue is signalled.
+// Waits until the given waitqueue is signalled. Returns true if we switched
+// contexts during the wait.
 export fn wait(
 	head: *wq_head,
 	link: *wq_link,
 	func: nullable *wq_func = null,
 	user: nullable *opaque = null,
-) void = {
+) bool = {
 	const task = match (current()) {
 	case null =>
 		// Attempted to wait while scheduler was not active
 		arch::pause();
-		return;
+		return false;
 	case let t: *task =>
 		yield t;
 	};
@@ -39,7 +40,7 @@ export fn wait(
 
 	link.next = head.head;
 	head.head = link;
-	schedule();
+	return schedule();
 };
 
 // Wakes all threads on this wait queue.
