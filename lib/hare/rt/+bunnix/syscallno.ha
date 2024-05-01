@@ -14,4 +14,5 @@ export type sys = enum u64 {
 	MPROTECT,
 	FORK,
 	EXECVE,
+	GETPPID,
 };

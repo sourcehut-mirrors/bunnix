@@ -45,6 +45,10 @@ export fn getpid() pid_t = {
 	return syswrap(syscall(sys::GETPID))!: pid_t;
 };
 
+export fn getppid() pid_t = {
+	return syswrap(syscall(sys::GETPPID))!: pid_t;
+};
+
 export fn exit(status: int) never = {
 	syscall(sys::EXIT, status: u64);
 	abort();
