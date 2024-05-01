@@ -9,7 +9,7 @@ export fn fork() (int | error) = {
 	const parent = current();
 	const ptask = parent.tasks[0]; // TODO: threads
 
-	const child = new_proc(parent.root, parent.pid)?;
+	const child = new_proc(parent.root, parent)?;
 	const ctask = sched::newtask(&child.vmm, child)?;
 	append(child.tasks, ctask);
 	mman::fork(&parent.vmm, &child.vmm)?;
@@ -31,5 +31,5 @@ export fn fork() (int | error) = {
 	sched::task_activate(ctask);
 
 	// Return to parent
-	return child.pid;
+	return child.creds.pid;
 };

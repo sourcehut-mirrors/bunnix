@@ -3,11 +3,11 @@ use fs;
 use proc;
 
 fn sys_getpid() (u64 | error) = {
-	return proc::current().pid: u64;
+	return proc::current().creds.pid: u64;
 };
 
 fn sys_getppid() (u64 | error) = {
-	return proc::current().ppid: u64;
+	return proc::current().creds.ppid: u64;
 };
 
 fn sys_kill(status: int) (u64 | error) = {
