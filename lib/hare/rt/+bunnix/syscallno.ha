@@ -15,4 +15,5 @@ export type sys = enum u64 {
 	FORK,
 	EXECVE,
 	GETPPID,
+	OPENAT,
 };

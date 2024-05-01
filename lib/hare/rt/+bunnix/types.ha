@@ -54,3 +54,12 @@ export type exec_options = struct {
 	// List of KEY=VALUE strings
 	environ: []str,
 };
+
+export def AT_FDCWD: int = -100;
+
+export type openat_options = struct {
+	dirfd: i64,
+	path: str,
+	flags: int,
+	mode: uint,
+};

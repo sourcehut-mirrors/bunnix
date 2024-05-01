@@ -91,3 +91,13 @@ export fn execve(path: str, args: []str, env: []str) (void | errno) = {
 	};
 	return syswrap(syscall(sys::EXECVE, &opts))?: pid_t;
 };
+
+export fn open(path: str, flags: int, mode: uint) (int | errno) = {
+	const opts = openat_options {
+		dirfd = AT_FDCWD,
+		path = path,
+		flags = flags,
+		mode = mode,
+	};
+	return syswrap(syscall(sys::OPENAT, &opts))?: int;
+};
