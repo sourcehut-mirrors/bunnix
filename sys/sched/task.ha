@@ -12,7 +12,7 @@ export type kstack = [KSTACK_SIZE]u8;
 export type task_state = enum {
 	STARTUP,
 	RUNNING,
-	BLOCKED,
+	WAIT,
 };
 
 export type task = struct {
