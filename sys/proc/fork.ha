@@ -9,7 +9,7 @@ export fn fork() (int | error) = {
 	const parent = current();
 	const ptask = parent.tasks[0]; // TODO: threads
 
-	const child = new_proc(parent.root)?;
+	const child = new_proc(parent.root, parent.pid)?;
 	const ctask = sched::newtask(&child.vmm, child)?;
 	append(child.tasks, ctask);
 	mman::fork(&parent.vmm, &child.vmm)?;

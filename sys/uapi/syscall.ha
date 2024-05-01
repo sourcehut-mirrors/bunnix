@@ -35,6 +35,7 @@ export type sys = enum u64 {
 	MPROTECT,
 	FORK,
 	EXECVE,
+	GETPPID,
 };
 
 export type syscall_handler = fn(u64, u64, u64, u64, u64) (u64 | error);
@@ -52,4 +53,5 @@ let systab: [_]*opaque = [
 	&sys_mprotect: *syscall_handler,
 	&sys_fork: *syscall_handler,
 	&sys_execve: *syscall_handler,
+	&sys_getppid: *syscall_handler,
 ];

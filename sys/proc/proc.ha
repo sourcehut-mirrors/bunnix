@@ -13,13 +13,14 @@ export type proc = struct {
 	root: *fs::vfs,
 	fds: []nullable *io::file,
 	pid: int,
+	ppid: int,
 
 	// TODO: Multithreading
 	tasks: []*sched::task,
 };
 
 // Creates a new process.
-export fn new_proc(root: *fs::vfs) (*proc | error) = {
+export fn new_proc(root: *fs::vfs, ppid: int) (*proc | error) = {
 	static let nextpid: int = 1;
 	assert(nextpid + 1 > nextpid); // TODO
 	defer nextpid += 1;
@@ -27,6 +28,7 @@ export fn new_proc(root: *fs::vfs) (*proc | error) = {
 	let proc = alloc(proc {
 		root = root,
 		pid = nextpid,
+		ppid = ppid,
 		...
 	});
 	mman::vmm_init(&proc.vmm)?;

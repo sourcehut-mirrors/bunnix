@@ -75,7 +75,7 @@ export fn main(ctx: *boot::context) void = {
 
 	// Start /bin/init
 	log::kprintfln(KERN, "entering userspace: exec {}", init);
-	const proc = proc::new_proc(&root)!;
+	const proc = proc::new_proc(&root, 1)!;
 	const node = fs::walk(&root, init)!;
 
 	// TODO: Implement console device properly, i.e. /dev/cons
