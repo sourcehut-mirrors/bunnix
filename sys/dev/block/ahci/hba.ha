@@ -1,6 +1,7 @@
 use arch;
 use ata;
 use dev::block;
+use errors::{error, errno};
 use log;
 use time;
 
@@ -38,16 +39,14 @@ fn hba_init(dev: *ahci_controller) void = {
 		let cmd = prep_identify(port, buffer.prdt)!;
 		port_wait(port);
 		port_submitcmd(port, cmd);
-		port_waitcmd(port, cmd);
-
-		const _is = port.port._is;
-		port.port._is = _is;
-		if (_is & HBA_PxIS_TFES != 0) {
+		match (port_waitcmd(port, cmd)) {
+		case error =>
 			log::kprintfln(log::WARN,
 				"Warning: AHCI port {} IDENTIFY failed, disabling port",
 				i);
 			dev.ports[i] = null;
 			continue;
+		case void => void;
 		};
 
 		let id = ata::ident { ... };

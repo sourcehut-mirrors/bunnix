@@ -15,7 +15,7 @@ fn bdev_readsectors(
 	assert(len(buf) % SECTORSZ == 0);
 
 	const hba = bdev.base;
-	const buffer = getbuffer(hba.pool, len(buf))!;
+	const buffer = getbuffer(hba.pool, len(buf))?;
 	defer releasebuffer(hba.pool, &buffer);
 
 	const nbyte = len(buf);
@@ -27,15 +27,10 @@ fn bdev_readsectors(
 		defer nread += amt;
 		defer lba += amt / SECTORSZ;
 
-		let cmd = prep_read_dma_ext(bdev, lba, buffer.prdt)!;
+		let cmd = prep_read_dma_ext(bdev, lba, buffer.prdt)?;
 		port_wait(bdev);
 		port_submitcmd(bdev, cmd);
-		port_waitcmd(bdev, cmd);
-
-		const _is = bdev.port._is;
-		bdev.port._is = _is;
-		// TODO: Handle read errors
-		assert(_is & HBA_PxIS_TFES == 0);
+		port_waitcmd(bdev, cmd)?;
 
 		buf[nread..nread+amt] = buffer.data[..amt];
 	};
@@ -50,20 +45,15 @@ fn bdev_writesectors(
 	assert(len(buf) % SECTORSZ == 0);
 
 	const hba = bdev.base;
-	const buffer = getbuffer(hba.pool, len(buf))!;
+	const buffer = getbuffer(hba.pool, len(buf))?;
 	defer releasebuffer(hba.pool, &buffer);
 
 	const nbyte = len(buf);
-	assert(nbyte < buffer.prdt.1);
+	assert(nbyte < buffer.prdt.1); // TODO
 	buffer.data[..nbyte] = buf[..nbyte];
 
-	// TODO: Non-blocking operation
-	let cmd = prep_write_dma_ext(bdev, lba, buffer.prdt)!;
+	let cmd = prep_write_dma_ext(bdev, lba, buffer.prdt)?;
 	port_wait(bdev);
 	port_submitcmd(bdev, cmd);
-	port_waitcmd(bdev, cmd);
-
-	const _is = bdev.port._is;
-	bdev.port._is = _is;
-	assert(_is & HBA_PxIS_TFES == 0);
+	port_waitcmd(bdev, cmd)?;
 };

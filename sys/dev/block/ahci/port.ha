@@ -231,11 +231,19 @@ fn port_submitcmd(port: *ahci_port, cmd: *hba_cmd_table) void = {
 	port.port.ci |= 1 << slot;
 };
 
-fn port_waitcmd(port: *ahci_port, cmd: *hba_cmd_table) void = {
+fn port_waitcmd(port: *ahci_port, cmd: *hba_cmd_table) (void | error) = {
 	const slot = ((cmd: uintptr - &port.mmio.cmdtable: uintptr): size
 		/ size(hba_cmd_table)): u32;
 	let link = sched::wq_link { ... };
 	for (port.port.ci & (1 << slot) != 0) {
 		sched::wait(&port.wq, &link);
+	};
+
+	const _is = port.port._is;
+	port.port._is = _is;
+	assert(_is & HBA_PxIS_FATAL == 0,
+		"Fatal AHCI controller failure"); // TODO: Handle me gracefully
+	if (_is & HBA_PxIS_TFES != 0) {
+		return errno::IO;
 	};
 };

@@ -191,10 +191,28 @@ def HBA_PxIE_TFEE: u32 = 1 << 30;
 def HBA_PxIE_CPDE: u32 = 1 << 31;
 
 // Interrupts enabled mask
-// TODO: Add more interrupts
 def HBA_PxIE_IEM: u32 =
+	HBA_PxIE_DHRE |
+	HBA_PxIE_PSE |
+	HBA_PxIE_DSE |
+	HBA_PxIE_SDBE |
 	HBA_PxIE_UFE |
-	HBA_PxIE_DHRE;
+	HBA_PxIE_DPE |
+	HBA_PxIE_PCE |
+	HBA_PxIE_DPME |
+	HBA_PxIE_PRCE |
+	HBA_PxIE_IPME |
+	HBA_PxIE_OFE |
+	HBA_PxIE_IFE |
+	HBA_PxIE_HBDE |
+	HBA_PxIE_HBFE |
+	HBA_PxIE_TFEE |
+	HBA_PxIE_CPDE;
+
+def HBA_PxIS_FATAL: u32 =
+	HBA_PxIS_HBFS |
+	HBA_PxIS_HBDS |
+	HBA_PxIS_IFS;
 
 def PORT_SSTS_DET_MASK: u32 = 0b1111;
 def PORT_SSTS_DET_NODEV: u32 = 0;
