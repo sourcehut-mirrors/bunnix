@@ -1,4 +1,5 @@
 use errors::{error, errno};
+use fs;
 use io;
 use proc;
 
@@ -73,4 +74,17 @@ fn sys_close(
 	io::unref(file);
 	proc::current().fds[fd] = null;
 	return 0u64;
+};
+
+fn sys_openat(opts: *openat_options) (u64 | error) = {
+	validate_user_addr(opts, size(openat_options))?;
+	validate_user_string(opts.path)?;
+	assert(opts.dirfd == AT_FDCWD);
+
+	// TODO: free/unref inode from walk
+	const current = proc::current();
+	const inode = fs::walk(current.root, opts.path)?;
+	const file = fs::inode_open(inode)?;
+	const fd = proc::appendfd(current, file);
+	return fd: u64;
 };
