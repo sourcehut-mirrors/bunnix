@@ -9,3 +9,15 @@ arch.pause:
 arch.idle:
 	hlt
 	jmp arch.idle
+
+.text
+.global rt.fetch_add
+rt.fetch_add:
+	lock xadd %rsi, (%rdi)
+	mov %rsi, %rax
+	ret
+
+.global rt.barrier
+rt.barrier:
+	mfence
+	ret
