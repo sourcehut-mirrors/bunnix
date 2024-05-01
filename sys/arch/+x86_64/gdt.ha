@@ -34,6 +34,7 @@ fn init_tss(cpu: *cpu) void = {
 	cpu.tss = x86_64::tss { ... };
 };
 
-fn set_kernel_stack(stack: *opaque) void = {
+// Sets the current kernel stack pointer.
+export fn set_kernel_stack(stack: *opaque) void = {
 	getcpu().tss.ist[0] = stack: uintptr;
 };

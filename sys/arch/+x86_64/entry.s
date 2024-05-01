@@ -182,7 +182,9 @@ arch.syscall:
 	movq %r10, %rcx		/* System-V ABI patch */
 	call uapi.syscall
 
+	cli
 	movq %gs:8, %r10
+_sysret:
 	movq 176(%r10), %rsp
 	movq 152(%r10), %rcx	/* sysret %rip */
 	movq 168(%r10), %r11	/* sysret %rflags */
@@ -193,6 +195,16 @@ arch.syscall:
 	movq 24(%r10), %r14
 	movq 16(%r10), %r15
 
-	cli
 	swapgs
 	sysretq
+
+// Used when arch::restore needs to return from a syscall directly, e.g. after
+// fork(2)
+.global arch.sysret
+arch.sysret:
+	cli
+	movq %gs:8, %r10
+	// Restore ABI return values
+	movq 128(%r10), %rax
+	movq 104(%r10), %rdx
+	jmp _sysret

@@ -13,8 +13,8 @@ export fn main() void = {
 	fmt::println("calling fork...")!;
 	let pid = rt::fork()!;
 	if (pid == 0) {
-		fmt::println("Hello from the child process!")!;
-		fmt::println("execve(2) into /bin/echo")!;
+		fmt::println("[child] Hello from the child process!")!;
+		fmt::println("[child] execve(2) into /bin/echo")!;
 		rt::execve("/bin/echo", [
 			"/bin/echo",
 			"Hello",
@@ -23,7 +23,7 @@ export fn main() void = {
 		], [])!;
 	} else {
 		fmt::printfln(
-			"Hello from the parent process! The child has pid {}",
+			"[parent] Hello from the parent process! The child has pid {}",
 			pid: int)!;
 	};
 

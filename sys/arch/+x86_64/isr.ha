@@ -88,11 +88,5 @@ export fn isr_handler(ctx: *context) *context = {
 		};
 	};
 
-	const next = match (getcpu().task) {
-	case let ctx: *context =>
-		yield ctx;
-	case null =>
-		yield ctx;
-	};
-	return next;
+	return ctx;
 };

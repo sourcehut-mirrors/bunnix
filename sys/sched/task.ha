@@ -23,6 +23,7 @@ export type task = struct {
 export type taskstate = struct {
 	vmm: *mman::vmm,
 	state: task_state,
+	restore: arch::restore_point,
 	next: nullable *task,
 	prev: nullable *task,
 	user: nullable *opaque,
@@ -50,8 +51,13 @@ fn task_fromctx(ctx: *arch::context) *task = {
 	return (ctx: uintptr - size(kstack): uintptr): *task;
 };
 
-// Returns the currently active task.
-export fn current() *task = {
+// Returns the currently active task. Only returns null during system startup.
+export fn current() nullable *task = {
 	const cpu = arch::getcpu();
-	return task_fromctx(cpu.task: *arch::context);
+	match (cpu.task) {
+	case let ctx: *arch::context =>
+		return task_fromctx(ctx);
+	case null =>
+		return null;
+	};
 };

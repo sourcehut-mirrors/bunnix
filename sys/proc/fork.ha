@@ -23,7 +23,11 @@ export fn fork() (int | error) = {
 		};
 	};
 
+	// Prepare child to return from syscall
 	ctask.ctx = ptask.ctx;
 	arch::context_set_rval(&ctask.ctx, 0, 0);
+	arch::set_restore_point(&ctask.restore, &arch::sysret: uintptr);
+
+	// Return to parent
 	return child.pid;
 };

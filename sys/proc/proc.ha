@@ -43,5 +43,6 @@ export fn appendfd(proc: *proc, file: *io::file) int = {
 
 // Returns the currently active process.
 export fn current() *proc = {
-	return sched::current().user: *proc;
+	const current = sched::current() as *sched::task;
+	return current.user: *proc;
 };

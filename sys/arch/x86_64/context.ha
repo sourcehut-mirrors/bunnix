@@ -28,3 +28,17 @@ export type context = struct {
 	rsp: u64,		// 176
 	ss: u64,		// 184
 };				// 192 (end)
+
+// Stores ABI registers for setjmp/longjmp operations (arch::save and
+// arch::restore).
+export type restore_point = struct {
+	rsp: u64,		// 0
+	rbp: u64,		// 8
+	rip: u64,		// 16
+	fsbase: u64,		// 24
+	rbx: u64,		// 32
+	r12: u64,		// 40
+	r13: u64,		// 48
+	r14: u64,		// 56
+	r15: u64,		// 64
+};

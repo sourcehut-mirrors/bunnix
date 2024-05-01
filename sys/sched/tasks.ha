@@ -4,7 +4,7 @@ use mman;
 let head: nullable *task = null;
 
 fn task_next() nullable *task = {
-	const prev = current();
+	const prev = current() as *task;
 	let next: nullable *task = prev.next;
 	for (next != prev) {
 		if (next == null) {

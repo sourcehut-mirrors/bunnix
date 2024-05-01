@@ -12,3 +12,5 @@ export fn switch_user(ctx: *context) void = {
 	cpu.task = ctx;
 	set_kernel_stack(&(ctx: *[*]context)[1]);
 };
+
+export fn sysret() never;
