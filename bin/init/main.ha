@@ -1,6 +1,8 @@
-use rt;
+use encoding::hex;
 use fmt;
+use io;
 use os;
+use rt;
 
 export fn main() void = {
 	fmt::println("Hello from userspace!")!;
@@ -14,16 +16,7 @@ export fn main() void = {
 	fmt::println("calling fork...")!;
 	let pid = rt::fork()!;
 	if (pid == 0) {
-		fmt::println("[child] Hello from the child process!")!;
-		fmt::printfln("[child] I have pid {}", rt::getpid(): int)!;
-		fmt::printfln("[child] My parent's pid is {}", rt::getppid(): int)!;
-		fmt::println("[child] execve(2) into /bin/echo")!;
-		rt::execve("/bin/echo", [
-			"/bin/echo",
-			"Hello",
-			"from",
-			"/bin/echo!",
-		], [])!;
+		child();
 	} else {
 		fmt::printfln(
 			"[parent] Hello from the parent process! The child has pid {}",
@@ -31,4 +24,29 @@ export fn main() void = {
 	};
 
 	for (true) void;
+};
+
+fn child() void = {
+	fmt::println("[child] Hello from the child process!")!;
+	fmt::printfln("[child] I have pid {}", rt::getpid(): int)!;
+	fmt::printfln("[child] My parent's pid is {}", rt::getppid(): int)!;
+
+	fmt::println("[child] open /bin/echo to test userspace filesystem access")!;
+	const fd = rt::open("/bin/echo", 0, 0)!;
+	fmt::printfln("[child] got fd {}", fd)!;
+	fmt::printfln("[child] reading first 128 bytes...")!;
+
+	let buf: [128]u8 = [0...];
+	const n = io::read(fd, buf)! as size;
+	hex::dump(os::stdout, buf[..n])!;
+
+	rt::close(fd)!;
+
+	fmt::println("[child] execve(2) into /bin/echo")!;
+	rt::execve("/bin/echo", [
+		"/bin/echo",
+		"Hello",
+		"from",
+		"/bin/echo!",
+	], [])!;
 };
