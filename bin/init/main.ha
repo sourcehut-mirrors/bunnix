@@ -1,5 +1,6 @@
 use encoding::hex;
 use fmt;
+use fs;
 use io;
 use os;
 use rt;
@@ -11,6 +12,15 @@ export fn main() void = {
 	fmt::println("os::args via System-V:")!;
 	for (let arg .. os::args) {
 		fmt::println(arg)!;
+	};
+
+	fmt::println("Contents of /:")!;
+	const iter = os::iter("/")!;
+	for (let dent => fs::next(iter)!) {
+		fmt::printfln("{}\t{}{}",
+			fs::mode_str(dent.ftype),
+			dent.name,
+			if (fs::isdir(dent.ftype)) "/" else "")!;
 	};
 
 	fmt::println("calling fork...")!;
