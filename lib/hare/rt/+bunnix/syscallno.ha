@@ -16,4 +16,5 @@ export type sys = enum u64 {
 	EXECVE,
 	GETPPID,
 	OPENAT,
+	GETDENTS,
 };

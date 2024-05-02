@@ -55,6 +55,30 @@ export type exec_options = struct {
 	environ: []str,
 };
 
+// Matches Linux definitions
+export def O_RDONLY: int	= 0o0;
+export def O_WRONLY: int	= 0o1;
+export def O_RDWR: int		= 0o2;
+export def O_APPEND: int	= 0o2000;
+export def O_CLOEXEC: int	= 0o2000000;
+export def O_CREATE: int	= 0o100;
+export def O_DIRECT: int	= 0o40000;
+export def O_DIRECTORY: int	= 0o200000;
+export def O_EXCLUSIVE: int	= 0o200;
+export def O_NOFOLLOW: int	= 0o400000;
+export def O_NONBLOCK: int	= 0o4000;
+export def O_PATH: int		= 0o10000000;
+export def O_TRUNC: int		= 0o1000;
+
+export def DT_UNKNOWN = 0;
+export def DT_FIFO = 0o010000;
+export def DT_DIR = 0o040000;
+export def DT_CHR = 0o020000;
+export def DT_BLK = 0o060000;
+export def DT_REG = 0o100000;
+export def DT_LINK = 0o120000;
+export def DT_SOCK = 0o140000;
+
 export def AT_FDCWD: int = -100;
 
 export type openat_options = struct {
@@ -62,4 +86,16 @@ export type openat_options = struct {
 	path: str,
 	flags: int,
 	mode: uint,
+};
+
+export type dirent_meta = struct {
+	ino: uint,
+	off: size,
+	reclen: size,
+	mode: uint,
+};
+
+export type dirent = struct {
+	dirent_meta,
+	name: [*]u8,
 };

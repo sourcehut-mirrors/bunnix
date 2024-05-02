@@ -101,3 +101,7 @@ export fn open(path: str, flags: int, mode: uint) (int | errno) = {
 	};
 	return syswrap(syscall(sys::OPENAT, &opts))?: int;
 };
+
+export fn getdents(fd: int, buf: *[*]u8, bufsz: size) (size | errno) = {
+	return syswrap(syscall(sys::GETDENTS, fd: i64, buf, bufsz))?: size;
+};
