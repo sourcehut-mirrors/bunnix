@@ -92,6 +92,16 @@ export fn execve(path: str, args: []str, env: []str) (void | errno) = {
 	return syswrap(syscall(sys::EXECVE, &opts))?: pid_t;
 };
 
+export fn fexecve(fd: int, args: []str, env: []str) (void | errno) = {
+	const opts = exec_options {
+		flags = exec_flag::FEXECVE,
+		fd = fd,
+		args = args,
+		environ = env,
+	};
+	return syswrap(syscall(sys::EXECVE, &opts))?: pid_t;
+};
+
 export fn open(path: str, flags: int, mode: uint) (int | errno) = {
 	const opts = openat_options {
 		dirfd = AT_FDCWD,
