@@ -3,6 +3,7 @@
 
 use errors;
 use fs;
+use io;
 use rt;
 use types::c;
 
@@ -12,9 +13,12 @@ type os_filesystem = struct {
 };
 
 @init fn init_cwd() void = {
-	// TODO Bunnix
 	static let cwd_fs = os_filesystem {
 		fs = fs::fs {
+			open = &fs_open,
+			openfile = &fs_open_file,
+			create = &fs_create,
+			createfile = &fs_create_file,
 			iter = &fs_iter,
 			...
 		},
@@ -24,31 +28,65 @@ type os_filesystem = struct {
 	cwd = &cwd_fs;
 };
 
-fn errno_to_fs(err: rt::errno) fs::error = {
-	switch (err) {
-	case rt::ENOENT =>
-		return errors::noentry;
-	case rt::EEXIST =>
-		return errors::exists;
-	case rt::EACCES =>
-		return errors::noaccess;
-	case rt::EBUSY =>
-		return errors::busy;
-	case rt::ENOTDIR =>
-		return fs::wrongtype;
-	case rt::ENOSYS =>
-		return errors::unsupported;
-	case =>
-		return errors::errno(err);
-	};
-};
-
 type os_iterator = struct {
 	iter: fs::iterator,
 	fd: int,
 	buf_pos: size,
 	buf_end: size,
 	buf: []u8,
+};
+
+fn _fs_open(
+	fs: *fs::fs,
+	path: str,
+	oflags: int,
+	mode: uint,
+) (io::file | fs::error) = {
+	let fs = fs: *os_filesystem;
+
+	const fd = match (rt::open(path, oflags, mode)) {
+	case let err: rt::errno =>
+		return errno_to_fs(err);
+	case let fd: int =>
+		yield fd;
+	};
+
+	return io::fdopen(fd);
+};
+
+fn fs_open_file(
+	fs: *fs::fs,
+	path: str,
+	flags: fs::flag,
+) (io::file | fs::error) = {
+	flags ^= fs::flag::CTTY | fs::flag::NOCLOEXEC; // invert NOCTTY/CLOEXEC
+	return _fs_open(fs, path, flags: int, 0);
+};
+
+fn fs_open(
+	fs: *fs::fs,
+	path: str,
+	flags: fs::flag,
+) (io::handle | fs::error) = fs_open_file(fs, path, flags)?;
+
+fn fs_create_file(
+	fs: *fs::fs,
+	path: str,
+	mode: fs::mode,
+	flags: fs::flag,
+) (io::file | fs::error) = {
+	flags ^= fs::flag::CTTY | fs::flag::NOCLOEXEC; // invert NOCTTY/CLOEXEC
+	flags |= fs::flag::CREATE;
+	return _fs_open(fs, path, flags: int, mode: uint)?;
+};
+
+fn fs_create(
+	fs: *fs::fs,
+	path: str,
+	mode: fs::mode,
+	flags: fs::flag,
+) (io::handle | fs::error) = {
+	return fs_create_file(fs, path, mode, flags)?;
 };
 
 fn fs_iter(fs: *fs::fs, path: str) (*fs::iterator | fs::error) = {
@@ -108,4 +146,23 @@ fn iter_finish(iter: *fs::iterator) void = {
 	rt::close(iter.fd)!;
 	free(iter.buf);
 	free(iter);
+};
+
+fn errno_to_fs(err: rt::errno) fs::error = {
+	switch (err) {
+	case rt::ENOENT =>
+		return errors::noentry;
+	case rt::EEXIST =>
+		return errors::exists;
+	case rt::EACCES =>
+		return errors::noaccess;
+	case rt::EBUSY =>
+		return errors::busy;
+	case rt::ENOTDIR =>
+		return fs::wrongtype;
+	case rt::ENOSYS =>
+		return errors::unsupported;
+	case =>
+		return errors::errno(err);
+	};
 };
