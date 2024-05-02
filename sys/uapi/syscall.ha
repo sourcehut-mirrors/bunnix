@@ -37,6 +37,7 @@ export type sys = enum u64 {
 	EXECVE,
 	GETPPID,
 	OPENAT,
+	GETDENTS,
 };
 
 export type syscall_handler = fn(u64, u64, u64, u64, u64) (u64 | error);
@@ -56,4 +57,5 @@ let systab: [_]*opaque = [
 	&sys_execve: *syscall_handler,
 	&sys_getppid: *syscall_handler,
 	&sys_openat: *syscall_handler,
+	&sys_getdents: *syscall_handler,
 ];

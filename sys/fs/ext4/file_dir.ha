@@ -2,7 +2,6 @@ use errors::{error, errno};
 use fs;
 use io;
 use lib::lwext4;
-use log;
 use types::c;
 
 const file_impl_dir = io::vtable {
@@ -28,15 +27,15 @@ fn dir_readdir(fd: *io::file, dent: *io::dirent) (void | io::EOF | error) = {
 	const fd = fd: *file;
 	const first = dir_iter_init(fd)?;
 
+	if (fd.diter.curr == null) {
+		return io::EOF;
+	};
+
 	if (!first) {
 		let r = lwext4::dir_iterator_next(&fd.diter);
 		if (r != errno::NONE) {
 			return r;
 		};
-	};
-
-	if (fd.diter.curr == null) {
-		return io::EOF;
 	};
 
 	const inode = fd.inode: *inode;

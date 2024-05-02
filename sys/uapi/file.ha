@@ -2,6 +2,7 @@ use errors::{error, errno};
 use fs;
 use io;
 use proc;
+use strings;
 
 fn validate_file(fd: i64) (*io::file | error) = {
 	const fds = &proc::current().fds;
@@ -81,10 +82,49 @@ fn sys_openat(opts: *openat_options) (u64 | error) = {
 	validate_user_string(opts.path)?;
 	assert(opts.dirfd == AT_FDCWD);
 
-	// TODO: free/unref inode from walk
+	// TODO:
+	// - free/unref inode from walk
+	// - validate open flags
 	const current = proc::current();
 	const (inode, _) = fs::walk(current.root, opts.path)?;
 	const file = io::inode_open(inode)?;
 	const fd = proc::appendfd(current, file);
 	return fd: u64;
+};
+
+fn sys_getdents(fd: i64, buf: *[*]u8, bufsz: size) (u64 | error) = {
+	const file = validate_file(fd)?;
+	validate_user_addr(buf, bufsz, true)?;
+	const buf = buf[..bufsz];
+
+	// Buffer must be able to store at least one dirent
+	if (bufsz < size(dirent_meta) + fs::NAME_MAX + 1) {
+		return errno::INVAL: error;
+	};
+
+	let n = 0z;
+	for (bufsz - n >= size(dirent_meta) + fs::NAME_MAX + 1) {
+		let next = &buf[n]: *dirent;
+
+		let dent = io::dirent { ... };
+		match (io::readdir(file, &dent)?) {
+		case void => void;
+		case io::EOF =>
+			break;
+		};
+
+		const nameln = len(dent.name);
+		next.ino = dent.ino;
+		next.mode = dent.mode;
+		next.reclen = nameln + size(dirent_meta) + 1;
+
+		const name = strings::toutf8(dent.name);
+		next.name[..nameln] = name[..];
+		next.name[nameln] = 0;
+
+		n += next.reclen;
+		next.off = n;
+	};
+
+	return n: u64;
 };
