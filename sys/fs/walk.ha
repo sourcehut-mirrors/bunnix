@@ -35,6 +35,16 @@ export fn inode_walk(
 			return errno::NOENT;
 		};
 
+		if (cur.mode & io::mode::OTHER_X != 0) {
+			void; // ok
+		} else if (cur.mode & io::mode::USER_X != 0) {
+			void; // TODO
+		} else if (cur.mode & io::mode::GROUP_X != 0) {
+			void; // TODO
+		} else {
+			return errno::ACCES;
+		};
+
 		const final = path::peekiter(iter) is void;
 		if (final && flag & walkflag::PARENT != 0) {
 			return (cur, name);
