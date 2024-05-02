@@ -18,6 +18,8 @@ export fn exec(
 	// TODO: Better error handling
 	defer io::unref(file);
 
+	io::seek(file, 0, io::whence::SET)?;
+
 	// Stash these in the kernel heap before switching vmms
 	// XXX: This is probably avoidable if we were clever
 	const args = strings::dupall(args);
