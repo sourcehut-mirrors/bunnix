@@ -42,15 +42,15 @@ fn child() void = {
 	fmt::printfln("[child] My parent's pid is {}", rt::getppid(): int)!;
 
 	fmt::println("[child] open /bin/echo to test userspace filesystem access")!;
-	const fd = rt::open("/bin/echo", 0, 0)!;
-	fmt::printfln("[child] got fd {}", fd)!;
+	const file = os::open("/bin/echo")!;
+	fmt::printfln("[child] got fd {}", file: int)!;
 	fmt::printfln("[child] reading first 128 bytes...")!;
 
 	let buf: [128]u8 = [0...];
-	const n = io::read(fd, buf)! as size;
+	const n = io::read(file, buf)! as size;
 	hex::dump(os::stdout, buf[..n])!;
 
-	rt::close(fd)!;
+	io::close(file)!;
 
 	fmt::println("[child] execve(2) into /bin/echo")!;
 	rt::execve("/bin/echo", [
