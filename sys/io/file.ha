@@ -97,10 +97,13 @@ export fn readdir(file: *file, dent: *dirent) (void | EOF | error) = {
 	};
 };
 
+// Increments the reference count on a file.
 export fn ref(file: *file) void = {
 	file.refs += 1;
 };
 
+// Decrements the reference count of a file, freeing resources associated with
+// it if the reference count becomes zero.
 export fn unref(file: *file) void = {
 	if (file.refs == 0) {
 		match (file.vtable.finish) {
@@ -110,5 +113,16 @@ export fn unref(file: *file) void = {
 		};
 	} else {
 		file.refs -= 1;
+	};
+};
+
+// Returns the [[inode]] associated with this file, or [[errno::BADF]] if this
+// file does not have an inode.
+export fn file_inode(file: *file) (*inode | error) = {
+	match (file.inode) {
+	case let ino: *inode =>
+		return ino;
+	case null =>
+		return errno::BADF;
 	};
 };
