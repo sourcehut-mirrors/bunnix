@@ -53,7 +53,7 @@ export fn exec(
 		mman::flag::ANON | mman::flag::USER,
 	)!;
 
-	populate_argv(&proc.vmm, args, env)!;
+	populate_argv(proc, args, env)!;
 
 	if (len(proc.tasks) == 0) {
 		let task = sched::newtask(&proc.vmm, proc)!;
@@ -77,9 +77,10 @@ export fn exec(
 	arch::enter_user(&task.ctx);
 };
 
-fn populate_argv(vmm: *mman::vmm, args: []str, env: []str) (void | error) = {
+fn populate_argv(proc: *proc, args: []str, env: []str) (void | error) = {
 	let vecsz = 0z;
 	let datasz = 0z;
+	let vmm = &proc.vmm;
 
 	// Arguments
 	vecsz += size(u64); // argc
@@ -95,7 +96,11 @@ fn populate_argv(vmm: *mman::vmm, args: []str, env: []str) (void | error) = {
 	};
 	vecsz += size(u64); // 0
 
-	// TODO: auxv
+	vecsz += size(elf::auxv64); // AT_PAGESZ
+	vecsz += size(elf::auxv64); // AT_UID
+	vecsz += size(elf::auxv64); // AT_EUID
+	vecsz += size(elf::auxv64); // AT_GID
+	vecsz += size(elf::auxv64); // AT_EGID
 	vecsz += size(elf::auxv64); // AT_NULL
 
 	const totalsz = vecsz + datasz;
@@ -130,10 +135,28 @@ fn populate_argv(vmm: *mman::vmm, args: []str, env: []str) (void | error) = {
 
 	vector[vi] = 0;
 
-	// TODO: auxv
 	let auxv = &vector[vi]: *[*]elf::auxv64;
-	let ai = 0z;
-	auxv[ai] = elf::auxv64 {
+	auxv[0] = elf::auxv64 {
+		a_type = elf::at::PAGESZ,
+		a_val = arch::PAGESIZE: u64,
+	};
+	auxv[1] = elf::auxv64 {
+		a_type = elf::at::UID,
+		a_val = proc.creds.uid: u64,
+	};
+	auxv[2] = elf::auxv64 {
+		a_type = elf::at::EUID,
+		a_val = proc.creds.euid: u64,
+	};
+	auxv[3] = elf::auxv64 {
+		a_type = elf::at::GID,
+		a_val = proc.creds.gid: u64,
+	};
+	auxv[4] = elf::auxv64 {
+		a_type = elf::at::EGID,
+		a_val = proc.creds.egid: u64,
+	};
+	auxv[2] = elf::auxv64 {
 		a_type = elf::at::NULL,
 		a_val = 0,
 	};
