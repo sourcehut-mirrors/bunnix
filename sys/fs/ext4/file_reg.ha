@@ -12,7 +12,7 @@ const file_impl_reg = io::vtable {
 };
 
 fn file_init(file: *file) (void | error) = {
-	let inode = file.inode;
+	let inode = file.inode: *inode;
 	let sb = inode.sb;
 	let lwfile = &file.lwfile;
 

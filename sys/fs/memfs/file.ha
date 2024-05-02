@@ -3,7 +3,6 @@ use errors::{error, errno};
 
 export type file = struct {
 	io::file,
-	inode: *inode,
 	pos: size,
 };
 
