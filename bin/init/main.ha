@@ -50,10 +50,8 @@ fn child() void = {
 	const n = io::read(file, buf)! as size;
 	hex::dump(os::stdout, buf[..n])!;
 
-	io::close(file)!;
-
 	fmt::println("[child] execve(2) into /bin/echo")!;
-	rt::execve("/bin/echo", [
+	rt::fexecve(file, [
 		"/bin/echo",
 		"Hello",
 		"from",
