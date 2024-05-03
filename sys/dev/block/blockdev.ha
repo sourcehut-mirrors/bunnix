@@ -6,6 +6,8 @@ export type blockdev = struct {
 	impl: const *blockdev_iface,
 	iface: interface,
 	serial: uint,
+	major: u32,
+	minor: u32,
 	blocksz: size,
 	blocks: size,
 	part_type: part_type,

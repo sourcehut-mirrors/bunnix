@@ -20,6 +20,8 @@ fn scanpart_mbr(
 		append(parts, blockpart {
 			impl = &blockpart_impl,
 			iface = interface::BLOCKPART,
+			major = bdev.major,
+			minor = partno + 1,
 			serial = bdev.serial,
 			blocksz = bdev.blocksz,
 			blocks = part.sectors,

@@ -24,6 +24,8 @@ fn scanpart_gpt(
 			impl = &blockpart_impl,
 			iface = interface::BLOCKPART,
 			serial = bdev.serial,
+			major = bdev.major,
+			minor = partno + 1,
 			blocksz = bdev.blocksz,
 			blocks = part.end_lba - part.start_lba,
 			bdev = bdev,

@@ -1,3 +1,4 @@
+use dev;
 use errors::{error, errno};
 use log;
 use regex;
@@ -15,10 +16,26 @@ let blockdevs: []*blockdev = [];
 export fn register(bdev: *blockdev) void = {
 	bdev.serial = serials[bdev.iface];
 	serials[bdev.iface] += 1;
+
+	bdev.major = switch (bdev.iface) {
+	case interface::SATA =>
+		yield dev::devmajor::SATA;
+	case interface::ATAPI =>
+		yield dev::devmajor::ATAPI;
+	case interface::NVME =>
+		yield dev::devmajor::NVME;
+	case => abort();
+	};
+	bdev.major += bdev.serial: u32;
+	bdev.minor = 0;
+
 	append(blockdevs, bdev);
-	log::kprintfln(BLOCK, "Registered block device {}{} ({} bytes)",
+
+	log::kprintfln(BLOCK, "Registered block device {}{} ({} bytes) {}:{}",
 		iface_str(bdev.iface), bdev.serial,
-		bdev.blocks * bdev.blocksz);
+		bdev.blocks * bdev.blocksz,
+		bdev.major, bdev.minor);
+
 	scanpart(bdev)!;
 };
 
