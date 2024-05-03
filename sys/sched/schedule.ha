@@ -91,4 +91,7 @@ export fn task_unlink(link: *task) void = {
 		next.prev = link.prev;
 	case null => void;
 	};
+
+	link.prev = null;
+	link.next = null;
 };

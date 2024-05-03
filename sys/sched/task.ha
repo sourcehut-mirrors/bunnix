@@ -47,9 +47,11 @@ export fn newtask(vmm: *mman::vmm, user: *opaque) (*task | error) = {
 
 // Configures a task as running and adds it to the scheduler.
 export fn task_activate(task: *task) void = {
-	assert(task.state != task_state::RUNNING);
 	task.state = task_state::RUNNING;
-	task_link(task);
+	// Don't double-link the same task
+	if (task.next == null && task.prev == null) {
+		task_link(task);
+	};
 };
 
 // Configures a task as blocked and removes it from the scheduler.
@@ -60,12 +62,8 @@ export fn task_block(task: *task) void = {
 
 // Frees resouces associated with a task.
 export fn task_finish(which: *task) void = {
-	if (which.state == task_state::RUNNING) {
-		task_unlink(which);
-	};
-
-	// TODO: ensure this task is not active
-
+	assert(current() != which); // TODO?
+	task_unlink(which);
 	mman::munmap(&mman::kernel, which: uintptr, size(task))!;
 };
 

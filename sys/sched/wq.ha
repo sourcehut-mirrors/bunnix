@@ -88,11 +88,15 @@ export fn wq_unlink(head: *wq_head, link: *wq_link) void = {
 	case null =>
 		head.head = null;
 	};
+
 	match (link.next) {
 	case let next: *wq_link =>
 		next.prev = link.prev;
 	case null => void;
 	};
+
+	link.prev = null;
+	link.next = null;
 };
 
 fn default_wake(link: *wq_link, user: nullable *opaque) void = {
