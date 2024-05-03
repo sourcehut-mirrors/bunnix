@@ -25,24 +25,13 @@ export fn main() void = {
 	};
 	fs::finish(iter);
 
-	fmt::println("open /dev/sata0")!;
-	const file = os::open("/dev/sata0")!;
-	fmt::printfln("reading from 0x100000 (start of FAT partition)...")!;
-	io::seek(file, 0x100000, io::whence::SET)!;
-
-	let buf: [128]u8 = [0...];
-	const n = io::read(file, buf)! as size;
-	hex::dump(os::stdout, buf[..n])!;
+	fmt::println("Create /etc/hello")!;
+	const file = os::create("/etc/hello", 0o644)!;
+	fmt::fprintln(file, "Hello world!")!;
 	io::close(file)!;
 
-	fmt::println("open /dev/sata0a")!;
-	const file = os::open("/dev/sata0a")!;
-	fmt::printfln("reading from 0...")!;
-
-	let buf: [128]u8 = [0...];
-	const n = io::read(file, buf)! as size;
-	hex::dump(os::stdout, buf[..n])!;
-	io::close(file)!;
+	fmt::println("mkdir /foobar")!;
+	os::mkdir("/foobar", 0o755)!;
 
 	fmt::println("calling fork...")!;
 	let pid = rt::fork()!;
