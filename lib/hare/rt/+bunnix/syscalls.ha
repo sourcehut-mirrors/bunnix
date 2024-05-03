@@ -115,3 +115,11 @@ export fn open(path: str, flags: int, mode: uint) (int | errno) = {
 export fn getdents(fd: int, buf: *[*]u8, bufsz: size) (size | errno) = {
 	return syswrap(syscall(sys::GETDENTS, fd: i64, buf, bufsz))?: size;
 };
+
+export fn gettime(clock: int, tp: *timespec) (void | errno) = {
+	syswrap(syscall(sys::GETTIME, clock: i64, tp))?;
+};
+
+export fn nanosleep(req: *timespec) (void | errno) = {
+	syswrap(syscall(sys::NANOSLEEP, req))?;
+};

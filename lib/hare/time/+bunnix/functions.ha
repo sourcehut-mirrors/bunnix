@@ -1,9 +1,34 @@
 // SPDX-License-Identifier: MPL-2.0
 // (c) Hare authors <https://harelang.org>
 
+use rt;
+
+// Converts a [[duration]] to an [[rt::timespec]]. This function is
+// non-portable.
+export fn duration_to_timespec(d: duration) rt::timespec = rt::timespec {
+	tv_sec = d / SECOND,
+	tv_nsec = d % SECOND,
+};
+
+// Converts an [[instant]] to an [[rt::timespec]]. This function is
+// non-portable.
+export fn instant_to_timespec(t: instant) rt::timespec = rt::timespec {
+	tv_sec = t.sec,
+	tv_nsec = t.nsec,
+};
+
+// Converts a [[rt::timespec]] to an [[instant]]. This function is non-portable.
+export fn timespec_to_instant(ts: rt::timespec) instant = instant {
+	sec = ts.tv_sec,
+	nsec = ts.tv_nsec,
+};
+
 // Yields the process to the kernel and returns after the requested duration.
 export fn sleep(d: duration) void = {
-	abort(); // TODO Bunnix
+	let req = duration_to_timespec(d);
+
+	// TODO: Handle EINTR
+	rt::nanosleep(&req)!;
 };
 
 // An enumeration of clocks available on this system. Different clocks represent
