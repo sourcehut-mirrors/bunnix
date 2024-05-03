@@ -54,5 +54,13 @@ fn bdev_bwrite(
 	blk_id: u64,
 	blk_cnt: u32,
 ) errno = {
-	abort(); // TODO
+	const bdev = bdev.bdif.p_user: *block::blockdev;
+	const buf = buf: *[*]u8;
+	const bytes = blk_cnt * bdev.blocksz;
+	match (block::write(bdev, blk_id, buf[..bytes])) {
+	case let err: error =>
+		return err: errno;
+	case void =>
+		return errno::NONE;
+	};
 };
