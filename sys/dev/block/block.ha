@@ -1,5 +1,6 @@
 use dev;
 use errors::{error, errno};
+use io;
 use log;
 use regex;
 use strconv;
@@ -101,4 +102,17 @@ export fn open(name: str) (*blockdev | error) = {
 	};
 
 	return &bdev.parts[part];
+};
+
+// Populates /dev with block device nodes
+export fn mknodes(root: *io::inode) (void | error) = {
+	for (let bdev .. blockdevs) {
+		io::inode_mknod(root, name(bdev), 0o600 | io::mode::CHR,
+			dev::mkdev(bdev.major, bdev.minor))!;
+
+		for (let part &.. bdev.parts) {
+			io::inode_mknod(root, name(part), 0o600 | io::mode::CHR,
+				dev::mkdev(part.major, part.minor))!;
+		};
+	};
 };

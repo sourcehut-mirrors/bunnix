@@ -5,7 +5,6 @@ use io;
 use os;
 use rt;
 use strings;
-use time;
 
 export fn main() void = {
 	fmt::println("Hello from userspace!")!;
@@ -15,15 +14,6 @@ export fn main() void = {
 	for (let arg .. os::args) {
 		fmt::println(arg)!;
 	};
-
-	fmt::println("Sleep for 1 sec")!;
-	time::sleep(1 * time::SECOND);
-	fmt::println("Sleep for 1 sec")!;
-	time::sleep(1 * time::SECOND);
-	fmt::println("Sleep for 0.5 sec")!;
-	time::sleep(500 * time::MILLISECOND);
-	fmt::println("Sleep for 0.5 sec")!;
-	time::sleep(500 * time::MILLISECOND);
 
 	fmt::println("Contents of /dev:")!;
 	const iter = os::iter("/dev")!;
@@ -47,12 +37,8 @@ export fn main() void = {
 	fmt::println("calling fork...")!;
 	let pid = rt::fork()!;
 	if (pid == 0) {
-		fmt::println("[child] Sleep for 2 sec")!;
-		time::sleep(2 * time::SECOND);
 		child();
 	} else {
-		fmt::println("[parent] Sleep for 1 sec")!;
-		time::sleep(1 * time::SECOND);
 		fmt::printfln(
 			"[parent] Hello from the parent process! The child has pid {}",
 			pid: int)!;

@@ -4,6 +4,7 @@ use uapi;		// link
 use arch;
 use boot;
 use dev;
+use dev::block;
 use errors::{error, errno, strerror};
 use fs;
 use fs::memfs;
@@ -112,4 +113,5 @@ fn mountdev(root: *fs::vfs) void = {
 		dev::mkdev(dev::devmajor::MEM, dev::devminor_mem::NULL))!;
 	io::inode_mknod(devroot, "zero", 0o666 | io::mode::CHR,
 		dev::mkdev(dev::devmajor::MEM, dev::devminor_mem::ZERO))!;
+	block::mknodes(devroot)!;
 };
