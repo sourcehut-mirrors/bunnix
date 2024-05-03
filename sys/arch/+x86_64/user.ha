@@ -7,10 +7,4 @@ export fn enter_user(ctx: *context) never = {
 	isr_return(ctx: uintptr);
 };
 
-export fn switch_user(ctx: *context) void = {
-	let cpu = getcpu();
-	cpu.task = ctx;
-	set_kernel_stack(&(ctx: *[*]context)[1]);
-};
-
 export fn sysret() never;
