@@ -14,6 +14,7 @@ export fn opendev(major: u32, minor: u32) (*io::file | error) = {
 			};
 		};
 	};
+
 	return errno::NXIO;
 };
 
