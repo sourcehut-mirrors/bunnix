@@ -1,4 +1,5 @@
 use dev::chr;
+use dev::block;
 use io;
 use errors::{error, errno};
 use lib::lwext4;
@@ -21,6 +22,10 @@ fn mkfile(ino: *inode) (*io::file | error) = {
 			const major = (ino.rdev >> 32): u32;
 			const minor = ino.rdev: u32;
 			return chr::open(major, minor);
+		} else if (io::isblockdev(ino.mode)) {
+			const major = (ino.rdev >> 32): u32;
+			const minor = ino.rdev: u32;
+			return block::opendev(major, minor);
 		} else {
 			return errno::NOTSUP;
 		};

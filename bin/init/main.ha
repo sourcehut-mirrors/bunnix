@@ -23,11 +23,21 @@ export fn main() void = {
 			dent.name,
 			if (fs::isdir(dent.ftype)) "/" else "")!;
 	};
+	fs::finish(iter);
 
-	fmt::println("open /bin/echo")!;
-	const file = os::open("/bin/echo")!;
-	fmt::printfln("got fd {}", file: int)!;
-	fmt::printfln("reading first 128 bytes...")!;
+	fmt::println("open /dev/sata0")!;
+	const file = os::open("/dev/sata0")!;
+	fmt::printfln("reading from 0x100000 (start of FAT partition)...")!;
+	io::seek(file, 0x100000, io::whence::SET)!;
+
+	let buf: [128]u8 = [0...];
+	const n = io::read(file, buf)! as size;
+	hex::dump(os::stdout, buf[..n])!;
+	io::close(file)!;
+
+	fmt::println("open /dev/sata0a")!;
+	const file = os::open("/dev/sata0a")!;
+	fmt::printfln("reading from 0...")!;
 
 	let buf: [128]u8 = [0...];
 	const n = io::read(file, buf)! as size;
