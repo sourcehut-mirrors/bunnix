@@ -4,12 +4,20 @@
 use errors;
 use fs;
 use io;
+use path;
 use rt;
 use types::c;
 
 type os_filesystem = struct {
 	fs: fs::fs,
 	getdents_bufsz: size,
+};
+
+// Returns the current working directory. The return value is statically
+// allocated and must be duplicated (see [[strings::dup]]) before calling getcwd
+// again.
+export fn getcwd() str = {
+	return "/"; // TODO
 };
 
 @init fn init_cwd() void = {
@@ -22,6 +30,7 @@ type os_filesystem = struct {
 			remove = &fs_remove,
 			iter = &fs_iter,
 			mkdir = &fs_mkdir,
+			resolve = &fs_resolve,
 			...
 		},
 		getdents_bufsz = 32768, // 32 KiB
@@ -170,6 +179,15 @@ fn iter_finish(iter: *fs::iterator) void = {
 	rt::close(iter.fd)!;
 	free(iter.buf);
 	free(iter);
+};
+
+fn fs_resolve(fs: *fs::fs, path: str) str = {
+	if (path::abs(path)) {
+		return path;
+	};
+	static let buf = path::buffer { ... };
+	path::set(&buf, getcwd(), path)!;
+	return path::string(&buf);
 };
 
 fn errno_to_fs(err: rt::errno) fs::error = {
