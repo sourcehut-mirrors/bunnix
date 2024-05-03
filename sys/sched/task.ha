@@ -47,6 +47,7 @@ export fn newtask(vmm: *mman::vmm, user: *opaque) (*task | error) = {
 
 // Configures a task as running and adds it to the scheduler.
 export fn task_activate(task: *task) void = {
+	assert(task.state != task_state::RUNNING);
 	task.state = task_state::RUNNING;
 	task_link(task);
 };

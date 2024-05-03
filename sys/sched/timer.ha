@@ -26,7 +26,6 @@ fn timer_wake(link: *wq_link, user: nullable *opaque) void = {
 	const timer = link: *timer;
 	if (*now >= timer.deadline) {
 		const task = timer.task as *task;
-		assert(task.state == task_state::WAIT);
 		task_activate(task);
 		wq_unlink(&timers, link);
 	};

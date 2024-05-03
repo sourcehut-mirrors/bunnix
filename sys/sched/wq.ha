@@ -97,6 +97,5 @@ export fn wq_unlink(head: *wq_head, link: *wq_link) void = {
 
 fn default_wake(link: *wq_link, user: nullable *opaque) void = {
 	const task = link.user: *task;
-	assert(task.state == task_state::WAIT);
 	task_activate(task);
 };
