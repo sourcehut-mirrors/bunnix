@@ -43,3 +43,4 @@ export @symbol("ext4_fs_alloc_inode") fn fs_alloc_inode(*fs, *inode_ref, int) er
 export @symbol("ext4_fs_inode_blocks_init") fn fs_inode_blocks_init(*fs, *inode_ref) void;
 export @symbol("ext4_fs_put_inode_ref") fn fs_put_inode_ref(*inode_ref) errno;
 export @symbol("ext4_fs_inode_links_count_inc") fn fs_inode_links_count_inc(*inode_ref) void;
+export @symbol("ext4_fs_free_inode") fn fs_free_inode(*inode_ref) errno;

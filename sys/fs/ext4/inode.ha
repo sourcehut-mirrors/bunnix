@@ -3,6 +3,8 @@ use fs;
 use io;
 use lib::lwext4;
 use types::c;
+// XXX TEMP
+use log;
 
 export type inode = struct {
 	io::inode,
@@ -79,11 +81,47 @@ fn ext4_inode_lookup(ino: *io::inode, name: str) (*io::inode | error) = {
 };
 
 fn ext4_inode_link(
-	ino: *io::inode,
+	parent: *io::inode,
 	child: *io::inode,
 	name: str,
 ) (void | error) = {
-	abort(); // TODO
+	const parent = parent: *inode;
+	const child = child: *inode;
+
+	match (ext4_inode_lookup(parent, name)) {
+	case *io::inode =>
+		return errno::EXIST;
+	case error => void;
+	};
+
+	_ext4_inode_link(parent, child, name)?;
+
+	let r = lwext4::fs_put_inode_ref(&parent.ref);
+	if (r != errno::NONE) {
+		return r;
+	};
+
+	lwext4::fs_inode_links_count_inc(&child.ref);
+	r = lwext4::fs_put_inode_ref(&child.ref);
+	if (r != errno::NONE) {
+		return r;
+	};
+};
+
+fn _ext4_inode_link(
+	parent: *io::inode,
+	child: *io::inode,
+	name: str,
+) (void | error) = {
+	const parent = parent: *inode;
+	const child = child: *inode;
+	let r = lwext4::dir_add_entry(&parent.ref,
+		c::unterminatedstr(name),
+		len(name): u32,
+		&child.ref);
+	if (r != errno::NONE) {
+		return r;
+	};
 };
 
 fn ext4_inode_unlink(ino: *io::inode, name: str) (void | error) = {
@@ -91,11 +129,11 @@ fn ext4_inode_unlink(ino: *io::inode, name: str) (void | error) = {
 };
 
 fn ext4_inode_create(
-	ino: *io::inode,
+	parent: *io::inode,
 	name: str,
 	mode: io::mode,
 ) (*io::inode | error) = {
-	const parent = ino: *inode;
+	const parent = parent: *inode;
 	const fs = &parent.sb.mp.fs;
 	if (fs.read_only) {
 		return errno::ROFS;
@@ -106,41 +144,60 @@ fn ext4_inode_create(
 	if (r != errno::NONE) {
 		return r;
 	};
-	const new_ino = child_ref.index;
 
 	lwext4::fs_inode_blocks_init(fs, &child_ref);
-
-	r = lwext4::dir_add_entry(&parent.ref,
-		c::unterminatedstr(name),
-		len(name): u32,
-		&child_ref);
-	if (r != errno::NONE) {
-		return r;
-	};
-
 	lwext4::inode_set_mode(&fs.sb, child_ref.inode,
 		(io::mode_perm(mode) | io::mode::REG): u32);
-	lwext4::fs_inode_links_count_inc(&child_ref);
 
-	r = lwext4::fs_put_inode_ref(&parent.ref);
-	if (r != errno::NONE) {
-		return r;
+	const child = inode_from_ref(parent.sb, &child_ref);
+	match (ext4_inode_link(parent, child, name)) {
+	case void =>
+		return child;
+	case let err: error =>
+		lwext4::fs_free_inode(&child_ref);
+
+		// Release the inode's block reference
+		child_ref.dirty = true;
+		lwext4::fs_put_inode_ref(&child_ref);
+
+		return err;
 	};
-
-	r = lwext4::fs_put_inode_ref(&child_ref);
-	if (r != errno::NONE) {
-		return r;
-	};
-
-	return inode_from_ref(parent.sb, &child_ref);
 };
 
 fn ext4_inode_mkdir(
-	ino: *io::inode,
+	parent: *io::inode,
 	name: str,
 	mode: io::mode,
 ) (*io::inode | error) = {
-	abort(); // TODO
+	const parent = parent: *inode;
+	const fs = &parent.sb.mp.fs;
+	if (fs.read_only) {
+		return errno::ROFS;
+	};
+
+	let child_ref = lwext4::inode_ref { ... };
+	let r = lwext4::fs_alloc_inode(fs, &child_ref, lwext4::EXT4_DE_DIR);
+	if (r != errno::NONE) {
+		return r;
+	};
+
+	lwext4::fs_inode_blocks_init(fs, &child_ref);
+	lwext4::inode_set_mode(&fs.sb, child_ref.inode,
+		(io::mode_perm(mode) | io::mode::DIR): u32);
+	lwext4::fs_inode_links_count_inc(&child_ref);
+
+	const child = inode_from_ref(parent.sb, &child_ref);
+	const hardlinks = [
+		(".", child),
+		("..", parent),
+	];
+	for (const (name, ino) .. hardlinks) {
+		_ext4_inode_link(child, ino, name)?;
+	};
+
+	ext4_inode_link(parent, child, name)?;
+
+	return child;
 };
 
 fn ext4_inode_rmdir(ino: *io::inode, name: str) (void | error) = {

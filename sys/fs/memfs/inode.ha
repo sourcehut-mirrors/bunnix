@@ -41,13 +41,14 @@ fn dir_findchild(parent: *inode, name: str) nullable *dirent = {
 };
 
 fn mkinode(sb: *superblock, ino: uint, mode: io::mode) inode = {
-	return inode {
+	const ino = inode {
 		impl = &inode_dir_impl,
 		sb = sb,
 		ino = ino,
 		mode = mode,
 		...
 	};
+	return ino;
 };
 
 const inode_dir_impl = io::inode_iface {

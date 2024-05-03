@@ -84,7 +84,8 @@ fn sys_openat(opts: *openat_options) (u64 | error) = {
 
 	// TODO:
 	// - free/unref inode from walk
-	// - validate open flags
+	// - validate/enforce open flags
+	// - O_DIRECTORY
 	const current = proc::current();
 
 	let walkflag = fs::walkflag::NONE;
@@ -111,6 +112,24 @@ fn sys_openat(opts: *openat_options) (u64 | error) = {
 	const file = io::inode_open(inode)?;
 	const fd = proc::installfd(current, file);
 	return fd: u64;
+};
+
+fn sys_mkdirat(opts: *mkdirat_options) (u64 | error) = {
+	validate_user_addr(opts, size(mkdirat_options))?;
+	validate_user_string(opts.path)?;
+	assert(opts.dirfd == AT_FDCWD);
+
+	// TODO:
+	// - free/unref inode from walk
+	// - validate/enforce open flags
+	// - O_DIRECTORY
+	const current = proc::current();
+
+	const walkflag = fs::walkflag::PARENT;
+	let (parent, final) = fs::walk(current.root, opts.path, walkflag)?;
+	io::inode_mkdir(parent, final, opts.mode: io::mode)?;
+
+	return 0u64;
 };
 
 fn sys_getdents(fd: i64, buf: *[*]u8, bufsz: size) (u64 | error) = {

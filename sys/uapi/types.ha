@@ -63,6 +63,12 @@ export type openat_options = struct {
 	mode: uint,
 };
 
+export type mkdirat_options = struct {
+	dirfd: i64,
+	path: str,
+	mode: uint,
+};
+
 export type dirent_meta = struct {
 	ino: uint,
 	off: size,
