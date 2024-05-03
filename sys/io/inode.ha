@@ -76,6 +76,26 @@ export fn inode_lookup(ino: *inode, name: str) (*inode | error) = {
 	};
 };
 
+// Creates a hard link
+export fn inode_link(ino: *inode, child: *inode, name: str) (void | error) = {
+	match (ino.impl.link) {
+	case let func: *fn_inode_link =>
+		return func(ino, child, name);
+	case null =>
+		return errno::NOTSUP;
+	};
+};
+
+// Removes a file
+export fn inode_unlink(ino: *inode, name: str) (void | error) = {
+	match (ino.impl.unlink) {
+	case let func: *fn_inode_unlink =>
+		return func(ino, name);
+	case null =>
+		return errno::NOTSUP;
+	};
+};
+
 // Creates a new file as a child of this inode.
 export fn inode_create(ino: *inode, name: str, mode: mode) (*inode | error) = {
 	match (ino.impl.create) {

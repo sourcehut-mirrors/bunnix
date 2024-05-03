@@ -3,8 +3,6 @@ use fs;
 use io;
 use lib::lwext4;
 use types::c;
-// XXX TEMP
-use log;
 
 export type inode = struct {
 	io::inode,

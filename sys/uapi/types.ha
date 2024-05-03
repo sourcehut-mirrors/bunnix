@@ -69,6 +69,18 @@ export type mkdirat_options = struct {
 	mode: uint,
 };
 
+export type linkat_options = struct {
+	olddirfd: int,
+	oldpath: str,
+	newdirfd: int,
+	newpath: str,
+};
+
+export type unlinkat_options = struct {
+	dirfd: int,
+	path: str,
+};
+
 export type dirent_meta = struct {
 	ino: uint,
 	off: size,

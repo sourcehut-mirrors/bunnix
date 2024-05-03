@@ -132,6 +132,29 @@ fn sys_mkdirat(opts: *mkdirat_options) (u64 | error) = {
 	return 0u64;
 };
 
+fn sys_linkat(opts: *linkat_options) (u64 | error) = {
+	validate_user_addr(opts, size(linkat_options))?;
+	validate_user_string(opts.oldpath)?;
+	validate_user_string(opts.newpath)?;
+	assert(opts.olddirfd == AT_FDCWD);
+	assert(opts.newdirfd == AT_FDCWD);
+
+	abort(); // TODO
+};
+
+fn sys_unlinkat(opts: *unlinkat_options) (u64 | error) = {
+	validate_user_addr(opts, size(unlinkat_options))?;
+	validate_user_string(opts.path)?;
+	assert(opts.dirfd == AT_FDCWD);
+
+	const current = proc::current();
+	const (parent, final) = fs::walk(current.root,
+		opts.path, fs::walkflag::PARENT)?;
+	io::inode_unlink(parent, final)?;
+
+	return 0u64;
+};
+
 fn sys_getdents(fd: i64, buf: *[*]u8, bufsz: size) (u64 | error) = {
 	const file = validate_file(fd)?;
 	validate_user_addr(buf, bufsz, true)?;
