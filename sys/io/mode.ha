@@ -78,12 +78,12 @@ export type mode = enum uint {
 export fn mode_str(m: mode) const str = {
 	static let buf: [10]u8 = [0...];
 	buf = [
-		(if (m & mode::DIR == mode::DIR) 'd'
-			else if (m & mode::FIFO == mode::FIFO) 'p'
-			else if (m & mode::SOCK == mode::SOCK) 's'
-			else if (m & mode::BLK == mode::BLK) 'b'
-			else if (m & mode::LINK == mode::LINK) 'l'
-			else if (m & mode::CHR == mode::CHR) 'c'
+		(if (m & IFMT == mode::DIR) 'd'
+			else if (m & IFMT == mode::FIFO) 'p'
+			else if (m & IFMT == mode::SOCK) 's'
+			else if (m & IFMT == mode::BLK) 'b'
+			else if (m & IFMT == mode::LINK) 'l'
+			else if (m & IFMT == mode::CHR) 'c'
 			else '-'): u8,
 		(if (m & mode::USER_R == mode::USER_R) 'r' else '-'): u8,
 		(if (m & mode::USER_W == mode::USER_W) 'w' else '-'): u8,
