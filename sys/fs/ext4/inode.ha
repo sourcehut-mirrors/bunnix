@@ -124,8 +124,52 @@ fn _ext4_inode_link(
 	};
 };
 
-fn ext4_inode_unlink(ino: *io::inode, name: str) (void | error) = {
-	abort(); // TODO
+fn ext4_inode_unlink(parent: *io::inode, name: str) (void | error) = {
+	const parent = parent: *inode;
+	const child = ext4_inode_lookup(parent, name)?: *inode;
+
+	if (io::isdir(child.mode)) {
+		// unlink(2) cannot remove directories per POSIX
+		return errno::PERM;
+	};
+
+	_ext4_inode_unlink(parent, child, name)?;
+
+	let r = lwext4::fs_put_inode_ref(&parent.ref);
+	if (r != errno::NONE) {
+		return r;
+	};
+
+	r = lwext4::fs_put_inode_ref(&child.ref);
+	if (r != errno::NONE) {
+		return r;
+	};
+};
+
+fn _ext4_inode_unlink(
+	parent: *io::inode,
+	child: *io::inode,
+	name: str,
+) (void | error) = {
+	const parent = parent: *inode;
+	const child = child: *inode;
+
+	let r = lwext4::dir_remove_entry(&parent.ref,
+		c::unterminatedstr(name),
+		len(name): u32);
+	if (r != errno::NONE) {
+		return r;
+	};
+
+	// Decrement link count of parent when removing ..
+	// Note that the actual removal of .. is handled by rmdir
+	if (io::isdir(child.mode)) {
+		lwext4::fs_inode_links_count_dec(&parent.ref);
+		parent.ref.dirty = true;
+	};
+
+	lwext4::fs_inode_links_count_dec(&child.ref);
+	child.ref.dirty = true;
 };
 
 fn ext4_inode_create(

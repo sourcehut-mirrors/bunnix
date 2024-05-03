@@ -29,10 +29,9 @@ export @symbol("ext4_dir_iterator_fini") fn dir_iterator_fini(*dir_iter) errno;
 export @symbol("ext4_dir_find_entry") fn dir_find_entry(*dir_search_result, *inode_ref, const *c::char, u32) errno;
 export @symbol("ext4_dir_destroy_result") fn dir_destroy_result(*inode_ref, *dir_search_result) errno;
 export @symbol("ext4_dir_add_entry") fn dir_add_entry(*inode_ref, const *c::char, u32, *inode_ref) errno;
+export @symbol("ext4_dir_remove_entry") fn dir_remove_entry(*inode_ref, const *c::char, u32) errno;
 
 //void ext4_dir_write_entry(struct ext4_sblock *sb, struct ext4_dir_en *en, uint16_t entry_len, struct ext4_inode_ref *child, const char *name, size_t name_len);
-//int ext4_dir_find_entry(struct ext4_dir_search_result *result, struct ext4_inode_ref *parent, const char *name, uint32_t name_len);
-//int ext4_dir_remove_entry(struct ext4_inode_ref *parent, const char *name, uint32_t name_len);
 //int ext4_dir_try_insert_entry(struct ext4_sblock *sb, struct ext4_inode_ref *inode_ref, struct ext4_block *dst_blk, struct ext4_inode_ref *child, const char *name, uint32_t name_len);
 //int ext4_dir_find_in_block(struct ext4_block *block, struct ext4_sblock *sb, size_t name_len, const char *name, struct ext4_dir_en **res_entry);
 //int ext4_dir_destroy_result(struct ext4_inode_ref *parent, struct ext4_dir_search_result *result);
