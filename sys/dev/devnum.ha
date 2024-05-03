@@ -7,9 +7,11 @@ export type devmajor = enum u32 {
 	MEM,
 	TTY_ALT,
 	TTY,
-	BLOCK,
 	INPUT,
 	FB,
+	SATA,
+	ATAPI,
+	NVME,
 };
 
 // Device minor number assignments for [[devmajor::MEM]].
