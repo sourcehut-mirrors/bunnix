@@ -66,7 +66,7 @@ export fn exec(
 
 	// Clear out old threads
 	for (len(proc.tasks) > 1) {
-		sched::task_unlink(proc.tasks[1]);
+		sched::task_finish(proc.tasks[1]);
 		delete(proc.tasks[1]);
 	};
 

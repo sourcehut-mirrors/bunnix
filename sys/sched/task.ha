@@ -42,12 +42,30 @@ export fn newtask(vmm: *mman::vmm, user: *opaque) (*task | error) = {
 	task.state = task_state::STARTUP;
 	task.vmm = vmm;
 	arch_init(&task.ctx);
-	task_link(task);
 	return task;
 };
 
+// Configures a task as running and adds it to the scheduler.
 export fn task_activate(task: *task) void = {
 	task.state = task_state::RUNNING;
+	task_link(task);
+};
+
+// Configures a task as blocked and removes it from the scheduler.
+export fn task_block(task: *task) void = {
+	task.state = task_state::WAIT;
+	task_unlink(task);
+};
+
+// Frees resouces associated with a task.
+export fn task_finish(which: *task) void = {
+	if (which.state == task_state::RUNNING) {
+		task_unlink(which);
+	};
+
+	// TODO: ensure this task is not active
+
+	mman::munmap(&mman::kernel, which: uintptr, size(task))!;
 };
 
 fn task_fromctx(ctx: *arch::context) *task = {
@@ -59,6 +77,9 @@ export fn current() nullable *task = {
 	const cpu = arch::getcpu();
 	match (cpu.task) {
 	case let ctx: *arch::context =>
+		if (ctx == idle) {
+			return null;
+		};
 		return task_fromctx(ctx);
 	case null =>
 		return null;

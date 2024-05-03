@@ -24,13 +24,15 @@ export fn main() void = {
 			if (fs::isdir(dent.ftype)) "/" else "")!;
 	};
 
-	let buf: [4096]u8 = [0...];
-	fmt::println("open /dev/null")!;
-	const dnull = os::open("/dev/null")!;
-	fmt::print("read: ")!;
-	const is_eof = io::read(dnull, buf)! is io::EOF;
-	assert(is_eof);
-	fmt::println("EOF")!;
+	fmt::println("open /bin/echo")!;
+	const file = os::open("/bin/echo")!;
+	fmt::printfln("got fd {}", file: int)!;
+	fmt::printfln("reading first 128 bytes...")!;
+
+	let buf: [128]u8 = [0...];
+	const n = io::read(file, buf)! as size;
+	hex::dump(os::stdout, buf[..n])!;
+	io::close(file)!;
 
 	fmt::println("calling fork...")!;
 	let pid = rt::fork()!;
@@ -51,16 +53,9 @@ fn child() void = {
 	fmt::printfln("[child] My parent's pid is {}", rt::getppid(): int)!;
 
 	fmt::println("[child] open /bin/echo to test userspace filesystem access")!;
-	const file = os::open("/bin/echo")!;
-	fmt::printfln("[child] got fd {}", file: int)!;
-	fmt::printfln("[child] reading first 128 bytes...")!;
-
-	let buf: [128]u8 = [0...];
-	const n = io::read(file, buf)! as size;
-	hex::dump(os::stdout, buf[..n])!;
 
 	fmt::println("[child] execve(2) into /bin/echo")!;
-	rt::fexecve(file, [
+	rt::execve("/bin/echo", [
 		"/bin/echo",
 		"Hello",
 		"from",

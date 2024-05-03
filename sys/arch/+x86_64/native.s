@@ -7,6 +7,9 @@ arch.pause:
 
 .global arch.idle
 arch.idle:
+	movq $_kernel_stack_top, %rsp
+	sti
+_idle:
 	hlt
 	jmp arch.idle
 

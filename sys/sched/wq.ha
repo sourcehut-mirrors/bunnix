@@ -34,7 +34,8 @@ export fn wait(
 		user = task;
 	};
 
-	task.state = task_state::WAIT;
+	task_block(task);
+
 	link.func = func;
 	link.user = user;
 
@@ -59,5 +60,5 @@ export fn wake(head: *wq_head) void = {
 fn default_wake(link: *wq_link) void = {
 	const task = link.user: *task;
 	assert(task.state == task_state::WAIT);
-	task.state = task_state::RUNNING;
+	task_activate(task);
 };
