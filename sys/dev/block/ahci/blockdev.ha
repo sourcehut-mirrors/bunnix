@@ -27,6 +27,10 @@ fn bdev_readsectors(
 		defer nread += amt;
 		defer lba += amt / SECTORSZ;
 
+		if (amt < buffer.prdt.1) {
+			buffer.prdt.1 = amt;
+		};
+
 		let cmd = prep_read_dma_ext(bdev, lba, buffer.prdt)?;
 		port_wait(bdev);
 		port_submitcmd(bdev, cmd);
@@ -49,11 +53,23 @@ fn bdev_writesectors(
 	defer releasebuffer(hba.pool, &buffer);
 
 	const nbyte = len(buf);
-	assert(nbyte < buffer.prdt.1); // TODO
-	buffer.data[..nbyte] = buf[..nbyte];
+	for (let nwrite = 0z; nwrite < len(buf)) {
+		let amt = len(buf) - nwrite;
+		if (amt > buffer.prdt.1) {
+			amt = buffer.prdt.1;
+		};
+		defer nwrite += amt;
+		defer lba += amt / SECTORSZ;
 
-	let cmd = prep_write_dma_ext(bdev, lba, buffer.prdt)?;
-	port_wait(bdev);
-	port_submitcmd(bdev, cmd);
-	port_waitcmd(bdev, cmd)?;
+		if (amt < buffer.prdt.1) {
+			buffer.prdt.1 = amt;
+		};
+
+		buffer.data[..amt] = buf[nwrite..nwrite+amt];
+
+		let cmd = prep_write_dma_ext(bdev, lba, buffer.prdt)?;
+		port_wait(bdev);
+		port_submitcmd(bdev, cmd);
+		port_waitcmd(bdev, cmd)?;
+	};
 };
