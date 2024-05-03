@@ -19,6 +19,7 @@ type os_filesystem = struct {
 			openfile = &fs_open_file,
 			create = &fs_create,
 			createfile = &fs_create_file,
+			remove = &fs_remove,
 			iter = &fs_iter,
 			mkdir = &fs_mkdir,
 			...
@@ -88,6 +89,15 @@ fn fs_create(
 	flags: fs::flag,
 ) (io::handle | fs::error) = {
 	return fs_create_file(fs, path, mode, flags)?;
+};
+
+fn fs_remove(fs: *fs::fs, path: str) (void | fs::error) = {
+	let fs = fs: *os_filesystem;
+	match (rt::unlink(path)) {
+	case let err: rt::errno =>
+		return errno_to_fs(err);
+	case void => void;
+	};
 };
 
 fn fs_mkdir(

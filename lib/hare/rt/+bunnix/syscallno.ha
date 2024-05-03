@@ -8,6 +8,9 @@ export type sys = enum u64 {
 	CLOSE,
 	OPENAT,
 	MKDIRAT,
+	LINKAT,
+	UNLINKAT,
+	GETDENTS,
 	GETPID,
 	KILL,
 	EXIT,
@@ -17,7 +20,6 @@ export type sys = enum u64 {
 	FORK,
 	EXECVE,
 	GETPPID,
-	GETDENTS,
 	GETTIME,
 	NANOSLEEP,
 };

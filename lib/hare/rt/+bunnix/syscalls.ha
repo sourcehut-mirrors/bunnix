@@ -60,6 +60,31 @@ export fn mkdir(path: str, mode: uint) (void | errno) = {
 	syswrap(syscall(sys::MKDIRAT, &opts))?;
 };
 
+export fn link(
+	oldpath: str,
+	newpath: str,
+) (void | errno) = {
+	const opts = linkat_options {
+		olddirfd = AT_FDCWD,
+		oldpath = oldpath,
+		newdirfd = AT_FDCWD,
+		newpath = newpath,
+	};
+	syswrap(syscall(sys::LINKAT, &opts))?;
+};
+
+export fn unlink(path: str) (void | errno) = {
+	const opts = unlinkat_options {
+		dirfd = AT_FDCWD,
+		path = path,
+	};
+	syswrap(syscall(sys::UNLINKAT, &opts))?;
+};
+
+export fn getdents(fd: int, buf: *[*]u8, bufsz: size) (size | errno) = {
+	return syswrap(syscall(sys::GETDENTS, fd: i64, buf, bufsz))?: size;
+};
+
 export fn getpid() pid_t = {
 	return syswrap(syscall(sys::GETPID))!: pid_t;
 };
@@ -119,10 +144,6 @@ export fn fexecve(fd: int, args: []str, env: []str) (void | errno) = {
 		environ = env,
 	};
 	return syswrap(syscall(sys::EXECVE, &opts))?: pid_t;
-};
-
-export fn getdents(fd: int, buf: *[*]u8, bufsz: size) (size | errno) = {
-	return syswrap(syscall(sys::GETDENTS, fd: i64, buf, bufsz))?: size;
 };
 
 export fn gettime(clock: int, tp: *timespec) (void | errno) = {
