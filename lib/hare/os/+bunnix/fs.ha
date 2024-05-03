@@ -20,6 +20,7 @@ type os_filesystem = struct {
 			create = &fs_create,
 			createfile = &fs_create_file,
 			iter = &fs_iter,
+			mkdir = &fs_mkdir,
 			...
 		},
 		getdents_bufsz = 32768, // 32 KiB
@@ -87,6 +88,19 @@ fn fs_create(
 	flags: fs::flag,
 ) (io::handle | fs::error) = {
 	return fs_create_file(fs, path, mode, flags)?;
+};
+
+fn fs_mkdir(
+	fs: *fs::fs,
+	path: str,
+	mode: fs::mode,
+) (void | fs::error) = {
+	match (rt::mkdir(path, mode)) {
+	case let err: rt::errno =>
+		return errno_to_fs(err);
+	case void =>
+		return;
+	};
 };
 
 fn fs_iter(fs: *fs::fs, path: str) (*fs::iterator | fs::error) = {

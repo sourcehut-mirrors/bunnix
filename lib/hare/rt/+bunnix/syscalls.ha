@@ -41,6 +41,25 @@ export fn close(fd: int) (void | errno) = {
 	syswrap(syscall(sys::CLOSE, fd: i64))?;
 };
 
+export fn open(path: str, flags: int, mode: uint) (int | errno) = {
+	const opts = openat_options {
+		dirfd = AT_FDCWD,
+		path = path,
+		flags = flags,
+		mode = mode,
+	};
+	return syswrap(syscall(sys::OPENAT, &opts))?: int;
+};
+
+export fn mkdir(path: str, mode: uint) (void | errno) = {
+	const opts = mkdirat_options {
+		dirfd = AT_FDCWD,
+		path = path,
+		mode = mode,
+	};
+	syswrap(syscall(sys::MKDIRAT, &opts))?;
+};
+
 export fn getpid() pid_t = {
 	return syswrap(syscall(sys::GETPID))!: pid_t;
 };
@@ -100,16 +119,6 @@ export fn fexecve(fd: int, args: []str, env: []str) (void | errno) = {
 		environ = env,
 	};
 	return syswrap(syscall(sys::EXECVE, &opts))?: pid_t;
-};
-
-export fn open(path: str, flags: int, mode: uint) (int | errno) = {
-	const opts = openat_options {
-		dirfd = AT_FDCWD,
-		path = path,
-		flags = flags,
-		mode = mode,
-	};
-	return syswrap(syscall(sys::OPENAT, &opts))?: int;
 };
 
 export fn getdents(fd: int, buf: *[*]u8, bufsz: size) (size | errno) = {
