@@ -44,8 +44,15 @@ export fn new_proc(root: *fs::vfs, parent: nullable *proc) (*proc | error) = {
 	return proc;
 };
 
-// Appends a file descriptor to this process's file table.
-export fn appendfd(proc: *proc, file: *io::file) int = {
+// Installs the given [[file]] in the process's file descriptor table, returning
+// the assigned file descriptor number.
+export fn installfd(proc: *proc, file: *io::file) int = {
+	for (let i = 0z; i < len(proc.fds); i += 1) {
+		if (proc.fds[i] == null) {
+			proc.fds[i] = file;
+			return i: int;
+		};
+	};
 	append(proc.fds, file);
 	return (len(proc.fds) - 1): int;
 };

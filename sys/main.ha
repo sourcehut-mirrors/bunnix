@@ -79,9 +79,9 @@ export fn main(ctx: *boot::context) void = {
 	const (inode, _) = fs::walk(&root, init)!;
 
 	// TODO: Implement console device properly, i.e. /dev/cons
-	proc::appendfd(proc, log::cons);	// stdin
-	proc::appendfd(proc, log::cons);	// stdout
-	proc::appendfd(proc, log::cons);	// stderr
+	proc::installfd(proc, log::cons);	// stdin
+	proc::installfd(proc, log::cons);	// stdout
+	proc::installfd(proc, log::cons);	// stderr
 
 	const file = io::inode_open(inode)!;
 

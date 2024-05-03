@@ -37,6 +37,7 @@ export fn main() void = {
 			dent.name,
 			if (fs::isdir(dent.ftype)) "/" else "")!;
 	};
+	fs::finish(iter);
 
 	fmt::println("calling fork...")!;
 	let pid = rt::fork()!;

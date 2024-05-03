@@ -109,7 +109,7 @@ fn sys_openat(opts: *openat_options) (u64 | error) = {
 	};
 
 	const file = io::inode_open(inode)?;
-	const fd = proc::appendfd(current, file);
+	const fd = proc::installfd(current, file);
 	return fd: u64;
 };
 
