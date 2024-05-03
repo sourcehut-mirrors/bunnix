@@ -206,14 +206,14 @@ export def EXT4_INODE_ROOT_INDEX: uint = 2;
 
 export def EXT4_DIRECTORY_FILENAME_LEN: uint = 255;
 
-export def EXT4_DE_UNKNOWN: u8 = 0;
-export def EXT4_DE_REG_FILE: u8 = 1;
-export def EXT4_DE_DIR: u8 = 2;
-export def EXT4_DE_CHRDEV: u8 = 3;
-export def EXT4_DE_BLKDEV: u8 = 4;
-export def EXT4_DE_FIFO: u8 = 5;
-export def EXT4_DE_SOCK: u8 = 6;
-export def EXT4_DE_SYMLIN: u8 = 7;
+export def EXT4_DE_UNKNOWN = 0;
+export def EXT4_DE_REG_FILE = 1;
+export def EXT4_DE_DIR = 2;
+export def EXT4_DE_CHRDEV = 3;
+export def EXT4_DE_BLKDEV = 4;
+export def EXT4_DE_FIFO = 5;
+export def EXT4_DE_SOCK = 6;
+export def EXT4_DE_SYMLINK = 7;
 
 export type dir_en_internal = union {
 	name_length_high: u8,

@@ -2,8 +2,8 @@
 
 use errors::{error, errno};
 
-export @symbol("ext4_inode_get_mode") fn inode_get_mode(*sblock, *inode) u32;
-export @symbol("ext4_inode_set_mode") fn inode_set_mode(*sblock, *inode, u32) void;
+export @symbol("ext4_inode_get_mode") fn inode_get_mode(*sblock, nullable *inode) u32;
+export @symbol("ext4_inode_set_mode") fn inode_set_mode(*sblock, nullable *inode, u32) void;
 export @symbol("ext4_inode_get_uid") fn inode_get_uid(*inode) u32;
 export @symbol("ext4_inode_set_uid") fn inode_set_uid(*inode, u32) void;
 export @symbol("ext4_inode_get_gid") fn inode_get_gid(*inode) u32;
