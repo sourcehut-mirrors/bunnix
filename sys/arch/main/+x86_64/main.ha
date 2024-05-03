@@ -51,5 +51,6 @@ export fn main(ctx: *boot::context) never = {
 };
 
 fn handle_pit_irq(user: nullable *opaque) void = {
+	sched::timer_process();
 	sched::schedule();
 };

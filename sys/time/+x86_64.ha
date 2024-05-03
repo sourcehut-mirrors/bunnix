@@ -35,6 +35,7 @@ export fn now(clock: clock) instant = {
 };
 
 // Returns after the requested duration.
+// TODO: This is obsolete, see sched::sleep
 export fn sleep(d: duration) void = {
 	const deadline = add(now(clock::MONOTONIC), d);
 	for (true) {

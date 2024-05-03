@@ -38,6 +38,8 @@ export type sys = enum u64 {
 	GETPPID,
 	OPENAT,
 	GETDENTS,
+	GETTIME,
+	NANOSLEEP,
 };
 
 export type syscall_handler = fn(u64, u64, u64, u64, u64) (u64 | error);
@@ -58,4 +60,6 @@ let systab: [_]*opaque = [
 	&sys_getppid: *syscall_handler,
 	&sys_openat: *syscall_handler,
 	&sys_getdents: *syscall_handler,
+	&sys_gettime: *syscall_handler,
+	&sys_nanosleep: *syscall_handler,
 ];

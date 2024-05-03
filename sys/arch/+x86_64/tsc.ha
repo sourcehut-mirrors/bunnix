@@ -17,3 +17,13 @@ export fn init_tsc() void = {
 	measuretsc(&timings);
 	tsc_rate = (timings.stop - timings.start) * 100;
 };
+
+// Returns the current value of a monotonically increasing timer.
+export fn gettime() u64 = {
+	return rdtsc();
+};
+
+// Returns the rate of the [getticks]] timer in Hz.
+export fn getrate() u64 = {
+	return tsc_rate;
+};
