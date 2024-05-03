@@ -86,7 +86,28 @@ fn sys_openat(opts: *openat_options) (u64 | error) = {
 	// - free/unref inode from walk
 	// - validate open flags
 	const current = proc::current();
-	const (inode, _) = fs::walk(current.root, opts.path)?;
+
+	let walkflag = fs::walkflag::NONE;
+	let oflag = opts.flags: io::flag;
+	if (oflag & io::flag::CREATE != 0) {
+		walkflag |= fs::walkflag::PARENT;
+	};
+
+	let (inode, final) = fs::walk(current.root, opts.path, walkflag)?;
+	if (oflag & io::flag::CREATE != 0) {
+		inode = match (io::inode_lookup(inode, final)) {
+		case let err: error =>
+			if (err: errno != errno::NOENT) {
+				return err;
+			};
+
+			const mode = opts.mode: io::mode;
+			yield io::inode_create(inode, final, mode)?;
+		case let ino: *io::inode =>
+			yield ino;
+		};
+	};
+
 	const file = io::inode_open(inode)?;
 	const fd = proc::appendfd(current, file);
 	return fd: u64;
