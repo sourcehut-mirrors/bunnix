@@ -236,7 +236,8 @@ fn port_waitcmd(port: *ahci_port, cmd: *hba_cmd_table) (void | error) = {
 		/ size(hba_cmd_table)): u32;
 	let link = sched::wq_link { ... };
 	for (port.port.ci & (1 << slot) != 0) {
-		sched::wait(&port.wq, &link);
+		//sched::wait(&port.wq, &link); // TODO: idle task
+		arch::pause();
 	};
 
 	const _is = port.port._is;
