@@ -55,6 +55,7 @@ const inode_dir_impl = io::inode_iface {
 	lookup = &inode_lookup,
 	create = &inode_create,
 	mkdir = &inode_mkdir,
+	mknod = &inode_mknod,
 	...
 };
 
@@ -106,4 +107,15 @@ fn inode_mkdir(
 	mode: io::mode,
 ) (*io::inode | error) = {
 	return inode_mkchild(ino, name, mode | io::mode::DIR);
+};
+
+fn inode_mknod(
+	ino: *io::inode,
+	name: str,
+	mode: io::mode,
+	rdev: u64,
+) (*io::inode | error) = {
+	let child = inode_mkchild(ino, name, mode)?;
+	child.rdev = rdev;
+	return child;
 };

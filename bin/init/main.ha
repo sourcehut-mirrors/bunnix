@@ -15,8 +15,8 @@ export fn main() void = {
 		fmt::println(arg)!;
 	};
 
-	fmt::println("Contents of /:")!;
-	const iter = os::iter("/")!;
+	fmt::println("Contents of /dev:")!;
+	const iter = os::iter("/dev")!;
 	for (let dent => fs::next(iter)!) {
 		fmt::printfln("{}\t{}{}",
 			fs::mode_str(dent.ftype),
@@ -24,20 +24,13 @@ export fn main() void = {
 			if (fs::isdir(dent.ftype)) "/" else "")!;
 	};
 
-	fmt::println("Creating /example.txt")!;
-	const file = os::create("/example.txt", 0o644)!;
-	io::writeall(file, strings::toutf8("Hello world!\n"))!;
-	io::close(file)!;
-
-	fmt::println("Contents of /:")!;
-	const iter = os::iter("/")!;
-	for (let dent => fs::next(iter)!) {
-		fmt::printfln("{}\t{}{}",
-			fs::mode_str(dent.ftype),
-			dent.name,
-			if (fs::isdir(dent.ftype)) "/" else "")!;
-	};
-	fs::finish(iter);
+	let buf: [4096]u8 = [0...];
+	fmt::println("open /dev/null")!;
+	const dnull = os::open("/dev/null")!;
+	fmt::print("read: ")!;
+	const is_eof = io::read(dnull, buf)! is io::EOF;
+	assert(is_eof);
+	fmt::println("EOF")!;
 
 	fmt::println("calling fork...")!;
 	let pid = rt::fork()!;

@@ -14,6 +14,7 @@ export type superblock_iface = struct {
 	get_root: *sb_get_root_func,
 };
 
+// Returns the root inode of this [[superblock]].
 export fn superblock_get_root(sb: *superblock) *io::inode = {
 	return sb.impl.get_root(sb);
 };

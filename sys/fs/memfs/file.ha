@@ -1,5 +1,7 @@
+use dev::chr;
 use io;
 use errors::{error, errno};
+use log;
 
 export type file = struct {
 	io::file,
@@ -12,6 +14,10 @@ fn mkfile(ino: *inode) (*io::file | error) = {
 			yield &file_impl_reg;
 		} else if (io::isdir(ino.mode)) {
 			yield &file_impl_dir;
+		} else if (io::ischdev(ino.mode)) {
+			const major = (ino.rdev >> 32): u32;
+			const minor = ino.rdev: u32;
+			return chr::open(major, minor);
 		} else {
 			return errno::NOTSUP;
 		};

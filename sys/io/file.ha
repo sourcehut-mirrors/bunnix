@@ -8,6 +8,7 @@ use errors::{error, errno};
 // I/O functionality in userspace.
 export type file = struct {
 	vtable: *vtable,
+	// XXX: Maybe inode reference should be moved to the file descriptor?
 	inode: nullable *inode,
 	// Note: refs is zero when there is one reference held, it will be
 	// finished when unrefed

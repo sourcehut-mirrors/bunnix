@@ -17,6 +17,6 @@ fn dir_readdir(fd: *io::file, dent: *io::dirent) (void | io::EOF | error) = {
 	const ent = &inode.entries[fd.pos];
 	dent.name = ent.name;
 	dent.ino = ent.inode.ino;
-	dent.mode = ent.inode.mode;
+	dent.mode = io::mode_type(ent.inode.mode);
 	fd.pos += 1;
 };

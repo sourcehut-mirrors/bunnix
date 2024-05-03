@@ -36,6 +36,14 @@ export type fn_inode_mkdir = fn(ino: *inode, name: str, mode: mode) (*inode | er
 // Removes a directory from this inode.
 export type fn_inode_rmdir = fn(ino: *inode, name: str) (void | error);
 
+// Makes a special file in this inode.
+export type fn_inode_mknod = fn(
+	ino: *inode,
+	name: str,
+	mode: mode,
+	dev: u64,
+) (*inode | error);
+
 // inode implementation.
 export type inode_iface = struct {
 	open: nullable *fn_inode_open,
@@ -45,6 +53,7 @@ export type inode_iface = struct {
 	create: nullable *fn_inode_create,
 	mkdir: nullable *fn_inode_mkdir,
 	rmdir: nullable *fn_inode_rmdir,
+	mknod: nullable *fn_inode_mknod,
 };
 
 // Opens an inode as a file.
@@ -82,6 +91,21 @@ export fn inode_mkdir(ino: *inode, name: str, mode: mode) (*inode | error) = {
 	match (ino.impl.mkdir) {
 	case let func: *fn_inode_mkdir =>
 		return func(ino, name, mode);
+	case null =>
+		return errno::NOTSUP;
+	};
+};
+
+// Makes a special file in this inode.
+export fn inode_mknod(
+	ino: *inode,
+	name: str,
+	mode: mode,
+	rdev: u64,
+) (*inode | error) = {
+	match (ino.impl.mknod) {
+	case let func: *fn_inode_mknod =>
+		return func(ino, name, mode, rdev);
 	case null =>
 		return errno::NOTSUP;
 	};

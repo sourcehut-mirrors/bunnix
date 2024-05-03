@@ -6,6 +6,7 @@ use boot;
 use dev;
 use errors::{error, errno, strerror};
 use fs;
+use fs::memfs;
 use io;
 use log;
 use mman;
@@ -73,6 +74,9 @@ export fn main(ctx: *boot::context) void = {
 	};
 	fs::mount_root(&root, fs);
 
+	// Populate /dev
+	mountdev(&root);
+
 	// Start /bin/init
 	log::kprintfln(KERN, "entering userspace: exec {}", init);
 	const proc = proc::new_proc(&root, null)!;
@@ -94,4 +98,18 @@ export fn main(ctx: *boot::context) void = {
 	};
 
 	abort(); // unreachable
+};
+
+fn mountdev(root: *fs::vfs) void = {
+	// TODO: We should probably have a devtmpfs thing and deal with
+	// hotplugging and such
+	const dev = memfs::new();
+	fs::mount_fs(root, dev, "/dev")!;
+	const devroot = fs::superblock_get_root(dev);
+	io::inode_mknod(devroot, "full", 0o666 | io::mode::CHR,
+		dev::mkdev(dev::devmajor::MEM, dev::devminor_mem::NOSPC))!;
+	io::inode_mknod(devroot, "null", 0o666 | io::mode::CHR,
+		dev::mkdev(dev::devmajor::MEM, dev::devminor_mem::NULL))!;
+	io::inode_mknod(devroot, "zero", 0o666 | io::mode::CHR,
+		dev::mkdev(dev::devmajor::MEM, dev::devminor_mem::ZERO))!;
 };
