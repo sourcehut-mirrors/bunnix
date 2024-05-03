@@ -65,7 +65,7 @@ fn dir_readdir(fd: *io::file, dent: *io::dirent) (void | io::EOF | error) = {
 		yield io::mode::FIFO;
 	case lwext4::EXT4_DE_SOCK =>
 		yield io::mode::SOCK;
-	case lwext4::EXT4_DE_SYMLIN =>
+	case lwext4::EXT4_DE_SYMLINK =>
 		yield io::mode::LINK;
 	case => abort();
 	};

@@ -63,7 +63,7 @@ fn open(opts: *fs::fs_opts) (*fs::superblock | error) = {
 	let fs = &sb.mp.fs;
 	let bc = &sb.mp.bc;
 
-	r = lwext4::fs_init(fs, lwbdev, true);
+	r = lwext4::fs_init(fs, lwbdev, opts.readonly);
 	if (r != errno::NONE) {
 		return r: error;
 	};
@@ -90,6 +90,7 @@ fn open(opts: *fs::fs_opts) (*fs::superblock | error) = {
 		return r: error;
 	};
 
+	lwbdev.fs = fs;
 	return sb;
 };
 
@@ -100,4 +101,13 @@ const ext4_impl = fs::superblock_iface {
 fn ext4_get_root(sb: *fs::superblock) *io::inode = {
 	const sb = sb: *superblock;
 	return get_inode(sb, lwext4::EXT4_INODE_ROOT_INDEX)!;
+};
+
+fn flush(sb: *superblock) (void | error) = {
+	// TODO: Should we only do this periodically?
+	log::kprintln(EXT4, "Flush filesystem to disk");
+	let r = lwext4::block_cache_flush(sb.mp.fs.bdev);
+	if (r != errno::NONE) {
+		return r;
+	};
 };
