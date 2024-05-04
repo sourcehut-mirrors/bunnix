@@ -92,6 +92,7 @@ export fn exit(status: int) never = {
 		arch::panic("init exited", &proc.tasks[0].ctx);
 	};
 
+	assert(!proc.exited);
 	proc.status = (status & 0x7f) << 8;
 	proc.exited = true;
 

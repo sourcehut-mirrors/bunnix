@@ -66,7 +66,9 @@ fn task_next() nullable *task = {
 
 // Adds a task to the scheduler.
 export fn task_link(link: *task) void = {
-	link.prev = null;
+	// Don't double link tasks
+	assert(link.prev == null && link.next == null);
+
 	link.next = head;
 
 	match (head) {
@@ -78,13 +80,13 @@ export fn task_link(link: *task) void = {
 	};
 };
 
-// Removes a task from the scheduler and frees state associated with it.
+// Removes a task from the scheduler.
 export fn task_unlink(link: *task) void = {
 	match (link.prev) {
 	case let prev: *task =>
 		prev.next = link.next;
 	case null =>
-		head = null;
+		head = link.next;
 	};
 
 	match (link.next) {
