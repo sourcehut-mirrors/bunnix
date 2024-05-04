@@ -13,6 +13,7 @@ export type proc = struct {
 	root: *fs::vfs,
 	fds: []filedesc,
 	creds: creds,
+	sig: sigproc,
 
 	// TODO: Multithreading
 	tasks: []*sched::task,

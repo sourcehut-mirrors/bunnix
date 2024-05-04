@@ -70,6 +70,8 @@ export fn exec(
 		delete(proc.tasks[1]);
 	};
 
+	proc.sig = sigproc { ... };
+
 	let task = proc.tasks[0];
 	arch::context_set_sp(&task.ctx, STACK_TOP);
 	arch::context_set_ip(&task.ctx, ip);
