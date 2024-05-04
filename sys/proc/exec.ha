@@ -136,6 +136,7 @@ fn populate_argv(proc: *proc, args: []str, env: []str) (void | error) = {
 	};
 
 	vector[vi] = 0;
+	vi += 1;
 
 	let auxv = &vector[vi]: *[*]elf::auxv64;
 	auxv[0] = elf::auxv64 {
