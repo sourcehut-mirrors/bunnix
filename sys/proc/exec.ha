@@ -5,6 +5,7 @@ use mman;
 use io;
 use sched;
 use strings;
+use log;
 
 // Loads an image into a process and executes it.
 //
@@ -23,9 +24,9 @@ export fn exec(
 	// Stash these in the kernel heap before switching vmms
 	// XXX: This is probably avoidable if we were clever
 	const args = strings::dupall(args);
-	defer free(args);
+	defer strings::freeall(args);
 	const env = strings::dupall(env);
-	defer free(env);
+	defer strings::freeall(env);
 
 	let old_vmm = proc.vmm;
 	match (mman::vmm_init(&proc.vmm)) {
