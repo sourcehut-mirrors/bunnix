@@ -32,3 +32,4 @@
 #define ETIMEDOUT 29
 #define EINTR 30
 #define EAGAIN 31
+#define ECHILD 32

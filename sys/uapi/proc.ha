@@ -3,6 +3,7 @@ use errors::{error, errno};
 use fs;
 use io;
 use proc;
+use sched;
 
 fn sys_getpid() (u64 | error) = {
 	return proc::current().creds.pid: u64;
@@ -51,4 +52,12 @@ fn sys_execve(opts: *exec_options) (u64 | error) = {
 	proc::exec(current, file, opts.args, opts.environ)?;
 
 	abort(); // Unreachable
+};
+
+fn sys_waitpid(pid: i64, wstatus: nullable *int, options: i64) (u64 | error) = {
+	if (wstatus != null) {
+		validate_user_addr(wstatus, size(int))?;
+	};
+
+	return proc::waitpid(pid: int, wstatus, options: int)?: u64;
 };

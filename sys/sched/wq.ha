@@ -1,4 +1,6 @@
 use arch;
+// XXX TEMP
+use log;
 
 export type wq_func = fn(link: *wq_link, user: nullable *opaque) void;
 

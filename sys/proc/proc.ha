@@ -14,8 +14,11 @@ export type proc = struct {
 	fds: []filedesc,
 	creds: creds,
 	sig: sigproc,
+
 	status: int,
+	exited: bool,
 	wq: sched::wq_head,
+	children: []*proc,
 
 	// TODO: Multithreading
 	tasks: []*sched::task,
@@ -28,29 +31,58 @@ export fn new_proc(root: *fs::vfs, parent: nullable *proc) (*proc | error) = {
 	defer nextpid += 1;
 
 	let creds = creds { ... };
-	match (parent) {
-	case let proc: *proc =>
-		creds = proc.creds;
-		creds.ppid = creds.pid;
-	case null => void;
-	};
 	creds.pid = nextpid;
 
-	let proc = alloc(proc {
+	let new_proc = alloc(proc {
 		root = root,
 		creds = creds,
 		...
 	});
-	mman::vmm_init(&proc.vmm)?;
+	mman::vmm_init(&new_proc.vmm)?;
 
-	append(procs, proc);
-	return proc;
+	match (parent) {
+	case let proc: *proc =>
+		new_proc.creds = proc.creds;
+		new_proc.creds.pid = nextpid;
+		new_proc.creds.ppid = proc.creds.pid;
+		append(proc.children, new_proc);
+	case null => void;
+	};
+
+	append(procs, new_proc);
+	return new_proc;
 };
 
 // Returns the currently active process.
 export fn current() *proc = {
 	const current = sched::current() as *sched::task;
 	return current.user: *proc;
+};
+
+// Returns a process by its pid.
+export fn getproc(pid: int) (*proc | error) = {
+	// TODO: Binary search
+	for (let proc .. procs) {
+		if (proc.creds.pid == pid) {
+			return proc;
+		};
+	};
+	return errno::CHILD;
+};
+
+fn cleanup(proc: *proc) void = {
+	for (let t .. proc.tasks) {
+		sched::task_block(t);
+	};
+
+	for (let fd .. proc.fds) {
+		match (fd.file) {
+		case let f: *io::file =>
+			io::unref(f);
+		case null => void;
+		};
+	};
+	free(proc.fds);
 };
 
 // Exits the calling process.
@@ -60,15 +92,36 @@ export fn exit(status: int) never = {
 		arch::panic("init exited", &proc.tasks[0].ctx);
 	};
 
-	proc.status = status << 8;
+	proc.status = (status & 0x7f) << 8;
+	proc.exited = true;
+
+	const parent = getproc(proc.creds.ppid)!;
+	sched::wake(&parent.wq);
+
+	cleanup(proc);
+
+	sched::schedule();
+	abort(); // unreachable
+};
+
+// Frees resources associated with this process.
+export fn finish(proc: *proc) void = {
+	assert(proc.creds.pid != 1);
+	assert(proc.exited);
 
 	for (let t .. proc.tasks) {
 		sched::task_finish(t);
 	};
 	free(proc.tasks);
 
-	sched::wake(&proc.wq);
+	const parent = getproc(proc.creds.ppid)!;
+	for (let i = 0z; i < len(parent.children); i += 1) {
+		if (parent.children[i] == proc) {
+			delete(parent.children[i]);
+			break;
+		};
+	};
 
-	sched::schedule();
-	abort(); // unreachable
+	mman::vmm_finish(&proc.vmm);
+	free(proc);
 };

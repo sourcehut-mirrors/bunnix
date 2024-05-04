@@ -1,5 +1,6 @@
 use arch;
 use mman;
+use log;
 
 let @symbol("_kernel_stack_top") _kernel_stack_top: [*]u8;
 

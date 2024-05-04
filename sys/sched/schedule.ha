@@ -86,6 +86,7 @@ export fn task_unlink(link: *task) void = {
 	case null =>
 		head = null;
 	};
+
 	match (link.next) {
 	case let next: *task =>
 		next.prev = link.prev;

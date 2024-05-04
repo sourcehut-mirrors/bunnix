@@ -68,5 +68,7 @@ export fn strerror(err: error) str = {
 		return "Interrupted system call";
 	case errno::AGAIN =>
 		return "Resource temporarily unavailalbe";
+	case errno::CHILD =>
+		return "No child process";
 	};
 };

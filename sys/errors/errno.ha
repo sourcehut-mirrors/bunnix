@@ -33,6 +33,7 @@ export type errno = enum uint {
 	TIMEDOUT,
 	INTR,
 	AGAIN,
+	CHILD,
 };
 
 // Error condition.
