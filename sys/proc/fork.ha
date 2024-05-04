@@ -14,12 +14,13 @@ export fn fork() (int | error) = {
 	append(child.tasks, ctask);
 	mman::fork(&parent.vmm, &child.vmm)?;
 
-	child.fds = alloc([null...], len(parent.fds));
+	child.fds = alloc([filedesc { ... }...], len(parent.fds));
 	for (let i = 0z; i < len(parent.fds); i += 1) {
-		match (parent.fds[i]) {
+		match (parent.fds[i].file) {
 		case let f: *io::file =>
-			child.fds[i] = f;
+			child.fds[i] = parent.fds[i];
 			io::ref(f);
+			// TODO: ref inode as well?
 		case null => void;
 		};
 	};

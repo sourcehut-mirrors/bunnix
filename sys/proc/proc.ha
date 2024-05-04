@@ -11,7 +11,7 @@ let procs: []*proc = [];
 export type proc = struct {
 	vmm: mman::vmm,
 	root: *fs::vfs,
-	fds: []nullable *io::file,
+	fds: []filedesc,
 	creds: creds,
 
 	// TODO: Multithreading
@@ -42,19 +42,6 @@ export fn new_proc(root: *fs::vfs, parent: nullable *proc) (*proc | error) = {
 
 	append(procs, proc);
 	return proc;
-};
-
-// Installs the given [[file]] in the process's file descriptor table, returning
-// the assigned file descriptor number.
-export fn installfd(proc: *proc, file: *io::file) int = {
-	for (let i = 0z; i < len(proc.fds); i += 1) {
-		if (proc.fds[i] == null) {
-			proc.fds[i] = file;
-			return i: int;
-		};
-	};
-	append(proc.fds, file);
-	return (len(proc.fds) - 1): int;
 };
 
 // Returns the currently active process.

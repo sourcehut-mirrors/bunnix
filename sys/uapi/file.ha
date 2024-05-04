@@ -4,19 +4,19 @@ use io;
 use proc;
 use strings;
 
-fn validate_file(fd: i64) (*io::file | error) = {
-	const fds = &proc::current().fds;
-	if (fd: size > len(fds)) {
+fn validate_file(fd: i64, write: bool = false) (*io::file | error) = {
+	const fd = proc::getfd(proc::current(), fd: int)?;
+
+	let flagvalid = true;
+	if (fd.oflag & 3 == io::flag::RDWR) {
+		void; // no-op
+	} else if (fd.oflag & 3 == io::flag::RDONLY && write) {
+		return errno::BADF;
+	} else if (fd.oflag & 3 == io::flag::WRONLY && !write) {
 		return errno::BADF;
 	};
-	const fd = match (fds[fd]) {
-	case let fd: *io::file =>
-		yield fd;
-	case null =>
-		return errno::BADF;
-	};
-	// TODO: Validate read/write access
-	return fd;
+
+	return fd.file: *io::file;
 };
 
 fn sys_readv(fd: i64, vecs: *[*]vector, nvec: u64) (u64 | error) = {
@@ -44,7 +44,7 @@ fn sys_readv(fd: i64, vecs: *[*]vector, nvec: u64) (u64 | error) = {
 fn sys_writev(fd: i64, vecs: *[*]vector, nvec: u64) (u64 | error) = {
 	validate_vectors(vecs, nvec, true)?;
 	const vecs = vecs[..nvec];
-	const file = validate_file(fd)?;
+	const file = validate_file(fd, true)?;
 
 	let sum = 0z;
 	for (let vec .. vecs) {
@@ -71,9 +71,7 @@ fn sys_lseek(
 fn sys_close(
 	fd: i64,
 ) (u64 | error) = {
-	const file = validate_file(fd)?;
-	io::unref(file);
-	proc::current().fds[fd] = null;
+	proc::closefd(proc::current(), fd: int)?;
 	return 0u64;
 };
 
@@ -82,12 +80,7 @@ fn sys_openat(opts: *openat_options) (u64 | error) = {
 	validate_user_string(opts.path)?;
 	assert(opts.dirfd == AT_FDCWD);
 
-	// TODO:
-	// - free/unref inode from walk
-	// - validate/enforce open flags
-	// - O_DIRECTORY
 	const current = proc::current();
-
 	let walkflag = fs::walkflag::NONE;
 	let oflag = opts.flags: io::flag;
 	if (oflag & io::flag::CREATE != 0) {
@@ -110,8 +103,7 @@ fn sys_openat(opts: *openat_options) (u64 | error) = {
 	};
 
 	const file = io::inode_open(inode)?;
-	const fd = proc::installfd(current, file);
-	return fd: u64;
+	return proc::installfd(current, file, oflag, inode): u64;
 };
 
 fn sys_mkdirat(opts: *mkdirat_options) (u64 | error) = {
