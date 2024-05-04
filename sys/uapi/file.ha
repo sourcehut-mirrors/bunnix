@@ -76,6 +76,10 @@ fn sys_close(
 };
 
 fn sys_openat(opts: *openat_options) (u64 | error) = {
+	// Note: our handling of O_DIRECTORY differs from POSIX:
+	// - If you don't specify O_DIRECTORY, you cannot open a directory
+	// - O_DIRECTORY is not compatible with O_CREATE (use mkdirat)
+	// - O_DIRECTORY can only be opened O_RDONLY
 	validate_user_addr(opts, size(openat_options))?;
 	validate_user_string(opts.path)?;
 	assert(opts.dirfd == AT_FDCWD);
@@ -85,6 +89,14 @@ fn sys_openat(opts: *openat_options) (u64 | error) = {
 	let oflag = opts.flags: io::flag;
 	if (oflag & io::flag::CREATE != 0) {
 		walkflag |= fs::walkflag::PARENT;
+	};
+	if (oflag & io::flag::DIRECTORY != 0) {
+		if (oflag & io::flag::CREATE != 0) {
+			return errno::ISDIR: error;
+		};
+		if (oflag & 3 != io::flag::RDONLY) {
+			return errno::ACCES: error;
+		};
 	};
 
 	let (inode, final) = fs::walk(current.root, opts.path, walkflag)?;
@@ -102,6 +114,12 @@ fn sys_openat(opts: *openat_options) (u64 | error) = {
 		};
 	};
 
+	if (oflag & io::flag::DIRECTORY != 0 && !io::isdir(inode.mode)) {
+		return errno::NOTDIR: error;
+	} else if (oflag & io::flag::DIRECTORY == 0 && io::isdir(inode.mode)) {
+		return errno::ISDIR: error;
+	};
+
 	const file = io::inode_open(inode)?;
 	return proc::installfd(current, file, oflag, inode): u64;
 };
@@ -111,12 +129,7 @@ fn sys_mkdirat(opts: *mkdirat_options) (u64 | error) = {
 	validate_user_string(opts.path)?;
 	assert(opts.dirfd == AT_FDCWD);
 
-	// TODO:
-	// - free/unref inode from walk
-	// - validate/enforce open flags
-	// - O_DIRECTORY
 	const current = proc::current();
-
 	const walkflag = fs::walkflag::PARENT;
 	let (parent, final) = fs::walk(current.root, opts.path, walkflag)?;
 	io::inode_mkdir(parent, final, opts.mode: io::mode)?;
