@@ -5,6 +5,7 @@ include $(ROOT)mk/conf.mk
 
 # /bin/*
 include echo/Makefile
+include env/Makefile
 include init/Makefile
 
 install-bin:
