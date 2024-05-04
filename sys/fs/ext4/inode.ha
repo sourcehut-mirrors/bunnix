@@ -52,10 +52,11 @@ fn inode_from_ref(sb: *superblock, ref: *lwext4::inode_ref) *inode = {
 
 const inode_impl = io::inode_iface {
 	open = &ext4_inode_open,
-	lookup = &ext4_inode_lookup,
 	create = &ext4_inode_create,
+	trunc = &ext4_inode_trunc,
 	link = &ext4_inode_link,
 	unlink = &ext4_inode_unlink,
+	lookup = &ext4_inode_lookup,
 	mkdir = &ext4_inode_mkdir,
 	rmdir = &ext4_inode_rmdir,
 	finish = &ext4_inode_finish,
@@ -66,27 +67,52 @@ fn ext4_inode_open(ino: *io::inode) (*io::file | error) = {
 	return mkfile(ino: *inode);
 };
 
-fn ext4_inode_lookup(ino: *io::inode, name: str) (*io::inode | error) = {
+fn ext4_inode_create(
+	parent: *io::inode,
+	name: str,
+	mode: io::mode,
+) (*io::inode | error) = {
+	const parent = parent: *inode;
+	const fs = &parent.sb.mp.fs;
+	if (fs.read_only) {
+		return errno::ROFS;
+	};
+
+	let child_ref = lwext4::inode_ref { ... };
+	let r = lwext4::fs_alloc_inode(fs, &child_ref, lwext4::EXT4_DE_REG_FILE);
+	if (r != errno::NONE) {
+		return r;
+	};
+
+	lwext4::fs_inode_blocks_init(fs, &child_ref);
+	lwext4::inode_set_mode(&fs.sb, child_ref.inode,
+		(io::mode_perm(mode) | io::mode::REG): u32);
+
+	const child = inode_from_ref(parent.sb, &child_ref);
+	match (ext4_inode_link(parent, child, name)) {
+	case void =>
+		return child;
+	case let err: error =>
+		lwext4::fs_free_inode(&child_ref);
+
+		// Release the inode's block reference
+		child_ref.dirty = false;
+		lwext4::fs_put_inode_ref(&child_ref);
+
+		return err;
+	};
+};
+
+fn ext4_inode_trunc(ino: *io::inode, length: size) (void | error) = {
 	const ino = ino: *inode;
-	const sb = ino.sb: *superblock;
-	let result = lwext4::dir_search_result { ... };
+	if (length > ino.bytes) {
+		abort(); // TODO: shim this, lwext4 does not support it
+	};
 
-	const cname = c::unterminatedstr(name);
-	const nameln = len(name): u32;
-	let r = lwext4::dir_find_entry(&result, &ino.ref, cname, nameln);
+	let r = lwext4::fs_truncate_inode(&ino.ref, length);
 	if (r != errno::NONE) {
 		return r;
 	};
-
-	const dentry = result.dentry as *lwext4::dir_en;
-	const targ = get_inode(sb, dentry.inode)?;
-
-	r = lwext4::dir_destroy_result(&ino.ref, &result);
-	if (r != errno::NONE) {
-		return r;
-	};
-
-	return targ;
 };
 
 fn ext4_inode_link(
@@ -181,40 +207,27 @@ fn _ext4_inode_unlink(
 	child.ref.dirty = true;
 };
 
-fn ext4_inode_create(
-	parent: *io::inode,
-	name: str,
-	mode: io::mode,
-) (*io::inode | error) = {
-	const parent = parent: *inode;
-	const fs = &parent.sb.mp.fs;
-	if (fs.read_only) {
-		return errno::ROFS;
-	};
+fn ext4_inode_lookup(ino: *io::inode, name: str) (*io::inode | error) = {
+	const ino = ino: *inode;
+	const sb = ino.sb: *superblock;
+	let result = lwext4::dir_search_result { ... };
 
-	let child_ref = lwext4::inode_ref { ... };
-	let r = lwext4::fs_alloc_inode(fs, &child_ref, lwext4::EXT4_DE_REG_FILE);
+	const cname = c::unterminatedstr(name);
+	const nameln = len(name): u32;
+	let r = lwext4::dir_find_entry(&result, &ino.ref, cname, nameln);
 	if (r != errno::NONE) {
 		return r;
 	};
 
-	lwext4::fs_inode_blocks_init(fs, &child_ref);
-	lwext4::inode_set_mode(&fs.sb, child_ref.inode,
-		(io::mode_perm(mode) | io::mode::REG): u32);
+	const dentry = result.dentry as *lwext4::dir_en;
+	const targ = get_inode(sb, dentry.inode)?;
 
-	const child = inode_from_ref(parent.sb, &child_ref);
-	match (ext4_inode_link(parent, child, name)) {
-	case void =>
-		return child;
-	case let err: error =>
-		lwext4::fs_free_inode(&child_ref);
-
-		// Release the inode's block reference
-		child_ref.dirty = false;
-		lwext4::fs_put_inode_ref(&child_ref);
-
-		return err;
+	r = lwext4::dir_destroy_result(&ino.ref, &result);
+	if (r != errno::NONE) {
+		return r;
 	};
+
+	return targ;
 };
 
 fn ext4_inode_mkdir(

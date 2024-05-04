@@ -56,6 +56,10 @@ fn file_write(fd: *io::file, buf: const []u8) (size | error) = {
 		return r: error;
 	};
 
+	// TODO: sync more stuff to the inode
+	let inode = fd.inode: *inode;
+	inode.bytes = fd.lwfile.fsize;
+
 	return n;
 };
 

@@ -34,6 +34,9 @@ export type fn_inode_unlink = fn(ino: *inode, name: str) (void | error);
 // Creates a new file as a child of this inode.
 export type fn_inode_create = fn(ino: *inode, name: str, mode: mode) (*inode | error);
 
+// Truncate this inode.
+export type fn_inode_trunc = fn(ino: *inode, length: size) (void | error);
+
 // Makes a new directory in this inode.
 export type fn_inode_mkdir = fn(ino: *inode, name: str, mode: mode) (*inode | error);
 
@@ -59,6 +62,7 @@ export type inode_iface = struct {
 	link: nullable *fn_inode_link,
 	unlink: nullable *fn_inode_unlink,
 	create: nullable *fn_inode_create,
+	trunc: nullable *fn_inode_trunc,
 	mkdir: nullable *fn_inode_mkdir,
 	rmdir: nullable *fn_inode_rmdir,
 	mknod: nullable *fn_inode_mknod,
@@ -110,6 +114,16 @@ export fn inode_create(ino: *inode, name: str, mode: mode) (*inode | error) = {
 	match (ino.impl.create) {
 	case let func: *fn_inode_create =>
 		return func(ino, name, mode);
+	case null =>
+		return errno::NOTSUP;
+	};
+};
+
+// Truncates this inode.
+export fn inode_trunc(ino: *inode, length: size) (void | error) = {
+	match (ino.impl.trunc) {
+	case let func: *fn_inode_trunc =>
+		return func(ino, length);
 	case null =>
 		return errno::NOTSUP;
 	};

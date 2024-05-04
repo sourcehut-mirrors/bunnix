@@ -53,8 +53,9 @@ fn mkinode(sb: *superblock, ino: uint, mode: io::mode) inode = {
 
 const inode_dir_impl = io::inode_iface {
 	open = &inode_open,
-	lookup = &inode_lookup,
+	trunc = &inode_trunc,
 	create = &inode_create,
+	lookup = &inode_lookup,
 	mkdir = &inode_mkdir,
 	mknod = &inode_mknod,
 	...
@@ -64,13 +65,15 @@ fn inode_open(ino: *io::inode) (*io::file | error) = {
 	return mkfile(ino: *inode);
 };
 
-fn inode_lookup(ino: *io::inode, name: str) (*io::inode | error) = {
+fn inode_trunc(ino: *io::inode, length: size) (void | error) = {
 	const ino = ino: *inode;
-	match (dir_findchild(ino, name)) {
-	case null =>
-		return errno::NOENT;
-	case let dent: *dirent =>
-		return dent.inode;
+	assert(io::isfile(ino.mode));
+	if (len(ino.data) == length) {
+		return;
+	} else if (len(ino.data) > length) {
+		delete(ino.data[length..]);
+	} else {
+		append(ino.data, [0...], length - len(ino.data));
 	};
 };
 
@@ -101,6 +104,17 @@ fn inode_create(
 ) (*io::inode | error) = {
 	return inode_mkchild(ino, name, mode | io::mode::REG);
 };
+
+fn inode_lookup(ino: *io::inode, name: str) (*io::inode | error) = {
+	const ino = ino: *inode;
+	match (dir_findchild(ino, name)) {
+	case null =>
+		return errno::NOENT;
+	case let dent: *dirent =>
+		return dent.inode;
+	};
+};
+
 
 fn inode_mkdir(
 	ino: *io::inode,

@@ -45,3 +45,4 @@ export @symbol("ext4_fs_put_inode_ref") fn fs_put_inode_ref(*inode_ref) errno;
 export @symbol("ext4_fs_inode_links_count_inc") fn fs_inode_links_count_inc(*inode_ref) void;
 export @symbol("ext4_fs_inode_links_count_dec") fn fs_inode_links_count_dec(*inode_ref) void;
 export @symbol("ext4_fs_free_inode") fn fs_free_inode(*inode_ref) errno;
+export @symbol("ext4_fs_truncate_inode") fn fs_truncate_inode(*inode_ref, size) errno;
