@@ -113,6 +113,10 @@ fn sys_openat(opts: *openat_options) (u64 | error) = {
 			const mode = opts.mode: io::mode;
 			yield io::inode_create(inode, final, mode)?;
 		case let ino: *io::inode =>
+			if (oflag & io::flag::EXCL != 0) {
+				io::inode_unref(ino);
+				return errno::EXIST: error;
+			};
 			yield ino;
 		};
 	};
