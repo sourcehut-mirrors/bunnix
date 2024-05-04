@@ -20,6 +20,64 @@ export fn getcwd() str = {
 	return "/"; // TODO
 };
 
+// Change the current working directory.
+export fn chdir(target: (*fs::fs | str)) (void | fs::error) = {
+	abort(); // TODO
+};
+
+// Changes the root directory of the process. Generally requires the caller to
+// have root or otherwise elevated permissions.
+//
+// This function is not appropriate for sandboxing.
+export fn chroot(target: str) (void | fs::error) = {
+	abort(); // TODO
+};
+
+// Makes a FIFO node. This function is only available on Unix systems.
+export fn mkfifo(path: str, mode: fs::mode) (void | fs::error) = {
+	abort(); // TODO
+};
+
+// Makes a block device node. This function is only available on Unix-like
+// systems.
+export fn mkblk(
+	path: str,
+	mode: fs::mode,
+	major: uint,
+	minor: uint,
+) (void | fs::error) = {
+	abort(); // TODO
+};
+
+// Makes a character device node. This function is only available on Unix-like
+// systems.
+export fn mkchr(
+	path: str,
+	mode: fs::mode,
+	major: uint,
+	minor: uint,
+) (void | fs::error) = {
+	abort(); // TODO
+};
+
+// Access modes for [[access]].
+export type amode = enum uint {
+	F_OK = 1 << 0,
+	R_OK = 1 << 1,
+	W_OK = 1 << 2,
+	X_OK = 1 << 3,
+};
+
+// Returns true if the given mode of access is permissible. The use of this
+// function is discouraged as it can allow for a race condition to occur betwen
+// testing for the desired access mode and actually using the file should the
+// permissions of the file change between these operations. It is recommended
+// instead to attempt to use the file directly and to handle any errors that
+// should occur at that time.
+export fn access(path: str, mode: amode) (bool | fs::error) = {
+	return true; // TODO
+};
+
 @init fn init_cwd() void = {
 	static let cwd_fs = os_filesystem {
 		fs = fs::fs {

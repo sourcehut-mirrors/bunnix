@@ -122,3 +122,16 @@ export type timespec = struct {
 	tv_sec: i64,
 	tv_nsec: i64,
 };
+
+export def WNOHANG: int = 1;
+export def WUNTRACED: int = 2;
+export def WCONTINUED: int = 8;
+
+export fn wexitstatus(s: int) int = (s & 0xff00) >> 8;
+export fn wtermsig(s: int) int = s & 0x7f;
+export fn wstopsig(s: int) int = wexitstatus(s);
+export fn wcoredump(s: int) int = s & 0x80;
+export fn wifexited(s: int) bool = wtermsig(s) <= 0;
+export fn wifstopped(s: int) bool = (((s & 0xFFFF) * 0x10001) >> 8) > 0x7f00;
+export fn wifsignaled(s: int) bool = (s & 0xFFFF) - 1 < 0xFF;
+export fn wifcontinued(s: int) bool = s == 0xFFFF;
