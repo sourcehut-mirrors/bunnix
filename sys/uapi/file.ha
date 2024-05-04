@@ -16,6 +16,28 @@ fn validate_file(fd: i64, write: bool = false) (*io::file | error) = {
 		return errno::BADF;
 	};
 
+	match (fd.inode) {
+	case let ino: *io::inode =>
+		if (io::isdir(ino.mode)) {
+			return errno::ISDIR;
+		};
+	case null => void;
+	};
+
+	return fd.file: *io::file;
+};
+
+fn validate_dirfd(fd: i64) (*io::file | error) = {
+	const fd = proc::getfd(proc::current(), fd: int)?;
+
+	match (fd.inode) {
+	case let ino: *io::inode =>
+		if (!io::isdir(ino.mode)) {
+			return errno::NOTDIR;
+		};
+	case null => void;
+	};
+
 	return fd.file: *io::file;
 };
 
@@ -190,7 +212,7 @@ fn sys_unlinkat(opts: *unlinkat_options) (u64 | error) = {
 };
 
 fn sys_getdents(fd: i64, buf: *[*]u8, bufsz: size) (u64 | error) = {
-	const file = validate_file(fd)?;
+	const file = validate_dirfd(fd)?;
 	validate_user_addr(buf, bufsz, true)?;
 	const buf = buf[..bufsz];
 
