@@ -12,13 +12,22 @@ export type inode = struct {
 };
 
 fn get_inode(sb: *superblock, ino: u32) (*inode | error) = {
+	match (fs::icache_get(&sb.ic, ino)) {
+	case let ino: *io::inode =>
+		return ino: *inode;
+	case error => void;
+	};
+
 	let ref = lwext4::inode_ref { ... };
 	let fs = &sb.mp.fs;
 	let r = lwext4::fs_get_inode_ref(fs, ino, &ref);
 	if (r != errno::NONE) {
 		return r;
 	};
-	return inode_from_ref(sb, &ref);
+
+	const ino = inode_from_ref(sb, &ref);
+	fs::icache_put(&sb.ic, ino);
+	return ino;
 };
 
 fn inode_from_ref(sb: *superblock, ref: *lwext4::inode_ref) *inode = {

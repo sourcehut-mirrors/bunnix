@@ -4,7 +4,7 @@ use errors::{error, errno};
 // structure.
 export type inode = struct {
 	impl: const *inode_iface,
-	ino: uint,
+	ino: u32,
 	dev: u64,
 	rdev: u64,
 	mode: mode,

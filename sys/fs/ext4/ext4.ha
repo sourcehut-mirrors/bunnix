@@ -12,6 +12,7 @@ export type superblock = struct {
 	fs::superblock,
 	bdev: *block::blockdev,
 	mp: lwext4::mountpoint,
+	ic: fs::icache,
 };
 
 let driver_impl = fs::driver_iface {
@@ -44,6 +45,7 @@ fn open(opts: *fs::fs_opts) (*fs::superblock | error) = {
 	let sb = alloc(superblock {
 		impl = &ext4_impl,
 		bdev = bdev,
+		ic = fs::icache { ... },
 
 		// We use a synthetic "mountpoint" to please some lwext4
 		// opeartions, like ext4_fread, but we generally try to avoid
