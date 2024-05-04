@@ -1,7 +1,8 @@
-use errors::{error, errno};
+use errors::{error, errno, strerror};
 use fs;
 use io;
 use lib::lwext4;
+use log;
 use types::c;
 
 export type inode = struct {
@@ -57,6 +58,7 @@ const inode_impl = io::inode_iface {
 	unlink = &ext4_inode_unlink,
 	mkdir = &ext4_inode_mkdir,
 	rmdir = &ext4_inode_rmdir,
+	finish = &ext4_inode_finish,
 	...
 };
 
@@ -208,7 +210,7 @@ fn ext4_inode_create(
 		lwext4::fs_free_inode(&child_ref);
 
 		// Release the inode's block reference
-		child_ref.dirty = true;
+		child_ref.dirty = false;
 		lwext4::fs_put_inode_ref(&child_ref);
 
 		return err;
@@ -253,4 +255,11 @@ fn ext4_inode_mkdir(
 
 fn ext4_inode_rmdir(ino: *io::inode, name: str) (void | error) = {
 	abort(); // TODO
+};
+
+fn ext4_inode_finish(ino: *io::inode) void = {
+	const ino = ino: *inode;
+	// TODO: should we put the lwext4 ref here?
+	fs::icache_remove(&ino.sb.ic, ino.ino);
+	free(ino);
 };

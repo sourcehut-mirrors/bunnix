@@ -4,6 +4,10 @@ use errors::{error, errno};
 // structure.
 export type inode = struct {
 	impl: const *inode_iface,
+
+	// Note the reference count is zero when one reference is held
+	refs: uint,
+
 	ino: u32,
 	dev: u64,
 	rdev: u64,
@@ -44,6 +48,10 @@ export type fn_inode_mknod = fn(
 	dev: u64,
 ) (*inode | error);
 
+// Called when the last reference to this inode is dropped, freeing resources
+// associated with it.
+export type fn_inode_finish = fn(ino: *inode) void;
+
 // inode implementation.
 export type inode_iface = struct {
 	open: nullable *fn_inode_open,
@@ -54,6 +62,7 @@ export type inode_iface = struct {
 	mkdir: nullable *fn_inode_mkdir,
 	rmdir: nullable *fn_inode_rmdir,
 	mknod: nullable *fn_inode_mknod,
+	finish: nullable *fn_inode_finish,
 };
 
 // Opens an inode as a file.
@@ -129,4 +138,24 @@ export fn inode_mknod(
 	case null =>
 		return errno::NOTSUP;
 	};
+};
+
+// Increments the reference count of an inode.
+export fn inode_ref(ino: *inode) void = {
+	ino.refs += 1;
+};
+
+// Decrements the reference count of an inode, freeing it if it reaches zero.
+export fn inode_unref(ino: *inode) void = {
+	if (ino.refs == 0) {
+		match (ino.impl.finish) {
+		case let func: *fn_inode_finish =>
+			func(ino);
+		case null => void;
+		};
+
+		return;
+	};
+
+	ino.refs -= 1;
 };

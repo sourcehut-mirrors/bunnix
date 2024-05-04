@@ -101,7 +101,10 @@ fn sys_openat(opts: *openat_options) (u64 | error) = {
 
 	let (inode, final) = fs::walk(current.root, opts.path, walkflag)?;
 	if (oflag & io::flag::CREATE != 0) {
-		inode = match (io::inode_lookup(inode, final)) {
+		const parent = inode;
+		defer io::inode_unref(parent);
+
+		inode = match (io::inode_lookup(parent, final)) {
 		case let err: error =>
 			if (err: errno != errno::NOENT) {
 				return err;
@@ -132,7 +135,9 @@ fn sys_mkdirat(opts: *mkdirat_options) (u64 | error) = {
 	const current = proc::current();
 	const walkflag = fs::walkflag::PARENT;
 	let (parent, final) = fs::walk(current.root, opts.path, walkflag)?;
-	io::inode_mkdir(parent, final, opts.mode: io::mode)?;
+	const child = io::inode_mkdir(parent, final, opts.mode: io::mode)?;
+	io::inode_unref(parent);
+	io::inode_unref(child);
 
 	return 0u64;
 };
@@ -156,6 +161,7 @@ fn sys_unlinkat(opts: *unlinkat_options) (u64 | error) = {
 	const (parent, final) = fs::walk(current.root,
 		opts.path, fs::walkflag::PARENT)?;
 	io::inode_unlink(parent, final)?;
+	io::inode_unref(parent);
 
 	return 0u64;
 };

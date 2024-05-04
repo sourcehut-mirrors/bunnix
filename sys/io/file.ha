@@ -107,6 +107,12 @@ export fn ref(file: *file) void = {
 // it if the reference count becomes zero.
 export fn unref(file: *file) void = {
 	if (file.refs == 0) {
+		match (file_inode(file)) {
+		case let ino: *inode =>
+			inode_unref(ino);
+		case error => void;
+		};
+
 		match (file.vtable.finish) {
 		case let func: *fn_file_finish =>
 			func(file);

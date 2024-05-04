@@ -29,9 +29,11 @@ export fn inode_walk(
 		defer last_name = name;
 
 		if (io::islink(cur.mode)) {
+			io::inode_unref(cur);
 			return errno::NOTSUP; // TODO
 		};
 		if (!io::isdir(cur.mode)) {
+			io::inode_unref(cur);
 			return errno::NOENT;
 		};
 
@@ -42,6 +44,7 @@ export fn inode_walk(
 		} else if (cur.mode & io::mode::GROUP_X != 0) {
 			void; // TODO
 		} else {
+			io::inode_unref(cur);
 			return errno::ACCES;
 		};
 
@@ -50,7 +53,9 @@ export fn inode_walk(
 			return (cur, name);
 		};
 
-		cur = io::inode_lookup(cur, name)?;
+		const next = io::inode_lookup(cur, name)?;
+		io::inode_unref(cur);
+		cur = next;
 	};
 };
 

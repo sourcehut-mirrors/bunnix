@@ -23,7 +23,7 @@ export fn fork() (int | error) = {
 			};
 
 			child.fds[i] = parent.fds[i];
-			io::ref(f); // TODO: ref inode as well?
+			io::ref(f);
 		case null => void;
 		};
 	};
