@@ -146,6 +146,14 @@ export fn fexecve(fd: int, args: []str, env: []str) (void | errno) = {
 	return syswrap(syscall(sys::EXECVE, &opts))?: pid_t;
 };
 
+export fn waitpid(
+	pid: pid_t,
+	wstatus: nullable *int,
+	options: int,
+) (pid_t | errno) = {
+	return syswrap(syscall(sys::WAITPID, pid: u64, wstatus, options: u64))?: pid_t;
+};
+
 export fn gettime(clock: int, tp: *timespec) (void | errno) = {
 	syswrap(syscall(sys::GETTIME, clock: i64, tp))?;
 };

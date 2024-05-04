@@ -19,6 +19,7 @@ export type sys = enum u64 {
 	MPROTECT,
 	FORK,
 	EXECVE,
+	WAITPID,
 	GETPPID,
 	GETTIME,
 	NANOSLEEP,

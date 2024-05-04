@@ -80,6 +80,8 @@ export fn strerror(err: errno) str = {
 		return "Interrupted system call";
 	case EAGAIN =>
 		return "Resource temporarily unavailable";
+	case ECHILD =>
+		return "No child process";
 	case =>
 		return unknown_errno(err);
 	};
@@ -153,6 +155,8 @@ export fn errname(err: errno) str = {
 		return "EINTR";
 	case EAGAIN =>
 		return "EAGAIN";
+	case ECHILD =>
+		return "ECHILD";
 	case =>
 		return unknown_errno(err);
 	};
@@ -190,3 +194,4 @@ export def ECANCELED: errno = 29;
 export def ETIMEDOUT: errno = 30;
 export def EINTR: errno = 31;
 export def EAGAIN: errno = 32;
+export def ECHILD: errno = 33;
