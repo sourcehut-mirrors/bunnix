@@ -62,7 +62,6 @@ export fn task_block(task: *task) void = {
 
 // Frees resouces associated with a task.
 export fn task_finish(which: *task) void = {
-	assert(current() != which); // TODO?
 	task_unlink(which);
 	mman::munmap(&mman::kernel, which: uintptr, size(task))!;
 };

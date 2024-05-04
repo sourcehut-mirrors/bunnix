@@ -6,7 +6,4 @@ export fn main() void = {
 		fmt::printf("{} ", arg)!;
 	};
 	fmt::println()!;
-
-	// TODO: implement exit(2)
-	for (true) void;
 };

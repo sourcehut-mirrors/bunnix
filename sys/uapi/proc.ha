@@ -1,3 +1,4 @@
+use arch;
 use errors::{error, errno};
 use fs;
 use io;
@@ -16,7 +17,7 @@ fn sys_kill(status: int) (u64 | error) = {
 };
 
 fn sys_exit(status: int) (u64 | error) = {
-	abort(); // TODO
+	proc::exit(status);
 };
 
 fn sys_fork() (u64 | error) = {

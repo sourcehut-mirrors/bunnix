@@ -14,6 +14,8 @@ export type proc = struct {
 	fds: []filedesc,
 	creds: creds,
 	sig: sigproc,
+	status: int,
+	wq: sched::wq_head,
 
 	// TODO: Multithreading
 	tasks: []*sched::task,
@@ -49,4 +51,24 @@ export fn new_proc(root: *fs::vfs, parent: nullable *proc) (*proc | error) = {
 export fn current() *proc = {
 	const current = sched::current() as *sched::task;
 	return current.user: *proc;
+};
+
+// Exits the calling process.
+export fn exit(status: int) never = {
+	const proc = current();
+	if (proc.creds.pid == 1) {
+		arch::panic("init exited", &proc.tasks[0].ctx);
+	};
+
+	proc.status = status << 8;
+
+	for (let t .. proc.tasks) {
+		sched::task_finish(t);
+	};
+	free(proc.tasks);
+
+	sched::wake(&proc.wq);
+
+	sched::schedule();
+	abort(); // unreachable
 };
