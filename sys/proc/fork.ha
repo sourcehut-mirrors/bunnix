@@ -18,9 +18,12 @@ export fn fork() (int | error) = {
 	for (let i = 0z; i < len(parent.fds); i += 1) {
 		match (parent.fds[i].file) {
 		case let f: *io::file =>
+			if (parent.fds[i].oflag & io::flag::CLOEXEC != 0) {
+				continue;
+			};
+
 			child.fds[i] = parent.fds[i];
-			io::ref(f);
-			// TODO: ref inode as well?
+			io::ref(f); // TODO: ref inode as well?
 		case null => void;
 		};
 	};
