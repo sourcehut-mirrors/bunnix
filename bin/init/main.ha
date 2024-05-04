@@ -37,16 +37,22 @@ export fn main() void = {
 	let pid = rt::fork()!;
 	if (pid == 0) {
 		child();
-	} else {
-		fmt::printfln(
-			"[parent] Hello from the parent process! The child has pid {}",
-			pid: int)!;
 	};
+
+	fmt::printfln(
+		"[parent] Hello from the parent process! The child has pid {}",
+		pid: int)!;
+
+	fmt::printfln("[parent] calling waitpid")!;
+	let status: int = 0;
+	let pid = rt::waitpid(-1, &status, 0)!;
+	fmt::printfln("[parent] child {} exited with status {}",
+		pid: int, status)!;
 
 	for (true) void;
 };
 
-fn child() void = {
+fn child() never = {
 	fmt::println("[child] Hello from the child process!")!;
 	fmt::printfln("[child] I have pid {}", rt::getpid(): int)!;
 	fmt::printfln("[child] My parent's pid is {}", rt::getppid(): int)!;
@@ -60,4 +66,6 @@ fn child() void = {
 		"from",
 		"/bin/echo!",
 	], [])!;
+
+	abort();
 };
