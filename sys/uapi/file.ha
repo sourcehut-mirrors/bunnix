@@ -124,6 +124,16 @@ fn sys_openat(opts: *openat_options) (u64 | error) = {
 	};
 
 	const file = io::inode_open(inode)?;
+
+	if (oflag & io::flag::APPEND != 0) {
+		match (io::seek(file, 0, io::whence::END)) {
+		case let err: error =>
+			io::unref(file);
+			return err;
+		case i64 => void;
+		};
+	};
+
 	return proc::installfd(current, file, oflag, inode): u64;
 };
 
