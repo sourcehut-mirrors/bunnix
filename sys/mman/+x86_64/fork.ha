@@ -6,6 +6,7 @@ use errors::{error, errno};
 
 // Forks the specified virtual memory manager.
 export fn fork(orig: *vmm, new: *vmm) (void | error) = {
+	// TODO: This could be improved quite a lot
 	vmm_enum(orig, &fork_iter, new);
 };
 
@@ -17,6 +18,19 @@ fn fork_iter(ent: *pte, vaddr: uintptr, user: nullable *opaque) void = {
 	let prot = prot::READ | prot::WRITE | prot::EXEC;
 	if (*ent & pte::XD != 0) {
 		prot &= ~prot::EXEC;
+	};
+
+	// Attempt to re-use read-only pages
+	if (*ent & pte::W == 0) {
+		match (ref(phys, PAGESIZE)) {
+		case void =>
+			mmap(new_vmm, phys, vaddr, PAGESIZE, prot, flag::USER)!;
+			return;
+		case error =>
+			// Copy the page if there are too many references to the
+			// old page
+			void;
+		};
 	};
 
 	mmap(new_vmm, 0, vaddr, PAGESIZE, prot, flag::USER | flag::ANON)!;

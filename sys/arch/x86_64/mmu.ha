@@ -40,6 +40,9 @@ export type pte = enum uintptr {
 	PAT  = 1 << 7,
 	G = 1 << 8,
 	XD = 1 << 63,
+
+	// Kernel bits
+	COW = 1 << 8,
 };
 
 // Page map level four table.
