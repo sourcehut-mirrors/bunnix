@@ -15,8 +15,21 @@ GDB = $(TRIPLET)gdb
 DTC = $(TRIPLET)dtc
 CC = $(TRIPLET)gcc
 
+#
+# Bootloader configuration
+ENABLE_EFI=1
+ENABLE_LEGACY=1
+
+# 1: make nographic et al will boot with EFI
+# 0: make nographic et al will boot with legacy boot
+PREFER_EFI=1
+
+# Legacy boot configuration
+# Only required if ENABLE_LEGACY=1
 SYSLINUX = /usr/share/syslinux
 
+# EFI boot configuration
+# Only required if ENABLE_EFI=1
 EFI_CC=x86-64-w64-migw32-gcc
 EFI_LD=x86-64-w64-mingw43-gcc
 

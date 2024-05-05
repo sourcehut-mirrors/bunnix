@@ -10,19 +10,44 @@ clean-boot:
 .PHONY: clean-boot
 clean: clean-boot
 
+# TODO: This file contains some not-x86_64-specific stuff
+# Could be generalized if we add another target
+
 all: target/bunnix.iso
 
 ROOT=target/root
 ROOT_TARGETS=\
-	$(ROOT)/boot/bunnix \
-	$(ROOT)/boot/bunnixboot.mb \
-	$(ROOT)/boot/syslinux/syslinux.cfg
+	$(ROOT)/boot/bunnix
+
+ISO_TARGETS=\
+	    sys/bunnix \
+	    target/initrd
+
+MKISOFSFLAGS=
+
+ifeq ($(ENABLE_LEGACY),1)
+ROOT_TARGETS+=$(ROOT)/boot/syslinux/syslinux.cfg
+ROOT_TARGETS+=$(ROOT)/boot/bunnixboot.mb
+
+ISO_TARGETS+=target/iso/boot/bunnixboot.mb
+ISO_TARGETS+=target/iso/syslinux.cfg
+ISO_TARGETS+=target/iso/mboot.c32
+ISO_TARGETS+=target/iso/ldlinux.c32
+ISO_TARGETS+=target/iso/libcom32.c32
+ISO_TARGETS+=target/iso/isolinux.bin
+
+MKISOFSFLAGS+=-b isolinux.bin
+
+MBR=$(SYSLINUX)/mbr.bin
+else
+MBR=/dev/null
+endif
 
 $(ROOT): $(ROOT_TARGETS)
 	mkdir -p $(ROOT)
 	for d in \
 		bin \
-		boot/syslinux \
+		boot \
 		dev \
 		etc \
 		lib \
@@ -48,13 +73,58 @@ $(ROOT)/boot/syslinux/syslinux.cfg: boot/multiboot/syslinux.cfg
 	mkdir -p $(ROOT)/boot/syslinux
 	cp $< $@
 
-target/fs.fat.img:
+target/initrd: $(ROOT)
+	# TODO: gzip me
+	cd $(ROOT) && tar -cvf ../../$@ *
+
+# Legacy boot support
+target/iso/boot/bunnixboot.mb: boot/multiboot/bunnixboot.mb
+	mkdir -p $$(dirname $@)
+	cp $< $@
+
+target/iso/syslinux.cfg: boot/multiboot/syslinux.cfg
+	mkdir -p $$(dirname $@)
+	cp $< $@
+
+target/iso/%.c32: $(SYSLINUX)/%.c32
+	mkdir -p $$(dirname $@)
+	cp $< $@
+
+target/iso/%.bin: $(SYSLINUX)/%.bin
+	mkdir -p $$(dirname $@)
+	cp $< $@
+
+# EFI support (TODO)
+
+# bunnix.iso
+target/iso: $(ISO_TARGETS)
+	mkdir -p target/iso/boot/modules
+	cp sys/bunnix target/iso/boot/
+	cp target/initrd target/iso/boot/modules/
+	touch target/iso
+
+target/bunnix.iso: target/iso
+	mkisofs -o $@ $(MKISOFSFLAGS) -c boot.cat -l \
+		-no-emul-boot -boot-load-size 4 -boot-info-table target/iso
+	isohybrid $@
+
+clean-target:
+	rm -rf target
+
+.PHONY: clean-target
+clean: clean-target
+
+# Disks for emulator use
+# TODO: Make these disks directly bootable
+target/fs.fat.img: $(ROOT)
 	mkdir -p target
 	qemu-img create -f raw $@ 48M
 	mkdosfs $@
-	# Add some files for interest
-	mcopy -i $@ README.md ::README.md
-	mcopy -i $@ COPYING ::COPYING
+	mmd -i $@ ::EFI
+	mmd -i $@ ::EFI/boot
+	mmd -i $@ ::modules
+	mcopy -i $@ $(ROOT)/boot/bunnix ::bunnix
+	mcopy -i $@ target/initrd ::modules/initrd
 
 target/fs.ext4.img: $(ROOT)
 	qemu-img create -f raw $@ 48M
@@ -66,47 +136,17 @@ target/fs.ext4.img: $(ROOT)
 target/disk.mbr.img: target/fs.fat.img target/fs.ext4.img
 	qemu-img create -f raw $@ 128M
 	sfdisk $@ < tools/mkdisk-mbr
-	dd if=target/fs.fat.img of=$@ seek=2048
-	dd if=target/fs.ext4.img of=$@ seek=133120
+	dd if=$(MBR) conv=notrunc of=$@
+	dd if=target/fs.fat.img conv=notrunc of=$@ seek=2048
+	dd if=target/fs.ext4.img conv=notrunc of=$@ seek=133120
 
-target/disk.gpt.img:
+target/disk.gpt.img: target/fs.fat.img target/fs.ext4.img
 	qemu-img create -f raw $@ 128M
 	sfdisk $@ < tools/mkdisk-gpt
+	dd if=target/fs.fat.img conv=notrunc of=$@ seek=2048
+	dd if=target/fs.ext4.img conv=notrunc of=$@ seek=133120
 
-target/initrd: $(ROOT)
-	# TODO: gzip me
-	cd $(ROOT) && tar -cvf ../../$@ *
-
-ISO_TARGETS=\
-	    boot/multiboot/bunnixboot.mb \
-	    boot/multiboot/syslinux.cfg \
-	    sys/bunnix \
-	    target/initrd
-
-target/iso: $(ISO_TARGETS)
-	mkdir -p target/iso/boot
-
-	install -m644 $(SYSLINUX)/mboot.c32 target/iso/mboot.c32
-	install -m644 $(SYSLINUX)/ldlinux.c32 target/iso/ldlinux.c32
-	install -m644 $(SYSLINUX)/libcom32.c32 target/iso/libcom32.c32
-	install -m644 $(SYSLINUX)/isolinux.bin target/iso/isolinux.bin
-
-	cp sys/bunnix target/iso/boot/
-	cp target/initrd target/iso/boot/
-	cp boot/multiboot/bunnixboot.mb target/iso/boot/
-	cp boot/multiboot/syslinux.cfg target/iso/
-
-target/bunnix.iso: target/iso
-	mkisofs -o $@ -b isolinux.bin -c boot.cat -l \
-		-no-emul-boot -boot-load-size 4 -boot-info-table target/iso
-	isohybrid $@
-
-clean-target:
-	rm -rf target
-
-.PHONY: clean-target
-clean: clean-target
-
+# Emulator targets
 QEMUARGS=\
 	$(QEMUFLAGS) -m 1G -no-reboot -no-shutdown \
 	-drive file=target/bunnix.iso,format=raw \
@@ -115,10 +155,11 @@ QEMUARGS=\
 	-device ahci,id=ahci \
 	-device ide-hd,drive=disk-mbr,bus=ahci.0 \
 	-device ide-hd,drive=disk-gpt,bus=ahci.1
+
 QEMU_TARGETS=\
-     target/bunnix.iso \
-     target/disk.mbr.img \
-     target/disk.gpt.img
+	target/bunnix.iso \
+	target/disk.mbr.img \
+	target/disk.gpt.img
 
 run: $(QEMU_TARGETS)
 	qemu-system-$(QEMUARCH) $(QEMUARGS) \
