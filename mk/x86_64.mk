@@ -73,13 +73,14 @@ target/disk.gpt.img:
 	qemu-img create -f raw $@ 128M
 	sfdisk $@ < tools/mkdisk-gpt
 
+target/initrd: $(ROOT)
+	cd $(ROOT) && tar -cvzf ../../$@ *
+
 ISO_TARGETS=\
 	    boot/multiboot/bunnixboot.mb \
 	    boot/multiboot/syslinux.cfg \
-	    sys/bunnix
-
-target/initrd.tar.gz: $(ROOT)
-	cd $(ROOT) && tar -cvzf ../../$@ *
+	    sys/bunnix \
+	    target/initrd
 
 target/bunnix.iso: $(ISO_TARGETS)
 	mkdir -p target/iso/boot
@@ -90,6 +91,7 @@ target/bunnix.iso: $(ISO_TARGETS)
 	install -m644 $(SYSLINUX)/isolinux.bin target/iso/isolinux.bin
 
 	cp sys/bunnix target/iso/boot/
+	cp target/initrd target/iso/boot/
 	cp boot/multiboot/bunnixboot.mb target/iso/boot/
 	cp boot/multiboot/syslinux.cfg target/iso/
 
