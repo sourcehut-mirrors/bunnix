@@ -30,8 +30,9 @@ SYSLINUX = /usr/share/syslinux
 
 # EFI boot configuration
 # Only required if ENABLE_EFI=1
-EFI_CC=x86-64-w64-migw32-gcc
-EFI_LD=x86-64-w64-mingw43-gcc
+EFI_TRIPLET=x86_64-w64-mingw32-
+EFI_CC=$(EFI_TRIPLET)gcc
+EFI_LD=$(EFI_TRIPLET)gcc
 
 OVMF=/usr/share/OVMF
 OVMF_FILE=OVMF.fd
