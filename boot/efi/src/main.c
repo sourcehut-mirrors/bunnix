@@ -82,6 +82,7 @@ efi_main(efi_handle image, efi_system_table *systab)
 	if (st != EFI_SUCCESS) {
 		bprintfln("Warning: failed to initialize GOP");
 	}
+
 	systab->BootServices->ExitBootServices(image, map_key);
 
 	init_mmu();

@@ -15,10 +15,14 @@ BUNNIX_LIBS=\
 
 BUNNIX_SRCS=$(call rwildcard,.,*.ha *.s *.sc)
 
-bunnix: $(BUNNIX_TARGETS) $(BUNNIX_SRCS)
+vt/alt-8x16.o: vt/alt-8x16
+	$(OBJCOPY) -I binary -O elf64-x86-64 $< $@
+
+bunnix: $(BUNNIX_TARGETS) $(BUNNIX_SRCS) vt/alt-8x16.o
 	$(KHAREBUILD) $(BUNNIX_LIBS) -o $@
 
 clean:
 	rm -f bunnix
+	rm -f vt/alt-8x16.o
 
 .PHONY: clean

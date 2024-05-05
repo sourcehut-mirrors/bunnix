@@ -5,11 +5,13 @@ use io;
 use log;
 use rt;
 use sched;
+use vt;
 
 @symbol("main") fn kmain(ctx: *boot::context) never;
 
 export fn main(ctx: *boot::context) never = {
 	// Set up a working console as early as possible
+	// TODO: refactor consoles generally
 	static let vgacons = dev::vga_console {
 		vtable = null: *io::vtable,
 		...
@@ -30,7 +32,27 @@ export fn main(ctx: *boot::context) never = {
 		...
 	};
 	cons = io::tee(&vgacons, &serialcons);
-	log::setcons(&cons);
+
+	if (ctx.fb.fb_base != 0) {
+		static let fbcons = vt::fb_console {
+			vtable = null: *io::vtable,
+			...
+		};
+		vt::fbcons_init(&fbcons, &ctx.fb);
+
+		static let cons2 = io::teefile {
+			vtable = null: *io::vtable,
+			primary = null: *io::file,
+			secondary = null: *io::file,
+			...
+		};
+		cons2 = io::tee(&fbcons, &cons);
+
+		log::setcons(&cons2);
+	} else {
+		log::setcons(&cons);
+	};
+
 	rt::abortcons(&log::write);
 
 	ctx = arch::mmu_init(ctx);
