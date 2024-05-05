@@ -13,7 +13,6 @@ You need the following:
 * e2fsprogs
 * mtools
 * sfdisk
-* syslinux
 * xorriso
 * qemu-system-x86\_64 and qemu-img
 
@@ -21,6 +20,10 @@ To build with EFI support:
 
 * binutils and gcc configured for x86-64-w64-migw32
 * OVMF (only requried if PREFER\_EFI=1, for qemu)
+
+To build with legacy boot support:
+
+* syslinux
 
 Copy conf/x86\_64.mk to config.mk and to taste before moving on.
 
