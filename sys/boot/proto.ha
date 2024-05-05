@@ -10,7 +10,7 @@ export type context = struct {
 	// Boot modules, if provided
 	mods: []module,
 	// Framebuffer, if available
-	fb: nullable *bootfb,
+	fb: bootfb,
 };
 
 // Memory purpose.

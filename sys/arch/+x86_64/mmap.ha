@@ -40,7 +40,10 @@ export fn mmu_init(bootctx: *boot::context) *boot::context = {
 	// Move boot context into upper half
 	bootctx = phys_tokernel(bootctx: uintptr): *boot::context;
 	bootctx.dtb = phys_tokernel(bootctx.dtb: uintptr);
-	bootctx.fb = phys_tokernel(bootctx.fb: uintptr): *boot::bootfb;
+
+	if (bootctx.fb.fb_base != 0) {
+		bootctx.fb.fb_base = phys_tokernel(bootctx.fb.fb_base): uintptr;
+	};
 
 	let cmdline = &bootctx.cmdline: *types::string;
 	cmdline.data = phys_tokernel(cmdline.data: uintptr): *[*]u8;
