@@ -176,8 +176,7 @@ target/disk.gpt.img: target/fs.fat.img target/fs.ext4.img
 
 # Emulator targets
 #
-QEMUARGS=\
-	$(QEMUFLAGS) -m 1G -no-reboot -no-shutdown
+QEMUARGS=$(QEMUFLAGS) -m 1G -no-reboot -no-shutdown
 
 ifeq ($(PREFER_EFI),0)
 

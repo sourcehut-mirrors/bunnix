@@ -69,7 +69,7 @@ export fn task_link(link: *task) void = {
 	// Don't double link tasks
 	assert(link.prev == null && link.next == null);
 
-	link.next = head;
+	link.prev = head;
 
 	match (head) {
 	case null =>

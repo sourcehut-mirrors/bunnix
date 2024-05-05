@@ -1,6 +1,5 @@
 use errors::{error, errno};
 use sched;
-use log;
 
 export def WNOHANG: int = 1;
 export def WUNTRACED: int = 2;
