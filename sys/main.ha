@@ -63,17 +63,22 @@ export fn main(ctx: *boot::context) void = {
 	};
 
 	// Mount root
-	log::kprintfln(KERN, "Mount root from {} as {}",
-		root_opts.device, root_opts.fstype);
-	const fs = match (fs::fs_open(&root_opts)) {
-	case let fs: *fs::superblock =>
-		yield fs;
-	case let err: error =>
-		log::kprintfln(KERN, "Error mounting root filesystem: {}",
-			strerror(err));
-		rt::halt();
+	if (len(ctx.mods) == 0) {
+		log::kprintfln(KERN, "Mount root from {} as {}",
+			root_opts.device, root_opts.fstype);
+		const fs = match (fs::fs_open(&root_opts)) {
+		case let fs: *fs::superblock =>
+			yield fs;
+		case let err: error =>
+			log::kprintfln(KERN, "Error mounting root filesystem: {}",
+				strerror(err));
+			rt::halt();
+		};
+		fs::mount_root(&root, fs);
+	} else {
+		log::kprintfln(KERN, "Mount root from initrd");
+		abort(); // TODO
 	};
-	fs::mount_root(&root, fs);
 
 	// Populate /dev
 	mountdev(&root);
