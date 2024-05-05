@@ -78,6 +78,9 @@ ISO_TARGETS=\
 	    boot/multiboot/syslinux.cfg \
 	    sys/bunnix
 
+target/initrd.tar.gz: $(ROOT)
+	cd $(ROOT) && tar -cvzf ../../$@ *
+
 target/bunnix.iso: $(ISO_TARGETS)
 	mkdir -p target/iso/boot
 
