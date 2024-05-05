@@ -1,6 +1,2 @@
 *.o
 bootx64.efi
-boot.img
-part.img
-test.img
-config.mk
