@@ -29,6 +29,8 @@ export fn mmu_init(bootctx: *boot::context) *boot::context = {
 	const low = getpml4e(kernel_pml4_phys, 0);
 	*low &= ~pml4e::P;
 
+	x86_64::wrcr3(kernel_pml4_phys);
+
 	const pml4e = getpml4e(kernel_pml4_phys, &kernel_start: uintptr);
 	kernel_pdpt_phys = *pml4e: uintptr & PADDR_MASK;
 	kernel_pdpt = phys_tokernel(kernel_pdpt_phys): *pdpt;

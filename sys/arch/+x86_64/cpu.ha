@@ -34,8 +34,9 @@ export fn init_cpu(i: size) void = {
 
 	x86_64::lgdt(&cpu.gdt, NGDT);
 	x86_64::ltr(SEG_TSS: u16 << 3);
-	x86_64::lidt(&idt);
+
 	x86_64::lseg(SEG_KDATA: u16 << 3);
+	x86_64::lidt(&idt);
 
 	x86_64::wrmsr(x86_64::MSR_IA32_KERNEL_GS_BASE, cpu: uintptr: u64);
 	x86_64::swapgs();
