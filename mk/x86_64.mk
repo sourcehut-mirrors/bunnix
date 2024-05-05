@@ -74,7 +74,8 @@ target/disk.gpt.img:
 	sfdisk $@ < tools/mkdisk-gpt
 
 target/initrd: $(ROOT)
-	cd $(ROOT) && tar -cvzf ../../$@ *
+	# TODO: gzip me
+	cd $(ROOT) && tar -cvf ../../$@ *
 
 ISO_TARGETS=\
 	    boot/multiboot/bunnixboot.mb \

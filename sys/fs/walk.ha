@@ -8,6 +8,8 @@ export type walkflag = enum uint {
 	// Terminate walk at the penultimate entry. The final path component can
 	// be identified with [[path::nextiter]] on the provided path iterator.
 	PARENT = 1 << 0,
+	// Disable access checks
+	NOACCESS = 1 << 1,
 };
 
 // Walks a single filesystem (i.e. does not perform a mountpoint lookup) to
@@ -37,15 +39,17 @@ export fn inode_walk(
 			return errno::NOENT;
 		};
 
-		if (cur.mode & io::mode::OTHER_X != 0) {
-			void; // ok
-		} else if (cur.mode & io::mode::USER_X != 0) {
-			void; // TODO
-		} else if (cur.mode & io::mode::GROUP_X != 0) {
-			void; // TODO
-		} else {
-			io::inode_unref(cur);
-			return errno::ACCES;
+		if (flag & walkflag::NOACCESS == 0) {
+			if (cur.mode & io::mode::OTHER_X != 0) {
+				void; // ok
+			} else if (cur.mode & io::mode::USER_X != 0) {
+				void; // TODO
+			} else if (cur.mode & io::mode::GROUP_X != 0) {
+				void; // TODO
+			} else {
+				io::inode_unref(cur);
+				return errno::ACCES;
+			};
 		};
 
 		const final = path::peekiter(iter) is void;

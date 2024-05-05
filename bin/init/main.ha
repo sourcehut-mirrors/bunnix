@@ -1,8 +1,13 @@
 use fmt;
+use os;
 use os::exec;
 
 export fn main() void = {
-	fmt::println("Hello from userspace!")!;
+	fmt::print("Userspace args: ")!;
+	for (let arg .. os::args) {
+		fmt::printf("{} ", arg)!;
+	};
+	fmt::println()!;
 
 	fmt::println("exec /bin/env FOO=bar BAR=baz /bin/env")!;
 	const cmd = exec::cmd("/bin/env", "FOO=bar", "BAR=baz", "/bin/env")!;

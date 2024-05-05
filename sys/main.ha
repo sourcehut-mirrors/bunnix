@@ -4,10 +4,8 @@ use uapi;		// link
 use arch;
 use boot;
 use dev;
-use dev::block;
 use errors::{error, errno, strerror};
 use fs;
-use fs::memfs;
 use io;
 use log;
 use mman;
@@ -32,7 +30,11 @@ export fn main(ctx: *boot::context) void = {
 	dev::scan();
 
 	// System startup
-	const args = match (shlex::split(ctx.cmdline)) {
+	const cmdline =
+		if (ctx.cmdline == "") "/bunnix"
+		else ctx.cmdline;
+
+	const args = match (shlex::split(cmdline)) {
 	case let s: []str =>
 		yield s;
 	case shlex::syntaxerr =>
@@ -76,8 +78,7 @@ export fn main(ctx: *boot::context) void = {
 		};
 		fs::mount_root(&root, fs);
 	} else {
-		log::kprintfln(KERN, "Mount root from initrd");
-		abort(); // TODO
+		mount_initrd(&root, &ctx.mods[0]);
 	};
 
 	// Populate /dev
@@ -95,7 +96,8 @@ export fn main(ctx: *boot::context) void = {
 
 	const file = io::inode_open(inode)!;
 
-	match (proc::exec(proc, file, [init], [])) {
+	args[0] = init;
+	match (proc::exec(proc, file, args, [])) {
 	case let err: error =>
 		log::kprintfln(KERN, "Error loading {}: {}",
 			init, strerror(err));
@@ -104,19 +106,4 @@ export fn main(ctx: *boot::context) void = {
 	};
 
 	abort(); // unreachable
-};
-
-fn mountdev(root: *fs::vfs) void = {
-	// TODO: We should probably have a devtmpfs thing and deal with
-	// hotplugging and such
-	const dev = memfs::new();
-	fs::mount_fs(root, dev, "/dev")!;
-	const devroot = fs::superblock_get_root(dev);
-	io::inode_mknod(devroot, "full", 0o666 | io::mode::CHR,
-		dev::mkdev(dev::devmajor::MEM, dev::devminor_mem::NOSPC))!;
-	io::inode_mknod(devroot, "null", 0o666 | io::mode::CHR,
-		dev::mkdev(dev::devmajor::MEM, dev::devminor_mem::NULL))!;
-	io::inode_mknod(devroot, "zero", 0o666 | io::mode::CHR,
-		dev::mkdev(dev::devmajor::MEM, dev::devminor_mem::ZERO))!;
-	block::mknodes(devroot)!;
 };

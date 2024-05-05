@@ -4,6 +4,7 @@ use io;
 use sort;
 use strings;
 
+// A memfs inode.
 export type inode = struct {
 	io::inode,
 	sb: *superblock,
@@ -114,7 +115,6 @@ fn inode_lookup(ino: *io::inode, name: str) (*io::inode | error) = {
 		return dent.inode;
 	};
 };
-
 
 fn inode_mkdir(
 	ino: *io::inode,
