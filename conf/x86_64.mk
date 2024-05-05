@@ -22,7 +22,7 @@ ENABLE_LEGACY=1
 
 # 1: make nographic et al will boot with EFI
 # 0: make nographic et al will boot with legacy boot
-PREFER_EFI=1
+PREFER_EFI=0
 
 # Legacy boot configuration
 # Only required if ENABLE_LEGACY=1

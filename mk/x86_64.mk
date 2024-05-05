@@ -35,7 +35,13 @@ ISO_TARGETS+=target/iso/ldlinux.c32
 ISO_TARGETS+=target/iso/libcom32.c32
 ISO_TARGETS+=target/iso/isolinux.bin
 
-MKISOFSFLAGS+=-b isolinux.bin
+MKISOFSFLAGS+=\
+	-isohybrid-mbr $(SYSLINUX)/isohdpfx.bin \
+	-eltorito-boot isolinux.bin \
+	-eltorito-catalog boot.cat  \
+	-no-emul-boot \
+	-boot-load-size 4 \
+	-boot-info-table
 
 MBR=$(SYSLINUX)/mbr.bin
 
@@ -55,8 +61,29 @@ boot/efi/bootx64.efi:
 ROOT_TARGETS+=$(ROOT)/boot/EFI/boot/bootx64.efi
 
 ISO_TARGETS+=target/iso/EFI/boot/bootx64.efi
+ISO_TARGETS+=target/iso/EFI/isoboot.img
 
 BOOT_EFI=boot/efi/bootx64.efi
+
+ifeq ($(ENABLE_LEGACY),1)
+
+# Prepare dual EFI/legacy boot ISO
+MKISOFSFLAGS+=\
+	-eltorito-alt-boot \
+	-e EFI/isoboot.img \
+	-no-emul-boot \
+	-isohybrid-gpt-basdat
+
+else
+
+# EFI only
+MKISOFSFLAGS+=\
+	-efi-boot-part \
+	--efi-boot-image \
+	-e EFI/isoboot.img \
+	-no-emul-boot
+
+endif
 
 else
 
@@ -120,6 +147,10 @@ target/iso/%.bin: $(SYSLINUX)/%.bin
 	cp $< $@
 
 # EFI support
+target/iso/EFI/isoboot.img: target/fs.fat.img
+	mkdir -p $$(dirname $@)
+	cp $< $@
+
 target/iso/EFI/boot/bootx64.efi: boot/efi/bootx64.efi
 	mkdir -p $$(dirname $@)
 	cp $< $@
@@ -132,9 +163,14 @@ target/iso: $(ISO_TARGETS)
 	touch target/iso
 
 target/bunnix.iso: target/iso
-	mkisofs -o $@ $(MKISOFSFLAGS) -c boot.cat -l \
-		-no-emul-boot -boot-load-size 4 -boot-info-table target/iso
-	isohybrid $@
+	mkisofs -o $@ $(MKISOFSFLAGS) \
+		-full-iso9660-filenames \
+		-joliet \
+		-rational-rock \
+		-sysid BUNNIX \
+		-volid "Bunnix" \
+		-follow-links \
+		target/iso
 
 clean-target:
 	rm -rf target
@@ -145,7 +181,7 @@ clean: clean-target
 # Disks for emulator use
 target/fs.fat.img: $(ROOT)
 	mkdir -p target
-	qemu-img create -f raw $@ 48M
+	qemu-img create -f raw $@ 16M
 	mkdosfs $@
 	mmd -i $@ ::EFI
 	mmd -i $@ ::EFI/boot
@@ -192,12 +228,7 @@ else
 
 QEMUARGS+=\
 	-L $(OVMF) -bios $(OVMF_FILE) \
-	-drive file=target/bunnix.iso,format=raw \
-	-drive id=disk-mbr,file=target/disk.mbr.img,if=none,format=raw \
-	-drive id=disk-gpt,file=target/disk.gpt.img,if=none,format=raw \
-	-device ahci,id=ahci \
-	-device ide-hd,drive=disk-gpt,bus=ahci.0 \
-	-device ide-hd,drive=disk-mbr,bus=ahci.1
+	-cdrom target/bunnix.iso
 
 endif
 
