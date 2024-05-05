@@ -57,6 +57,10 @@ export fn earlyinit() void = {
 	init_idt();
 	init_cpu(0);
 
+	let efer = x86_64::rdmsr(x86_64::MSR_EFER);
+	efer |= 1; // Enable SCE
+	x86_64::wrmsr(x86_64::MSR_EFER, efer);
+
 	// Set up MSRs for syscalls etc
 	x86_64::wrmsr(x86_64::MSR_IA32_STAR, 0x08 << 32 | 0x10 << 48);
 	x86_64::wrmsr(x86_64::MSR_IA32_LSTAR, &syscall: uintptr: u64);
