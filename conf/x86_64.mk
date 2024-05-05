@@ -16,3 +16,9 @@ DTC = $(TRIPLET)dtc
 CC = $(TRIPLET)gcc
 
 SYSLINUX = /usr/share/syslinux
+
+EFI_CC=x86-64-w64-migw32-gcc
+EFI_LD=x86-64-w64-mingw43-gcc
+
+OVMF=/usr/share/OVMF
+OVMF_FILE=OVMF.fd

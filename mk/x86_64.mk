@@ -82,7 +82,7 @@ ISO_TARGETS=\
 	    sys/bunnix \
 	    target/initrd
 
-target/bunnix.iso: $(ISO_TARGETS)
+target/iso: $(ISO_TARGETS)
 	mkdir -p target/iso/boot
 
 	install -m644 $(SYSLINUX)/mboot.c32 target/iso/mboot.c32
@@ -95,6 +95,7 @@ target/bunnix.iso: $(ISO_TARGETS)
 	cp boot/multiboot/bunnixboot.mb target/iso/boot/
 	cp boot/multiboot/syslinux.cfg target/iso/
 
+target/bunnix.iso: target/iso
 	mkisofs -o $@ -b isolinux.bin -c boot.cat -l \
 		-no-emul-boot -boot-load-size 4 -boot-info-table target/iso
 	isohybrid $@

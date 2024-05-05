@@ -9,7 +9,9 @@ You need the following:
 * GNU make
 * An up-to-date [Hare](https://harelang.org) toolchain. Bunnix tracks Hare
   master, not the latest stable release.
-* binutils and gcc configured for an x86_64-elf target
+* binutils and gcc configured for x86_64-elf (kernel & legacy boot)
+* binutils and gcc configured for x86-64-w64-migw32 (EFI boot)
+* OVMF (EFI boot)
 * e2fsprogs
 * mtools
 * sfdisk
