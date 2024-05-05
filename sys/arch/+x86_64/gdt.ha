@@ -32,6 +32,7 @@ fn init_gdt(cpu: *cpu) void = {
 
 fn init_tss(cpu: *cpu) void = {
 	cpu.tss = x86_64::tss { ... };
+	cpu.tss.ist[0] = &_kernel_stack_top: uintptr;
 };
 
 // Sets the current kernel stack pointer.
