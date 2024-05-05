@@ -12,20 +12,17 @@ clean: clean-boot
 
 all: target/bunnix.iso
 
-target/fs.fat.img:
-	mkdir -p target
-	qemu-img create -f raw $@ 48M
-	mkdosfs $@
-	# Add some files for interest
-	mcopy -i $@ README.md ::README.md
-	mcopy -i $@ COPYING ::COPYING
+ROOT=target/root
+ROOT_TARGETS=\
+	$(ROOT)/boot/bunnix \
+	$(ROOT)/boot/bunnixboot.mb \
+	$(ROOT)/boot/syslinux/syslinux.cfg
 
-target/fs.ext4.img:
-	mkdir -p target/root/
-
+$(ROOT): $(ROOT_TARGETS)
+	mkdir -p $(ROOT)
 	for d in \
 		bin \
-		boot \
+		boot/syslinux \
 		dev \
 		etc \
 		lib \
@@ -36,11 +33,32 @@ target/fs.ext4.img:
 	do mkdir -p target/root/$$d; \
 	done
 
-	make -C bin install DESTDIR=../target/root
-	git archive HEAD | tar -C target/root/src -x
+	make -C bin install DESTDIR=../$(ROOT)
+	git archive HEAD | tar -C $(ROOT)/src -x
 
+$(ROOT)/boot/bunnix: sys/bunnix
+	mkdir -p $(ROOT)/boot
+	cp $< $@
+
+$(ROOT)/boot/bunnixboot.mb: sys/bunnix
+	mkdir -p $(ROOT)/boot
+	cp $< $@
+
+$(ROOT)/boot/syslinux/syslinux.cfg: boot/multiboot/syslinux.cfg
+	mkdir -p $(ROOT)/boot/syslinux
+	cp $< $@
+
+target/fs.fat.img:
+	mkdir -p target
 	qemu-img create -f raw $@ 48M
-	mkfs.ext4 -d target/root/ -O^metadata_csum $@
+	mkdosfs $@
+	# Add some files for interest
+	mcopy -i $@ README.md ::README.md
+	mcopy -i $@ COPYING ::COPYING
+
+target/fs.ext4.img: $(ROOT)
+	qemu-img create -f raw $@ 48M
+	mkfs.ext4 -d $(ROOT) -O^metadata_csum $@
 
 .PHONY: target/fs.ext4.img
 .PHONY: target/fs.fat.img
@@ -56,20 +74,21 @@ target/disk.gpt.img:
 	sfdisk $@ < tools/mkdisk-gpt
 
 ISO_TARGETS=\
-	boot/multiboot/bunnixboot.mb \
-	boot/multiboot/syslinux.cfg \
-	sys/bunnix
+	    boot/multiboot/bunnixboot.mb \
+	    boot/multiboot/syslinux.cfg \
+	    sys/bunnix
 
 target/bunnix.iso: $(ISO_TARGETS)
-	mkdir -p target/iso
-	cp boot/multiboot/syslinux.cfg target/iso/syslinux.cfg
+	mkdir -p target/iso/boot
+
 	install -m644 $(SYSLINUX)/mboot.c32 target/iso/mboot.c32
 	install -m644 $(SYSLINUX)/ldlinux.c32 target/iso/ldlinux.c32
 	install -m644 $(SYSLINUX)/libcom32.c32 target/iso/libcom32.c32
 	install -m644 $(SYSLINUX)/isolinux.bin target/iso/isolinux.bin
 
-	cp boot/multiboot/bunnixboot.mb target/iso/bunnixboot.mb
-	cp sys/bunnix target/iso/bunnix
+	cp sys/bunnix target/iso/boot/
+	cp boot/multiboot/bunnixboot.mb target/iso/boot/
+	cp boot/multiboot/syslinux.cfg target/iso/
 
 	mkisofs -o $@ -b isolinux.bin -c boot.cat -l \
 		-no-emul-boot -boot-load-size 4 -boot-info-table target/iso
