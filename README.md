@@ -9,15 +9,18 @@ You need the following:
 * GNU make
 * An up-to-date [Hare](https://harelang.org) toolchain. Bunnix tracks Hare
   master, not the latest stable release.
-* binutils and gcc configured for x86_64-elf (kernel & legacy boot)
-* binutils and gcc configured for x86-64-w64-migw32 (EFI boot)
-* OVMF (EFI boot)
+* binutils and gcc configured for x86_64-elf
 * e2fsprogs
 * mtools
 * sfdisk
 * syslinux
 * xorriso
 * qemu-system-x86\_64 and qemu-img
+
+To build with EFI support:
+
+* binutils and gcc configured for x86-64-w64-migw32
+* OVMF (only requried if PREFER\_EFI=1, for qemu)
 
 Copy conf/x86\_64.mk to config.mk and to taste before moving on.
 
