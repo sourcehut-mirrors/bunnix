@@ -11,7 +11,7 @@ arch.idle:
 	sti
 _idle:
 	hlt
-	jmp arch.idle
+	jmp _idle
 
 .text
 .global rt.fetch_add
