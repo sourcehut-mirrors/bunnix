@@ -57,14 +57,14 @@ export def DT_SOCK = 0o140000;
 export def AT_FDCWD: int = -100;
 
 export type openat_options = struct {
-	dirfd: i64,
+	dirfd: int,
 	path: str,
 	flags: int,
 	mode: uint,
 };
 
 export type mkdirat_options = struct {
-	dirfd: i64,
+	dirfd: int,
 	path: str,
 	mode: uint,
 };

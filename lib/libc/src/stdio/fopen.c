@@ -18,23 +18,20 @@ FILE *fopen(const char *restrict filename, const char *restrict mode)
 	/* Compute the flags to pass to open() */
 	flags = __fmodeflags(mode);
 
-	// TODO
-	(void)fd;
-	(void)flags;
-	(void)f;
-	errno = ENOTSUP;
-	return 0;
-
-	/*
-	fd = sys_open(filename, flags, 0666);
+	struct __openat_options opts = {
+		.dirfd = AT_FDCWD,
+		.path = sys_string(filename, strlen(filename)),
+		.flags = flags,
+		.mode = 0,
+	};
+	fd = syscall(SYS_openat, &opts);
 	if (fd < 0) return 0;
-	if (flags & O_CLOEXEC)
-		__syscall(SYS_fcntl, fd, F_SETFD, FD_CLOEXEC);
+
+	fd = syscall(SYS_openat, &opts);
 
 	f = __fdopen(fd, mode);
 	if (f) return f;
 
-	__syscall(SYS_close, fd);
+	syscall(SYS_close, fd);
 	return 0;
-	*/
 }

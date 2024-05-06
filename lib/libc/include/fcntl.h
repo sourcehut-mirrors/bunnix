@@ -10,6 +10,7 @@ extern "C" {
 #define __NEED_off_t
 #define __NEED_pid_t
 #define __NEED_mode_t
+#define __NEED___string_t
 
 #ifdef _GNU_SOURCE
 #define __NEED_size_t
@@ -35,6 +36,13 @@ int open(const char *, int, ...);
 int openat(int, const char *, int, ...);
 int posix_fadvise(int, off_t, off_t, int);
 int posix_fallocate(int, off_t, off_t);
+
+struct __openat_options {
+	int dirfd;
+	__string_t path;
+	int flags;
+	mode_t mode;
+};
 
 #define O_SEARCH   O_PATH
 #define O_EXEC     O_PATH

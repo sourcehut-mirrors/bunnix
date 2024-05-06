@@ -7,14 +7,14 @@ FILE *__fopen_rb_ca(const char *filename, FILE *f, unsigned char *buf, size_t le
 {
 	memset(f, 0, sizeof *f);
 
-	// TODO
-	errno = ENOTSUP;
-	return 0;
-
-	/*
-	f->fd = sys_open(filename, O_RDONLY|O_CLOEXEC);
+	struct __openat_options opts = {
+		.dirfd = AT_FDCWD,
+		.path = sys_string(filename, strlen(filename)),
+		.flags = O_RDONLY|O_CLOEXEC,
+		.mode = 0,
+	};
+	f->fd = syscall(SYS_openat, &opts);
 	if (f->fd < 0) return 0;
-	__syscall(SYS_fcntl, f->fd, F_SETFD, FD_CLOEXEC);
 
 	f->flags = F_NOWR | F_PERM;
 	f->buf = buf + UNGET;
@@ -25,5 +25,4 @@ FILE *__fopen_rb_ca(const char *filename, FILE *f, unsigned char *buf, size_t le
 	f->lock = -1;
 
 	return f;
-	*/
 }

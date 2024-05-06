@@ -308,6 +308,19 @@ struct iovec { void *iov_base; size_t iov_len; };
 #endif
 
 
+/* Bunnix syscall ABI */
+#if defined(__NEED___string_t) && !defined(__DEFINED___string_t)
+typedef struct __string { const char *data; unsigned long length; unsigned long cap; } __string_t;
+#define __DEFINED___string_t
+#endif
+
+
+#if defined(__NEED___slice_t) && !defined(__DEFINED___slice_t)
+typedef struct __slice { const void *data; unsigned long length; unsigned long cap; } __slice_t;
+#define __DEFINED___slice_t
+#endif
+
+
 #undef _Addr
 #undef _Int64
 #undef _Reg

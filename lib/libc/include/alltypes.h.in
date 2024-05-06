@@ -64,6 +64,11 @@ TYPEDEF struct __sigset_t { unsigned long __bits[128/sizeof(long)]; } sigset_t;
 
 STRUCT iovec { void *iov_base; size_t iov_len; };
 
+/* Bunnix syscall ABI */
+TYPEDEF struct __string { const char *data; unsigned long length; unsigned long cap; } __string_t;
+
+TYPEDEF struct __slice { const void *data; unsigned long length; unsigned long cap; } __slice_t;
+
 #undef _Addr
 #undef _Int64
 #undef _Reg
