@@ -17,21 +17,27 @@ $(SYSROOT)/boot/bunnix: sys/bunnix
 $(SYSROOT): $(SYSROOT)/boot/bunnix
 
 # Userspace
-$(SYSROOT):
+lib:
+	make -C lib install DESTDIR=../$(SYSROOT)
+.PHONY: lib
+
+$(SYSROOT)/bin: lib
+	mkdir -p $(SYSROOT)/bin
+	make -C bin install DESTDIR=../$(SYSROOT)
+
+$(SYSROOT): $(SYSROOT)/bin
 	mkdir -p $(SYSROOT)
 	for d in \
 		bin \
 		boot \
 		dev \
 		etc \
-		include \
 		lib \
 		proc \
 		tmp \
 		var; \
 	do mkdir -p $(SYSROOT)/$$d; \
 	done
-	make -C bin install DESTDIR=../$(SYSROOT)
 
 target/initrd: $(SYSROOT)
 	# TODO: gzip me

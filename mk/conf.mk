@@ -1,8 +1,7 @@
 include $(ROOT)config.mk
 include $(ROOT)mk/$(ARCH).conf.mk
 
-# https://stackoverflow.com/questions/2483182/recursive-wildcards-in-gnu-make
-rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
+SYSROOT=$(ROOT)target/root/
 
 # Kernel build configuration
 KHAREPATH=$(ROOT)sys/
@@ -19,9 +18,12 @@ HAREPATH=$(ROOT)lib/hare/
 HAREFLAGS=-a$(HAREARCH) -T^+$(HAREARCH)+bunnix -R
 HAREBUILD=HAREPATH=$(HAREPATH) $(HARE) build $(HAREFLAGS)
 
-# TODO: Generate me?
-HARE_SOURCES=$(call rwildcard,$(ROOT)lib/hare/,*.ha *.s *.sc)
+# C build configuration
+USER_CFLAGS=--sysroot=$(SYSROOT) -std=c11 -Wall -Wextra -Wpedantic -I$(SYSROOT)/usr/include
+USER_CBUILD=$(CC) $(USER_CFLAGS)
 
-SYSROOT=$(ROOT)target/root/
-
+# Various macros
 MKDIR=mkdir -p $$(dirname $@)
+# https://stackoverflow.com/questions/2483182/recursive-wildcards-in-gnu-make
+rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
+HARE_SOURCES=$(call rwildcard,$(ROOT)lib/hare/,*.ha *.s *.sc)

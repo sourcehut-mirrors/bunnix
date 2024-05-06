@@ -1,0 +1,3 @@
+libc.a
+crt0.o
+/out
