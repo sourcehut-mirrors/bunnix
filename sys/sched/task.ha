@@ -26,7 +26,7 @@ export type taskstate = struct {
 	state: task_state,
 	restore: arch::restore_point,
 	next: nullable *task,
-	prev: nullable *task,
+	prev: nullable *nullable *task,
 	user: nullable *opaque,
 };
 

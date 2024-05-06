@@ -30,6 +30,9 @@ export fn schedule() bool = {
 		switch_idle();
 	};
 
+	// Ensure that the task is linked and runnable
+	assert(next.next != null || next.prev != null);
+
 	if (next == prev) {
 		return false;
 	};
@@ -69,29 +72,30 @@ export fn task_link(link: *task) void = {
 	// Don't double link tasks
 	assert(link.prev == null && link.next == null);
 
-	link.prev = head;
-
 	match (head) {
 	case null =>
 		head = link;
-	case let next: *task =>
-		next.prev = link;
-		head = link;
+		link.prev = &head;
+	case let task: *task =>
+		link.prev = &task.next;
+		task.next = link;
 	};
 };
 
 // Removes a task from the scheduler.
 export fn task_unlink(link: *task) void = {
-	match (link.prev) {
-	case let prev: *task =>
-		prev.next = link.next;
-	case null =>
-		head = link.next;
+	// Don't double unlink tasks
+	if (link.prev == null) {
+		assert(link.next == null);
+		return;
 	};
+
+	const prev = link.prev as *nullable *task;
+	*prev = link.next;
 
 	match (link.next) {
 	case let next: *task =>
-		next.prev = link.prev;
+		next.prev = prev;
 	case null => void;
 	};
 

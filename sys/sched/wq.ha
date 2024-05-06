@@ -1,12 +1,10 @@
 use arch;
-// XXX TEMP
-use log;
 
 export type wq_func = fn(link: *wq_link, user: nullable *opaque) void;
 
 export type wq_link = struct {
 	next: nullable *wq_link,
-	prev: nullable *wq_link,
+	prev: nullable *nullable *wq_link,
 	user: nullable *opaque,
 	func: nullable *wq_func,
 };
@@ -23,9 +21,12 @@ export fn wait(
 	func: nullable *wq_func = null,
 	user: nullable *opaque = null,
 ) bool = {
+	assert(link.prev == null && link.next == null,
+		"sched::wait race on wq_link");
 	const task = match (current()) {
 	case null =>
-		// Attempted to wait while scheduler was not active
+		// Attempted to wait while scheduler was not active, pause and
+		// return immediately (busy loop)
 		arch::pause();
 		return false;
 	case let t: *task =>
@@ -42,14 +43,13 @@ export fn wait(
 	link.func = func;
 	link.user = user;
 
-	link.prev = null;
-	link.next = head.head;
 	match (head.head) {
-	case let next: *wq_link =>
-		next.prev = link;
-		head.head = link;
 	case null =>
 		head.head = link;
+		link.prev = &head.head;
+	case let wq: *wq_link =>
+		link.prev = &wq.next;
+		wq.next = link;
 	};
 
 	return schedule();
@@ -84,16 +84,18 @@ export fn signal(head: *wq_head, user: nullable *opaque = null) void = {
 // Unlinks this wait queue entry from the wait list, without waking or signaling
 // it.
 export fn wq_unlink(head: *wq_head, link: *wq_link) void = {
-	match (link.prev) {
-	case let prev: *wq_link =>
-		prev.next = link.next;
-	case null =>
-		head.head = null;
+	// Don't double unlink wqs
+	if (link.prev == null) {
+		assert(link.next == null);
+		return;
 	};
+
+	const prev = link.prev as *nullable *wq_link;
+	*prev = link.next;
 
 	match (link.next) {
 	case let next: *wq_link =>
-		next.prev = link.prev;
+		next.prev = prev;
 	case null => void;
 	};
 
