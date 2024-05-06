@@ -6,7 +6,8 @@ int fputws(const wchar_t *restrict ws, FILE *restrict f)
 {
 	unsigned char buf[BUFSIZ];
 	size_t l=0;
-	locale_t *ploc = &CURRENT_LOCALE, loc = *ploc;
+	locale_t cur = CURRENT_LOCALE;
+	locale_t *ploc = &cur, loc = *ploc;
 
 	FLOCK(f);
 

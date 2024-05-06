@@ -43,6 +43,7 @@ extern "C" {
 
 // libc-internal errors
 #define EILSEQ		256
+#define ENOMSG		257
 
 #ifdef __GNUC__
 __attribute__((const))

@@ -13,7 +13,8 @@ CFLAGS = -std=c11 -g -nostdinc -ffreestanding \
 	 -Wall -Wextra -Werror \
 	 -Wno-unused-parameter -Wno-sign-compare -Wno-parentheses \
 	 -Wno-implicit-fallthrough -Wno-dangling-pointer \
-	 -Wno-unused-function
+	 -Wno-unused-function -Wno-unused-but-set-variable \
+	 -Wno-unknown-pragmas -Wno-missing-braces
 CFLAGS += -D_XOPEN_SOURCE=700 -Isrc/include/ -Isrc/internal/ -Iout/include/ -Iarch/$(ARCH)/ -Iarch/generic/ -Iinclude/
 LDFLAGS = -Wl,--sort-section,alignment -Wl,--sort-common -Wl,--gc-sections -Wl,--hash-style=both -Wl,--no-undefined -Wl,--exclude-libs=ALL
 
@@ -42,15 +43,20 @@ src/%.o: src/%.s
 
 DIRS=\
      ctype \
-     errno \
      env \
+     errno \
      exit \
      internal \
+     locale \
+     math \
+     multibyte \
      stdio \
      string \
      unistd
 
 OBJECTS = $(foreach dir,$(DIRS),$(patsubst %.c,%.o,$(wildcard src/$(dir)/*.c)))
+OBJECTS += $(foreach dir,$(DIRS),$(patsubst %.c,%.o,$(wildcard src/$(dir)/$(ARCH)*.c)))
+OBJECTS += $(foreach dir,$(DIRS),$(patsubst %.c,%.o,$(wildcard src/$(dir)/$(ARCH)*.S)))
 
 libc.a: $(OBJECTS)
 	@printf "AR\t%s\n" "$@"

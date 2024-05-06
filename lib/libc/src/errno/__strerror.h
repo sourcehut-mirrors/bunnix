@@ -41,3 +41,4 @@ E(ECHILD,       "No child process")
 // libc-internal errors
 
 E(EILSEQ,       "Illegal byte sequence")
+E(ENOMSG,       "No message of desired type")
