@@ -1,3 +1,4 @@
+use arch;
 use bytes;
 use errors::{error, errno};
 use format::elf;
@@ -58,18 +59,25 @@ fn phdr_load(
 		prot |= mman::prot::EXEC;
 	};
 
-	assert(phdr.p_vaddr % 4096 == 0); // TODO
-	let base = mman::mmap(vmm, 0,
-		phdr.p_vaddr: uintptr,
-		phdr.p_memsz,
-		prot,
+	let p_filesz = phdr.p_filesz: size;
+	let p_memsz = phdr.p_memsz: size;
+	let p_vaddr = phdr.p_vaddr: uintptr;
+	let p_offs = 0z;
+
+	if (p_vaddr & arch::PAGEMASK != 0) {
+		p_offs = (p_vaddr & arch::PAGEMASK): size;
+		p_vaddr &= ~arch::PAGEMASK;
+		p_memsz += p_offs;
+	};
+
+	let base = mman::mmap(vmm, 0, p_vaddr, p_memsz, prot,
 		mman::flag::ANON | mman::flag::USER)?;
 	let data = base: *[*]u8;
 	io::seek(image, phdr.p_offset: i64, io::whence::SET)?;
-	io::readall(image, data[..phdr.p_filesz])?;
+	io::readall(image, data[p_offs..p_offs+p_filesz])?;
 
 	if (phdr.p_flags & elf::pf::W == 0) {
 		prot &= ~mman::prot::WRITE;
-		mman::mprotect(vmm, phdr.p_vaddr: uintptr, phdr.p_memsz, prot)!;
+		mman::mprotect(vmm, p_vaddr: uintptr, p_memsz, prot)!;
 	};
 };

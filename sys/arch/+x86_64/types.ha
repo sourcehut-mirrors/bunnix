@@ -11,3 +11,6 @@ export def PAGESIZE: size = x86_64::PAGESIZE;
 
 // Page size, as a uintptr.
 export def UPAGESIZE: uintptr = x86_64::UPAGESIZE;
+
+// Masks the low bits of page address.
+export def PAGEMASK: uintptr = 0xFFF;
