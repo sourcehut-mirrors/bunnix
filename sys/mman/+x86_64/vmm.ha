@@ -49,12 +49,6 @@ export fn vmm_map(vmm: *vmm) void = {
 	x86_64::wrcr3(vmm.pml4);
 };
 
-fn finish_iter(ent: *pte, vaddr: uintptr, user: nullable *opaque) void = {
-	const phys = *ent: uintptr & PADDR_MASK;
-	unref(phys, PAGESIZE);
-	*ent &= ~pte::P;
-};
-
 // Returns the physical memory address mapped to this virtual address.
 export fn mmap_phys(vmm: *vmm, vaddr: uintptr) uintptr = {
 	const pte = arch::getpte(vmm.pml4, vaddr) as *pte;
