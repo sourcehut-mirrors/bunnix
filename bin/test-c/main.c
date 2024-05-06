@@ -2,10 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-int main() {
+int main(int argc, char *argv[]) {
 	const char *lang = "C";
-	printf("Hello userspace from %s!\n", lang);
+	printf("Hello userspace from %s! argc: %d\n", lang, argc);
+
+	for (int i = 0; i < argc; ++i) {
+		printf("argc[%d]: %s\n", i, argv[i]);
+	}
 
 	printf("Open /usr/include/stdio.h\n");
 	FILE *f = fopen("/usr/include/stdio.h", "r");
@@ -31,5 +36,9 @@ int main() {
 	printf("First 256 bytes: %s\n", buf);
 
 	fclose(f);
+
+	printf("execl /bin/echo Hello world!\n");
+	execl("/bin/echo", "/bin/echo", "Hello world!", NULL);
+
 	return 0;
 }

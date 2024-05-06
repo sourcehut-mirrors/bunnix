@@ -58,6 +58,7 @@ DIRS=\
      misc \
      mman \
      multibyte \
+     process \
      regex \
      setjmp \
      stat \

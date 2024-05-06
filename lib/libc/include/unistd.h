@@ -33,6 +33,8 @@ extern "C" {
 #define __NEED_pid_t
 #define __NEED_intptr_t
 #define __NEED_useconds_t
+#define __NEED___string_t
+#define __NEED___slice_t
 
 #include <bits/alltypes.h>
 
@@ -84,6 +86,18 @@ char *getcwd(char *, size_t);
 unsigned alarm(unsigned);
 unsigned sleep(unsigned);
 int pause(void);
+
+#define EXEC_FEXECVE 1 << 0
+
+struct __exec_options {
+	int flags;
+	union {
+		__string_t path;
+		int fd;
+	};
+	__slice_t args;
+	__slice_t environ;
+};
 
 pid_t fork(void);
 pid_t _Fork(void);

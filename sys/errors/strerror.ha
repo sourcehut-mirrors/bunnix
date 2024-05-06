@@ -70,5 +70,7 @@ export fn strerror(err: error) str = {
 		return "Resource temporarily unavailalbe";
 	case errno::CHILD =>
 		return "No child process";
+	case errno::NAMETOOLONG =>
+		return "Filename too long";
 	};
 };

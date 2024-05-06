@@ -40,6 +40,7 @@ extern "C" {
 #define EINTR		31
 #define EAGAIN		32
 #define ECHILD		33
+#define ENAMETOOLONG	34
 
 // libc-internal errors
 #define EILSEQ		256

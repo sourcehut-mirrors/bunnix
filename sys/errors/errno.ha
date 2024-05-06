@@ -34,6 +34,7 @@ export type errno = enum uint {
 	INTR,
 	AGAIN,
 	CHILD,
+	NAMETOOLONG,
 };
 
 // Error condition.
