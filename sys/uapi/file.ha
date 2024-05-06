@@ -42,7 +42,7 @@ fn validate_dirfd(fd: i64) (*io::file | error) = {
 };
 
 fn sys_readv(fd: i64, vecs: *[*]vector, nvec: u64) (u64 | error) = {
-	validate_vectors(vecs, nvec, false)?;
+	validate_vectors(vecs, nvec, true)?;
 	const vecs = vecs[..nvec];
 	const file = validate_file(fd)?;
 
@@ -64,7 +64,7 @@ fn sys_readv(fd: i64, vecs: *[*]vector, nvec: u64) (u64 | error) = {
 };
 
 fn sys_writev(fd: i64, vecs: *[*]vector, nvec: u64) (u64 | error) = {
-	validate_vectors(vecs, nvec, true)?;
+	validate_vectors(vecs, nvec)?;
 	const vecs = vecs[..nvec];
 	const file = validate_file(fd, true)?;
 
