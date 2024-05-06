@@ -56,6 +56,10 @@ export def DT_SOCK = 0o140000;
 
 export def AT_FDCWD: int = -100;
 
+export def AT_SYMLINK_NOFOLLOW: int = 0x100;
+export def AT_REMOVEDIR: int = 0x200;
+export def AT_EMPTY_PATH: int = 0x1000;
+
 export type openat_options = struct {
 	dirfd: int,
 	path: str,
@@ -74,11 +78,13 @@ export type linkat_options = struct {
 	oldpath: str,
 	newdirfd: int,
 	newpath: str,
+	flags: int,
 };
 
 export type unlinkat_options = struct {
 	dirfd: int,
 	path: str,
+	flags: int,
 };
 
 export type dirent_meta = struct {
@@ -91,6 +97,29 @@ export type dirent_meta = struct {
 export type dirent = struct {
 	dirent_meta,
 	name: [*]u8,
+};
+
+export type st = struct {
+	dev: u64,
+	ino: u64,
+	mode: uint,
+	nlink: u64,
+	uid: uint,
+	gid: uint,
+	rdev: u64,
+	sz: u64,
+	blksz: u64,
+	blocks: u64,
+	atime: timespec,
+	mtime: timespec,
+	ctime: timespec,
+};
+
+export type fstatat_options = struct {
+	dirfd: int,
+	path: str,
+	stat: *st,
+	flags: int,
 };
 
 export type timespec = struct {

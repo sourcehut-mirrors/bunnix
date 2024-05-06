@@ -247,3 +247,44 @@ fn sys_getdents(fd: i64, buf: *[*]u8, bufsz: size) (u64 | error) = {
 
 	return n: u64;
 };
+
+fn populate_stat(statbuf: *st, ino: *io::inode) void = {
+	*statbuf = st {
+		ino = ino.ino,
+		dev = ino.dev,
+		mode = ino.mode,
+		nlink = 0,			// TODO
+		uid = ino.uid,
+		gid = ino.gid,
+		rdev = ino.rdev,
+		sz = ino.bytes,
+		blksz = 512,			// TODO
+		blocks = ino.blocks,
+		atime = timespec { ... },	// TODO
+		mtime = timespec { ... },	// TODO
+		ctime = timespec { ... },	// TODO
+	};
+};
+
+fn sys_fstatat(opts: *fstatat_options) (u64 | error) = {
+	validate_user_addr(opts, size(fstatat_options))?;
+	validate_user_addr(opts.stat, size(st), true)?;
+	validate_user_string(opts.path)?;
+
+	const fd = if (opts.flags & AT_EMPTY_PATH != 0) {
+		yield validate_file(opts.dirfd)?;
+	} else {
+		abort(); // TODO
+	};
+
+	match (fd.inode) {
+	case let ino: *io::inode =>
+		populate_stat(opts.stat, ino);
+	case null =>
+		// TODO: We should never have a [[file]] without an inode, so we
+		// should drop nullable in the future
+		return errno::BADF: error;
+	};
+
+	return 0u64;
+};
