@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 int main() {
-	puts("Hello userspace from C!");
+	const char *lang = "C";
+	printf("Hello userspace from %s!\n", lang);
 	return 0;
 }
