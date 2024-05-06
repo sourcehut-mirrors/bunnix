@@ -5,7 +5,6 @@ use mman;
 use io;
 use sched;
 use strings;
-use log;
 
 // Loads an image into a process and executes it.
 //
@@ -17,8 +16,6 @@ export fn exec(
 	env: []str,
 ) (void | error) = {
 	// TODO: Better error handling
-	defer io::unref(file);
-
 	io::seek(file, 0, io::whence::SET)?;
 
 	// Stash these in the kernel heap before switching vmms
@@ -62,6 +59,17 @@ export fn exec(
 	};
 
 	// Note: exec cannot fail beyond this point
+
+	for (let fd &.. proc.fds) {
+		if (fd.file == null) {
+			continue;
+		};
+		if (fd.oflag & io::flag::CLOEXEC == 0) {
+			continue;
+		};
+		io::unref(fd.file as *io::file);
+		fd.file = null;
+	};
 
 	mman::vmm_finish(&old_vmm);
 

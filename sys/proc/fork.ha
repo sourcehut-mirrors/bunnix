@@ -3,7 +3,6 @@ use errors::{error, errno};
 use mman;
 use sched;
 use io;
-use log;
 
 export fn fork() (int | error) = {
 	const parent = current();
@@ -18,10 +17,6 @@ export fn fork() (int | error) = {
 	for (let i = 0z; i < len(parent.fds); i += 1) {
 		match (parent.fds[i].file) {
 		case let f: *io::file =>
-			if (parent.fds[i].oflag & io::flag::CLOEXEC != 0) {
-				continue;
-			};
-
 			child.fds[i] = parent.fds[i];
 			io::ref(f);
 		case null => void;
