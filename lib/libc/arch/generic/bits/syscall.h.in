@@ -1,3 +1,6 @@
+#ifndef _SYS_SYSCALL_H
+#define _SYS_SYSCALL_H
+
 #define __NR_readv		0
 #define __NR_writev		1
 #define __NR_lseek		2
@@ -19,3 +22,5 @@
 #define __NR_getppid		18
 #define __NR_gettime		19
 #define __NR_nanosleep		20
+
+#endif

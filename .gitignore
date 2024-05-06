@@ -16,3 +16,4 @@ config.mk
 /bin/init/init
 /bin/echo/echo
 /bin/env/env
+/bin/test-c/test-c

@@ -1,0 +1,47 @@
+#ifndef _SYS_SYSCALL_H
+#define _SYS_SYSCALL_H
+
+#define __NR_readv		0
+#define __NR_writev		1
+#define __NR_lseek		2
+#define __NR_close		3
+#define __NR_openat		4
+#define __NR_mkdirat		5
+#define __NR_linkat		6
+#define __NR_unlinkat		7
+#define __NR_getdents		8
+#define __NR_getpid		9
+#define __NR_kill		10
+#define __NR_exit		11
+#define __NR_mmap		12
+#define __NR_munmap		13
+#define __NR_mprotect		14
+#define __NR_fork		15
+#define __NR_execve		16
+#define __NR_waitpid		17
+#define __NR_getppid		18
+#define __NR_gettime		19
+#define __NR_nanosleep		20
+
+#endif
+#define SYS_readv		0
+#define SYS_writev		1
+#define SYS_lseek		2
+#define SYS_close		3
+#define SYS_openat		4
+#define SYS_mkdirat		5
+#define SYS_linkat		6
+#define SYS_unlinkat		7
+#define SYS_getdents		8
+#define SYS_getpid		9
+#define SYS_kill		10
+#define SYS_exit		11
+#define SYS_mmap		12
+#define SYS_munmap		13
+#define SYS_mprotect		14
+#define SYS_fork		15
+#define SYS_execve		16
+#define SYS_waitpid		17
+#define SYS_getppid		18
+#define SYS_gettime		19
+#define SYS_nanosleep		20

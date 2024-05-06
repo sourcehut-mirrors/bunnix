@@ -9,8 +9,8 @@ export fn main() void = {
 	};
 	fmt::println()!;
 
-	fmt::println("exec /bin/env FOO=bar BAR=baz /bin/env")!;
-	const cmd = exec::cmd("/bin/env", "FOO=bar", "BAR=baz", "/bin/env")!;
+	fmt::println("exec /bin/test-c")!;
+	const cmd = exec::cmd("/bin/test-c")!;
 	const proc = exec::start(&cmd)!;
 	const st = exec::wait(&proc)!;
 	const exit = exec::exit(&st);

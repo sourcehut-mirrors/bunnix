@@ -17,11 +17,12 @@ $(SYSROOT)/boot/bunnix: sys/bunnix
 $(SYSROOT): $(SYSROOT)/boot/bunnix
 
 # Userspace
-lib:
-	make -C lib install DESTDIR=../$(SYSROOT)
-.PHONY: lib
+LIBC_SOURCES=$(call rwildcard,lib/libc,*.c *.h *.S)
 
-$(SYSROOT)/bin: lib
+$(SYSROOT)/usr/lib/libc.a: $(LIBC_SOURCES)
+	make -C lib install DESTDIR=../$(SYSROOT)
+
+$(SYSROOT)/bin: $(SYSROOT)/usr/lib/libc.a
 	mkdir -p $(SYSROOT)/bin
 	make -C bin install DESTDIR=../$(SYSROOT)
 

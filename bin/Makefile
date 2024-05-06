@@ -3,6 +3,17 @@ all:
 ROOT=../
 include $(ROOT)mk/conf.mk
 
+# BEGIN C TEST CODE
+test-c/test-c: $(SYSROOT)/usr/lib/libc.a test-c/main.c
+	$(USER_CBUILD) -o $@ $^
+
+all: test-c/test-c
+install-bin: test-c/test-c
+clean-test-c:
+	rm -f test-c/test-c
+clean: clean-test-c
+# EOF
+
 HAREPROGS=\
 	echo \
 	env \

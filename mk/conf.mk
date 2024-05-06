@@ -19,7 +19,7 @@ HAREFLAGS=-a$(HAREARCH) -T^+$(HAREARCH)+bunnix -R
 HAREBUILD=HAREPATH=$(HAREPATH) $(HARE) build $(HAREFLAGS)
 
 # C build configuration
-USER_CFLAGS=--sysroot=$(SYSROOT) -std=c11 -Wall -Wextra -Wpedantic -I$(SYSROOT)/usr/include
+USER_CFLAGS=--sysroot=$(SYSROOT) -std=c11 -Wall -Wextra -Wpedantic -isystem=/usr/include
 USER_CBUILD=$(CC) $(USER_CFLAGS)
 
 # Various macros
