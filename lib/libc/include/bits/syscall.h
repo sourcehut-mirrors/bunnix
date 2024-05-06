@@ -22,6 +22,7 @@
 #define __NR_getppid		18
 #define __NR_gettime		19
 #define __NR_nanosleep		20
+#define __NR_fstatat		21
 
 #endif
 #define SYS_readv		0
@@ -45,3 +46,4 @@
 #define SYS_getppid		18
 #define SYS_gettime		19
 #define SYS_nanosleep		20
+#define SYS_fstatat		21

@@ -53,6 +53,7 @@ DIRS=\
      math \
      mman \
      multibyte \
+     stat \
      stdio \
      string \
      unistd

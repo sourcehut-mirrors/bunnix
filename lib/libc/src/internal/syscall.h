@@ -40,6 +40,6 @@ hidden long __syscall_ret(unsigned long),
 #define __syscall_cp(...) __SYSCALL_DISP(__syscall_cp,__VA_ARGS__)
 #define syscall_cp(...) __syscall_ret(__syscall_cp(__VA_ARGS__))
 
-#define sys_string(s, n) ((__string_t){ s, n, n })
+#define sys_string(s, n) (n == 0 ? (__string_t){0} : (__string_t){ s, n, n })
 
 #endif

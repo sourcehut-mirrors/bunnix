@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 
 int main() {
 	const char *lang = "C";
@@ -13,7 +14,15 @@ int main() {
 		return 1;
 	};
 
-	printf("FILE %p w/fd %d\n", (void *)f, fileno(f));
+	int fd = fileno(f);
+	printf("FILE %p w/fd %d\n", (void *)f, fd);
+
+	struct stat st;
+	int r = fstat(fd, &st);
+	if (r != 0) {
+		perror("fstat");
+	};
+	printf("fstat: mode %o owner %d/%d\n", st.st_mode, st.st_uid, st.st_gid);
 
 	char buf[256];
 	size_t n = fread(buf, 1, sizeof(buf) - 1, f);
