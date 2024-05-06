@@ -271,20 +271,29 @@ fn sys_fstatat(opts: *fstatat_options) (u64 | error) = {
 	validate_user_addr(opts.stat, size(st), true)?;
 	validate_user_string(opts.path)?;
 
-	const fd = if (opts.flags & AT_EMPTY_PATH != 0) {
-		yield validate_file(opts.dirfd)?;
+	const current = proc::current();
+	let ino: nullable *io::inode = null;
+
+	if (opts.flags & AT_EMPTY_PATH != 0) {
+		const fd = validate_file(opts.dirfd)?;
+		match (fd.inode) {
+		case let i: *io::inode =>
+			ino = i;
+		case null =>
+			// TODO: We should never have a [[file]] without an
+			// inode, so we should drop nullable in the future
+			return errno::BADF: error;
+		};
 	} else {
-		abort(); // TODO
+		assert(opts.dirfd == AT_FDCWD); // TODO
+		let (targ, _) = fs::walk(current.root, opts.path)?;
+		ino = targ;
 	};
 
-	match (fd.inode) {
-	case let ino: *io::inode =>
-		populate_stat(opts.stat, ino);
-	case null =>
-		// TODO: We should never have a [[file]] without an inode, so we
-		// should drop nullable in the future
-		return errno::BADF: error;
-	};
+	const ino = ino as *io::inode;
+	defer io::inode_unref(ino);
+
+	populate_stat(opts.stat, ino);
 
 	return 0u64;
 };
