@@ -48,6 +48,15 @@ int munlock (const void *, size_t);
 int mlockall (int);
 int munlockall (void);
 
+struct __mmap_options {
+	void *addr;
+	size_t len;
+	int prot;
+	int flags;
+	int fd;
+	off_t off;
+};
+
 #ifdef _GNU_SOURCE
 void *mremap (void *, size_t, size_t, int, ...);
 int remap_file_pages (void *, size_t, int, size_t, int);

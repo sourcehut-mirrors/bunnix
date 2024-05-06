@@ -48,7 +48,10 @@ DIRS=\
      exit \
      internal \
      locale \
+     malloc \
+     malloc/mallocng \
      math \
+     mman \
      multibyte \
      stdio \
      string \
