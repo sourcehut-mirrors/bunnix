@@ -26,6 +26,8 @@ $(SYSROOT)/bin: $(SYSROOT)/usr/lib/libc.a
 	mkdir -p $(SYSROOT)/bin
 	make -C bin install DESTDIR=../$(SYSROOT)
 
+.PHONY: $(SYSROOT)/bin
+
 $(SYSROOT): $(SYSROOT)/bin
 	mkdir -p $(SYSROOT)
 	for d in \
