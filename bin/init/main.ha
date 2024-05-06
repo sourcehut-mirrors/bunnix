@@ -11,17 +11,13 @@ export fn main() void = {
 	};
 	fmt::println()!;
 
-	fmt::println("[hare] open /usr/include/stdio.h")!;
-	const file = os::open("/usr/include/stdio.h")!;
-	fmt::printfln("[hare] fstat {}", file: int)!;
-	const stat = os::fstat(file)!;
-	fmt::printfln("[hare] mode {} bytes {} owner {}:{}",
-		fs::mode_str(stat.mode),
-		stat.sz, stat.uid, stat.gid)!;
-	io::close(file)!;
+	fmt::println("stat /usr/include/stdio.h")!;
+	const st = os::stat("/usr/include/stdio.h")!;
+	fmt::printfln("mode {:o}/{} owner {}:{} size {} bytes",
+		st.mode: uint, fs::mode_str(st.mode), st.uid, st.gid, st.sz)!;
 
-	fmt::println("[hare] exec /bin/test-c")!;
-	const cmd = exec::cmd("/bin/test-c")!;
+	fmt::println("[hare] exec /bin/grep ' f.*;' /usr/include/stdio.h")!;
+	const cmd = exec::cmd("/bin/grep", " f.*;", "/usr/include/stdio.h")!;
 	const proc = exec::start(&cmd)!;
 	const st = exec::wait(&proc)!;
 	const exit = exec::exit(&st);
