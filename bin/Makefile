@@ -4,7 +4,7 @@ ROOT=../
 include $(ROOT)mk/conf.mk
 
 # BEGIN C TEST CODE
-test-c/main.o: $(SYSROOT)/usr/lib/libc.a
+test-c/main.o: $(SYSROOT)/usr/lib/libc.a test-c/main.c
 	$(USER_CBUILD) -g -c -o $@ test-c/main.c
 
 test-c/test-c: $(SYSROOT)/usr/lib/libc.a test-c/main.o
