@@ -23,3 +23,5 @@ HAREBUILD=HAREPATH=$(HAREPATH) $(HARE) build $(HAREFLAGS)
 HARE_SOURCES=$(call rwildcard,$(ROOT)lib/hare/,*.ha *.s *.sc)
 
 SYSROOT=$(ROOT)target/root/
+
+MKDIR=mkdir -p $$(dirname $@)

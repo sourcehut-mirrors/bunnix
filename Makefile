@@ -10,7 +10,7 @@ sys/bunnix:
 .PHONY: sys/bunnix
 
 $(SYSROOT)/boot/bunnix: sys/bunnix
-	@mkdir -p $(SYSROOT)/boot
+	@$(MKDIR)
 	cp $< $@
 
 $(SYSROOT): $(SYSROOT)/boot/bunnix

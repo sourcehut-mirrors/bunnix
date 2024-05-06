@@ -88,41 +88,41 @@ BOOT_EFI=/dev/null
 endif
 
 $(SYSROOT)/boot/bunnixboot.mb: sys/bunnix
-	@mkdir -p $$(dirname $@)
+	@$(MKDIR)
 	cp $< $@
 
 $(SYSROOT)/boot/syslinux/syslinux.cfg: boot/multiboot/syslinux.cfg
-	@mkdir -p $$(dirname $@)
+	@$(MKDIR)
 	cp $< $@
 
 $(SYSROOT)/boot/EFI/boot/bootx64.efi: boot/efi/bootx64.efi
-	@mkdir -p $$(dirname $@)
+	@$(MKDIR)
 	cp $< $@
 
 # Legacy boot support
 target/iso/boot/bunnixboot.mb: boot/multiboot/bunnixboot.mb
-	mkdir -p $$(dirname $@)
+	@$(MKDIR)
 	cp $< $@
 
 target/iso/syslinux.cfg: boot/multiboot/syslinux.cfg
-	mkdir -p $$(dirname $@)
+	@$(MKDIR)
 	cp $< $@
 
 target/iso/%.c32: $(SYSLINUX)/%.c32
-	mkdir -p $$(dirname $@)
+	@$(MKDIR)
 	cp $< $@
 
 target/iso/%.bin: $(SYSLINUX)/%.bin
-	mkdir -p $$(dirname $@)
+	@$(MKDIR)
 	cp $< $@
 
 # EFI support
 target/iso/EFI/isoboot.img: target/fs.fat.img
-	mkdir -p $$(dirname $@)
+	@$(MKDIR)
 	cp $< $@
 
 target/iso/EFI/boot/bootx64.efi: boot/efi/bootx64.efi
-	mkdir -p $$(dirname $@)
+	@$(MKDIR)
 	cp $< $@
 
 # bunnix.iso
@@ -150,7 +150,6 @@ clean: clean-target
 
 # Disks for emulator use
 target/fs.fat.img: $(SYSROOT)
-	mkdir -p target
 	qemu-img create -f raw $@ 16M
 	mkdosfs $@
 	mmd -i $@ ::EFI
