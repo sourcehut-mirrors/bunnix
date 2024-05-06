@@ -69,6 +69,7 @@ export fn link(
 		oldpath = oldpath,
 		newdirfd = AT_FDCWD,
 		newpath = newpath,
+		flags = 0,
 	};
 	syswrap(syscall(sys::LINKAT, &opts))?;
 };
@@ -77,6 +78,7 @@ export fn unlink(path: str) (void | errno) = {
 	const opts = unlinkat_options {
 		dirfd = AT_FDCWD,
 		path = path,
+		flags = 0,
 	};
 	syswrap(syscall(sys::UNLINKAT, &opts))?;
 };
@@ -160,4 +162,19 @@ export fn gettime(clock: int, tp: *timespec) (void | errno) = {
 
 export fn nanosleep(req: *timespec) (void | errno) = {
 	syswrap(syscall(sys::NANOSLEEP, req))?;
+};
+
+export fn fstatat(
+	dirfd: int,
+	path: str,
+	statbuf: *st,
+	flags: int,
+) (errno | void) = {
+	const opts = fstatat_options {
+		dirfd = dirfd,
+		path = path,
+		stat = statbuf,
+		flags = flags,
+	};
+	syswrap(syscall(sys::FSTATAT, &opts))?;
 };

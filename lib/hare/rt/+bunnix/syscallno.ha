@@ -23,4 +23,5 @@ export type sys = enum u64 {
 	GETPPID,
 	GETTIME,
 	NANOSLEEP,
+	FSTATAT,
 };

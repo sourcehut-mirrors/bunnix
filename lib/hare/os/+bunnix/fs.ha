@@ -6,6 +6,7 @@ use fs;
 use io;
 use path;
 use rt;
+use time;
 use types::c;
 
 type os_filesystem = struct {
@@ -87,6 +88,8 @@ export fn access(path: str, mode: amode) (bool | fs::error) = {
 			createfile = &fs_create_file,
 			remove = &fs_remove,
 			iter = &fs_iter,
+			stat = &fs_stat,
+			fstat = &fs_fstat,
 			mkdir = &fs_mkdir,
 			resolve = &fs_resolve,
 			...
@@ -237,6 +240,50 @@ fn iter_finish(iter: *fs::iterator) void = {
 	rt::close(iter.fd)!;
 	free(iter.buf);
 	free(iter);
+};
+
+fn fs_stat(fs: *fs::fs, path: str) (fs::filestat | fs::error) = {
+	abort(); // TODO
+};
+
+fn fs_fstat(fs: *fs::fs, fd: io::file) (fs::filestat | fs::error) = {
+	let fs = fs: *os_filesystem;
+	let st = rt::st { ... };
+	match (rt::fstatat(fd, "", &st, rt::AT_EMPTY_PATH)) {
+	case let err: rt::errno =>
+		return errno_to_fs(err);
+	case void => void;
+	};
+	return st_to_filestat(&st);
+};
+
+fn st_to_filestat(st: *rt::st) fs::filestat = {
+	return fs::filestat {
+		mask = fs::stat_mask::UID
+			| fs::stat_mask::GID
+			| fs::stat_mask::SIZE
+			| fs::stat_mask::INODE
+			| fs::stat_mask::ATIME
+			| fs::stat_mask::MTIME
+			| fs::stat_mask::CTIME,
+		mode = st.mode: fs::mode,
+		uid = st.uid,
+		gid = st.gid,
+		sz = st.sz,
+		inode = st.ino,
+		atime = time::instant {
+			sec = st.atime.tv_sec,
+			nsec = st.atime.tv_nsec,
+		},
+		mtime = time::instant {
+			sec = st.mtime.tv_sec,
+			nsec = st.mtime.tv_nsec,
+		},
+		ctime = time::instant {
+			sec = st.ctime.tv_sec,
+			nsec = st.ctime.tv_nsec,
+		},
+	};
 };
 
 fn fs_resolve(fs: *fs::fs, path: str) str = {
