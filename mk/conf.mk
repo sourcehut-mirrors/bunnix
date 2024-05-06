@@ -21,3 +21,5 @@ HAREBUILD=HAREPATH=$(HAREPATH) $(HARE) build $(HAREFLAGS)
 
 # TODO: Generate me?
 HARE_SOURCES=$(call rwildcard,$(ROOT)lib/hare/,*.ha *.s *.sc)
+
+SYSROOT=$(ROOT)target/root/

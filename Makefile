@@ -4,10 +4,49 @@ ROOT=./
 include mk/conf.mk
 include mk/$(ARCH).mk
 
+# Kernel
 sys/bunnix:
 	make -C sys
-
 .PHONY: sys/bunnix
+
+$(SYSROOT)/boot/bunnix: sys/bunnix
+	@mkdir -p $(SYSROOT)/boot
+	cp $< $@
+
+$(SYSROOT): $(SYSROOT)/boot/bunnix
+
+# Userspace
+$(SYSROOT):
+	mkdir -p $(SYSROOT)
+	for d in \
+		bin \
+		boot \
+		dev \
+		etc \
+		include \
+		lib \
+		proc \
+		tmp \
+		var; \
+	do mkdir -p $(SYSROOT)/$$d; \
+	done
+	make -C bin install DESTDIR=../$(SYSROOT)
+
+target/initrd: $(SYSROOT)
+	# TODO: gzip me
+	cd $(SYSROOT) && tar -cvf ../../$@ *
+
+ifeq ($(INSTALL_SRC), 1)
+
+$(SYSROOT)/src:
+	@mkdir -p $(SYSROOT)/src
+	git archive HEAD | tar -C $(SYSROOT)/src -x
+
+.PHONY: $(SYSROOT)/src
+
+$(SYSROOT): $(SYSROOT)/src
+
+endif
 
 clean-bin:
 	make -C bin clean
@@ -15,11 +54,15 @@ clean-bin:
 clean-sys:
 	make -C sys clean
 
+clean-sysroot:
+	rm -rf $(SYSROOT)
+
 clean-vendor:
 	make -C vendor clean
 
 .PHONY: clean-bin
 .PHONY: clean-sys
+.PHONY: clean-sysroot
 .PHONY: clean-vendor
 
-clean: clean-bin clean-sys clean-vendor
+clean: clean-bin clean-sys clean-sysroot clean-vendor

@@ -36,3 +36,9 @@ EFI_LD=$(EFI_TRIPLET)gcc
 
 OVMF=/usr/share/OVMF
 OVMF_FILE=OVMF.fd
+
+#
+# Userspace configuration
+
+# Install Bunnix source code to /src?
+INSTALL_SRC=1

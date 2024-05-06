@@ -3,10 +3,6 @@
 
 all: target/bunnix.iso
 
-ROOT=target/root
-ROOT_TARGETS=\
-	$(ROOT)/boot/bunnix
-
 ISO_TARGETS=\
 	    sys/bunnix \
 	    target/initrd
@@ -25,8 +21,8 @@ clean-boot-legacy:
 
 clean: clean-boot-legacy
 
-ROOT_TARGETS+=$(ROOT)/boot/syslinux/syslinux.cfg
-ROOT_TARGETS+=$(ROOT)/boot/bunnixboot.mb
+$(SYSROOT): $(SYSROOT)/boot/syslinux/syslinux.cfg
+$(SYSROOT): $(SYSROOT)/boot/bunnixboot.mb
 
 ISO_TARGETS+=target/iso/boot/bunnixboot.mb
 ISO_TARGETS+=target/iso/syslinux.cfg
@@ -58,7 +54,7 @@ boot/efi/bootx64.efi:
 	make -C boot/efi
 .PHONY: boot/efi/bootx64.efi
 
-ROOT_TARGETS+=$(ROOT)/boot/EFI/boot/bootx64.efi
+$(SYSROOT): $(SYSROOT)/boot/EFI/boot/bootx64.efi
 
 ISO_TARGETS+=target/iso/EFI/boot/bootx64.efi
 ISO_TARGETS+=target/iso/EFI/isoboot.img
@@ -91,43 +87,17 @@ BOOT_EFI=/dev/null
 
 endif
 
-$(ROOT): $(ROOT_TARGETS)
-	mkdir -p $(ROOT)
-	for d in \
-		bin \
-		boot \
-		dev \
-		etc \
-		lib \
-		proc \
-		src \
-		tmp \
-		var; \
-	do mkdir -p target/root/$$d; \
-	done
-
-	make -C bin install DESTDIR=../$(ROOT)
-	git archive HEAD | tar -C $(ROOT)/src -x
-
-$(ROOT)/boot/bunnix: sys/bunnix
-	mkdir -p $(ROOT)/boot
+$(SYSROOT)/boot/bunnixboot.mb: sys/bunnix
+	@mkdir -p $$(dirname $@)
 	cp $< $@
 
-$(ROOT)/boot/bunnixboot.mb: sys/bunnix
-	mkdir -p $(ROOT)/boot
+$(SYSROOT)/boot/syslinux/syslinux.cfg: boot/multiboot/syslinux.cfg
+	@mkdir -p $$(dirname $@)
 	cp $< $@
 
-$(ROOT)/boot/syslinux/syslinux.cfg: boot/multiboot/syslinux.cfg
-	mkdir -p $(ROOT)/boot/syslinux
+$(SYSROOT)/boot/EFI/boot/bootx64.efi: boot/efi/bootx64.efi
+	@mkdir -p $$(dirname $@)
 	cp $< $@
-
-$(ROOT)/boot/EFI/boot/bootx64.efi: boot/efi/bootx64.efi
-	mkdir -p $(ROOT)/boot/EFI/boot
-	cp $< $@
-
-target/initrd: $(ROOT)
-	# TODO: gzip me
-	cd $(ROOT) && tar -cvf ../../$@ *
 
 # Legacy boot support
 target/iso/boot/bunnixboot.mb: boot/multiboot/bunnixboot.mb
@@ -179,7 +149,7 @@ clean-target:
 clean: clean-target
 
 # Disks for emulator use
-target/fs.fat.img: $(ROOT)
+target/fs.fat.img: $(SYSROOT)
 	mkdir -p target
 	qemu-img create -f raw $@ 16M
 	mkdosfs $@
@@ -187,12 +157,12 @@ target/fs.fat.img: $(ROOT)
 	mmd -i $@ ::EFI/boot
 	mmd -i $@ ::modules
 	mcopy -i $@ $(BOOT_EFI) ::EFI/boot/bootx64.efi
-	mcopy -i $@ $(ROOT)/boot/bunnix ::bunnix
+	mcopy -i $@ $(SYSROOT)/boot/bunnix ::bunnix
 	mcopy -i $@ target/initrd ::modules/initrd
 
-target/fs.ext4.img: $(ROOT)
+target/fs.ext4.img: $(SYSROOT)
 	qemu-img create -f raw $@ 48M
-	mkfs.ext4 -d $(ROOT) -O^metadata_csum $@
+	mkfs.ext4 -d $(SYSROOT) -O^metadata_csum $@
 
 .PHONY: target/fs.ext4.img
 .PHONY: target/fs.fat.img
