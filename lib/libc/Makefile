@@ -41,6 +41,11 @@ src/%.o: src/%.s
 	@printf "CC\t%s\n" "$@"
 	@$(CC) $(CFLAGS) -c -o $@ $<
 
+src/%.o: src/%.S
+	@mkdir -p $$(dirname $@)
+	@printf "CC\t%s\n" "$@"
+	@$(CC) $(CFLAGS) -c -o $@ $<
+
 DIRS=\
      ctype \
      env \
@@ -49,18 +54,22 @@ DIRS=\
      internal \
      locale \
      malloc \
-     malloc/mallocng \
      math \
+     misc \
      mman \
      multibyte \
+     regex \
+     setjmp \
      stat \
      stdio \
+     stdlib \
      string \
      unistd
 
 OBJECTS = $(foreach dir,$(DIRS),$(patsubst %.c,%.o,$(wildcard src/$(dir)/*.c)))
-OBJECTS += $(foreach dir,$(DIRS),$(patsubst %.c,%.o,$(wildcard src/$(dir)/$(ARCH)*.c)))
-OBJECTS += $(foreach dir,$(DIRS),$(patsubst %.c,%.o,$(wildcard src/$(dir)/$(ARCH)*.S)))
+OBJECTS += $(foreach dir,$(DIRS),$(patsubst %.c,%.o,$(wildcard src/$(dir)/$(ARCH)/*.c)))
+OBJECTS += $(foreach dir,$(DIRS),$(patsubst %.S,%.o,$(wildcard src/$(dir)/$(ARCH)/*.S)))
+OBJECTS += $(foreach dir,$(DIRS),$(patsubst %.s,%.o,$(wildcard src/$(dir)/$(ARCH)/*.s)))
 
 libc.a: $(OBJECTS)
 	@printf "AR\t%s\n" "$@"
