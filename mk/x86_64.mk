@@ -12,9 +12,10 @@ MKISOFSFLAGS=
 # Legacy boot support
 ifeq ($(ENABLE_LEGACY),1)
 
-boot/multiboot/bunnixboot.mb:
+MULTIBOOT_SOURCES=$(call rwildcard,boot/multiboot,*.ha *.s *.sc)
+
+boot/multiboot/bunnixboot.mb: $(MULTIBOOT_SOURCES) $(KERNEL_SOURCES)
 	make -C boot/multiboot/
-.PHONY: boot/multiboot/bunnixboot.mb
 
 clean-boot-legacy:
 	make -C boot/multiboot/ clean
@@ -50,9 +51,10 @@ endif
 # EFI support
 ifeq ($(ENABLE_EFI),1)
 
-boot/efi/bootx64.efi:
+EFI_SOURCES=$(call rwildcard,boot/multiboot,*.c)
+
+boot/efi/bootx64.efi: $(EFI_SOURCES)
 	make -C boot/efi
-.PHONY: boot/efi/bootx64.efi
 
 $(SYSROOT): $(SYSROOT)/boot/EFI/boot/bootx64.efi
 

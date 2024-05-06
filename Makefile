@@ -5,9 +5,10 @@ include mk/conf.mk
 include mk/$(ARCH).mk
 
 # Kernel
-sys/bunnix:
+KERNEL_SOURCES=$(call rwildcard,sys,*.ha *.s *.sc)
+
+sys/bunnix: $(KERNEL_SOURCES)
 	make -C sys
-.PHONY: sys/bunnix
 
 $(SYSROOT)/boot/bunnix: sys/bunnix
 	@$(MKDIR)
@@ -35,6 +36,8 @@ $(SYSROOT):
 target/initrd: $(SYSROOT)
 	# TODO: gzip me
 	cd $(SYSROOT) && tar -cvf ../../$@ *
+
+.PHONY: target/initrd
 
 ifeq ($(INSTALL_SRC), 1)
 
