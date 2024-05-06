@@ -243,7 +243,14 @@ fn iter_finish(iter: *fs::iterator) void = {
 };
 
 fn fs_stat(fs: *fs::fs, path: str) (fs::filestat | fs::error) = {
-	abort(); // TODO
+	let fs = fs: *os_filesystem;
+	let st = rt::st { ... };
+	match (rt::fstatat(rt::AT_FDCWD, path, &st, 0)) {
+	case let err: rt::errno =>
+		return errno_to_fs(err);
+	case void => void;
+	};
+	return st_to_filestat(&st);
 };
 
 fn fs_fstat(fs: *fs::fs, fd: io::file) (fs::filestat | fs::error) = {
