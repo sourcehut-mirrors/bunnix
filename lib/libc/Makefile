@@ -60,6 +60,7 @@ DIRS=\
      env \
      errno \
      exit \
+     fcntl \
      internal \
      locale \
      malloc \
