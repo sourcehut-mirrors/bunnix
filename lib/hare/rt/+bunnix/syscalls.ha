@@ -141,8 +141,7 @@ export fn getegid() gid_t = {
 
 
 export fn exit(status: int) never = {
-	syscall(sys::EXIT, status: u64);
-	abort();
+	for (true) syscall(sys::EXIT, status: u64);
 };
 
 export fn mmap(
