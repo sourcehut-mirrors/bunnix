@@ -76,8 +76,62 @@ fn platform_finish(cmd: *command) void = {
 };
 
 fn platform_exec(cmd: *command) error = {
-	assert(len(cmd.files) == 0); // TODO
-	assert(cmd.dir == ""); // TODO
+	let need_devnull = false;
+	for (let file &.. cmd.files) {
+		const from = match (file.0) {
+		case let file: io::file =>
+			yield file;
+		case nullfd =>
+			need_devnull = true;
+			continue;
+		case closefd =>
+			continue;
+		};
+
+		file.0 = match (rt::dup(from, rt::O_CLOEXEC)) {
+		case let fd: int =>
+			yield fd;
+		case let err: rt::errno =>
+			return errors::errno(err);
+		};
+	};
+
+	const devnull: io::file = if (need_devnull) {
+		yield os::open("/dev/null")!;
+	} else -1;
+
+	for (let file .. cmd.files) {
+		const from = match (file.0) {
+		case let file: io::file =>
+			yield file;
+		case nullfd =>
+			yield devnull;
+		case closefd =>
+			io::close(file.1)?;
+			continue;
+		};
+
+		if (file.1 == from) {
+			void; // TODO Bunnix
+			//let flags = match (rt::fcntl(from, rt::F_GETFD, 0)) {
+			//case let flags: int =>
+			//	yield flags;
+			//case let e: rt::errno =>
+			//	return errors::errno(e);
+			//};
+			//rt::fcntl(from, rt::F_SETFD, flags & ~rt::FD_CLOEXEC)!;
+		} else {
+			match (rt::dup2(from, file.1)) {
+			case int => void;
+			case let e: rt::errno =>
+				return errors::errno(e);
+			};
+		};
+	};
+
+	if (cmd.dir != "") {
+		os::chdir(cmd.dir)?;
+	};
 
 	match (rt::fexecve(cmd.platform, cmd.argv, cmd.env)) {
 	case let err: rt::errno =>
