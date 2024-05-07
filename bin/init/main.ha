@@ -28,9 +28,12 @@ export fn main() void = {
 		exec::wait(&proc)!;
 	case =>
 		io::close(wr)!;
+		io::dup2(rd, os::stdin_file, io::dupflag::NONE)!;
+		io::close(rd)!;
+
 		fmt::println("[child] read from pipe:")!;
 
-		io::copy(os::stdout, rd)!;
+		io::copy(os::stdout, os::stdin)!;
 
 		fmt::println("[child] exit")!;
 		os::exit(0);
