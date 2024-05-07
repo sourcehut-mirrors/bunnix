@@ -4,8 +4,12 @@ use io;
 use proc;
 use strings;
 
+fn validate_fd(fd: i64) (*proc::filedesc | error) = {
+	return proc::getfd(proc::current(), fd: int)?;
+};
+
 fn validate_file(fd: i64, write: bool = false) (*io::file | error) = {
-	const fd = proc::getfd(proc::current(), fd: int)?;
+	const fd = validate_fd(fd)?;
 
 	let flagvalid = true;
 	if (fd.oflag & 3 == io::flag::RDWR) {
@@ -24,7 +28,7 @@ fn validate_file(fd: i64, write: bool = false) (*io::file | error) = {
 	case null => void;
 	};
 
-	return fd.file: *io::file;
+	return fd.file as *io::file;
 };
 
 fn validate_dirfd(fd: i64) (*io::file | error) = {
@@ -295,7 +299,7 @@ fn sys_pipe(pair: *[2]int, flags: i64) (u64 | error) = {
 	validate_user_addr(pair, size([2]int))?;
 
 	// Only CLOEXEC is supported
-	const flags = (flags & ~O_CLOEXEC): io::flag;
+	const flags = (flags & O_CLOEXEC): io::flag;
 
 	const (rd, wr) = fs::mkpipe()?;
 
@@ -306,4 +310,34 @@ fn sys_pipe(pair: *[2]int, flags: i64) (u64 | error) = {
 	pair[1] = fdwr;
 
 	return 0u64;
+};
+
+fn sys_dup(fd: i64) (u64 | error) = {
+	const fd = validate_fd(fd)?;
+	const cur = proc::current();
+	const file = fd.file as *io::file;
+	return proc::installfd(cur, file, fd.oflag, fd.inode): u64;
+};
+
+fn sys_dup2(oldfd: i64, newfd: i64, flags: i64) (u64 | error) = {
+	const oldfd = oldfd: int;
+	const newfd = newfd: int;
+	const flags = flags: io::flag & O_CLOEXEC;
+
+	const old = validate_fd(oldfd)?;
+	if (oldfd == newfd) {
+		return oldfd: u64;
+	};
+
+	const cur = proc::current();
+	proc::closefd(cur, newfd): void;
+
+	let new = proc::getfd(cur, newfd, true)?;
+	assert(new.file == null); // invariant enforced by proc::closefd
+	new.file = old.file;
+	new.oflag = old.oflag | flags;
+	new.inode = old.inode;
+
+	io::ref(new.file as *io::file);
+	return newfd: u64;
 };

@@ -46,6 +46,8 @@ export type sys = enum u64 {
 	FSTATAT,
 	PIPE,
 	CHDIRAT,
+	DUP,
+	DUP2,
 };
 
 export type syscall_handler = fn(u64, u64, u64, u64, u64) (u64 | error);
@@ -74,4 +76,6 @@ let systab: [_]*opaque = [
 	&sys_fstatat: *syscall_handler,
 	&sys_pipe: *syscall_handler,
 	&sys_chdirat: *syscall_handler,
+	&sys_dup: *syscall_handler,
+	&sys_dup2: *syscall_handler,
 ];

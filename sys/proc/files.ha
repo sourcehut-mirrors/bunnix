@@ -34,11 +34,19 @@ export fn installfd(
 };
 
 // Returns a reference to a file descriptor in this process's file table.
-export fn getfd(proc: *proc, fd: int) (*filedesc | error) = {
+export fn getfd(
+	proc: *proc,
+	fd: int,
+	allocate: bool = false,
+) (*filedesc | error) = {
+	if (allocate && fd: size > len(proc.fds)) {
+		append(proc.fds, [filedesc { ... }...], len(proc.fds) - fd: size);
+	};
+
 	if (fd < 0 || fd: size > len(proc.fds)) {
 		return errno::BADF;
 	};
-	if (proc.fds[fd].file == null) {
+	if (proc.fds[fd].file == null && !allocate) {
 		return errno::BADF;
 	};
 	return &proc.fds[fd];
