@@ -104,6 +104,10 @@ export fn inode_link(ino: *inode, child: *inode, name: str) (void | error) = {
 
 // Removes a file
 export fn inode_unlink(ino: *inode, name: str) (void | error) = {
+	if (ino.mountpoint != null) {
+		return errno::BUSY;
+	};
+
 	match (ino.impl.unlink) {
 	case let func: *fn_inode_unlink =>
 		return func(ino, name);
