@@ -5,7 +5,7 @@ export def NSIG: int = 64;
 // Signal number assignments
 export type sig = enum int {
 	SIGABRT = 1,
-	SIGALAM,
+	SIGALRM,
 	SIGBUS,
 	SIGCHLD,
 	SIGCONT,

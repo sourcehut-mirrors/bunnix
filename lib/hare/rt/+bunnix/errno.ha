@@ -82,6 +82,74 @@ export fn strerror(err: errno) str = {
 		return "Resource temporarily unavailable";
 	case ECHILD =>
 		return "No child process";
+	case ENAMETOOLONG =>
+		return "Filename too long";
+	case EADDRINUSE =>
+		return "Address in use";
+	case EADDRNOTAVAIL =>
+		return "Address not available";
+	case EAFNOSUPPORT =>
+		return "Address family not supported by protocol";
+	case EALREADY =>
+		return "Operation already in progress";
+	case ECONNRESET =>
+		return "Connection reset by peer";
+	case EDEADLK =>
+		return "Resource deadlock would occur";
+	case EDESTADDRREQ =>
+		return "Destination address required";
+	case EDOM =>
+		return "Domain error";
+	case EHOSTUNREACH =>
+		return "Host is unreachable";
+	case EINPROGRESS =>
+		return "Operation in progress";
+	case EISCONN =>
+		return "Socket is connected";
+	case ELOOP =>
+		return "Symbolic link loop";
+	case EMFILE =>
+		return "No file descriptors available";
+	case EMSGSIZE =>
+		return "Message too large";
+	case ENETDOWN =>
+		return "Network is down";
+	case ENETRESET =>
+		return "Connection reset by network";
+	case ENETUNREACH =>
+		return "Network unreachable";
+	case ENFILE =>
+		return "Too many open files in system";
+	case ENOBUFS =>
+		return "No buffer space available";
+	case ENOPROTOOPT =>
+		return "Protocol not available";
+	case ENOTCONN =>
+		return "Socket not connected";
+	case ENOTSOCK =>
+		return "Not a socket";
+	case ENOTTY =>
+		return "Not a tty";
+	case EPIPE =>
+		return "Broken pipe";
+	case EPROTONOSUPPORT =>
+		return "Protocol not supported";
+	case EPROTOTYPE =>
+		return "Protocol wrong type for socket";
+	case ESPIPE =>
+		return "Invalid seek";
+	case ESRCH =>
+		return "No such process";
+	case EWOULDBLOCK =>
+		return "Resource temporarily unavailable";
+	case EXDEV =>
+		return "Cross-device link";
+	case ECONNABORTED =>
+		return "Connection aborted";
+	case ENOLCK =>
+		return "No locks available";
+	case EOPNOTSUPP =>
+		return "Not supported";
 	case =>
 		return unknown_errno(err);
 	};
@@ -157,6 +225,74 @@ export fn errname(err: errno) str = {
 		return "EAGAIN";
 	case ECHILD =>
 		return "ECHILD";
+	case ENAMETOOLONG =>
+		return "ENAMETOOLONG";
+	case EADDRINUSE =>
+		return "EADDRINUSE";
+	case EADDRNOTAVAIL =>
+		return "EADDRNOTAVAIL";
+	case EAFNOSUPPORT =>
+		return "EAFNOSUPPORT";
+	case EALREADY =>
+		return "EALREADY";
+	case ECONNRESET =>
+		return "ECONNRESET";
+	case EDEADLK =>
+		return "EDEADLK";
+	case EDESTADDRREQ =>
+		return "EDESTADDRREQ";
+	case EDOM =>
+		return "EDOM";
+	case EHOSTUNREACH =>
+		return "EHOSTUNREACH";
+	case EINPROGRESS =>
+		return "EINPROGRESS";
+	case EISCONN =>
+		return "EISCONN";
+	case ELOOP =>
+		return "ELOOP";
+	case EMFILE =>
+		return "EMFILE";
+	case EMSGSIZE =>
+		return "EMSGSIZE";
+	case ENETDOWN =>
+		return "ENETDOWN";
+	case ENETRESET =>
+		return "ENETRESET";
+	case ENETUNREACH =>
+		return "ENETUNREACH";
+	case ENFILE =>
+		return "ENFILE";
+	case ENOBUFS =>
+		return "ENOBUFS";
+	case ENOPROTOOPT =>
+		return "ENOPROTOOPT";
+	case ENOTCONN =>
+		return "ENOTCONN";
+	case ENOTSOCK =>
+		return "ENOTSOCK";
+	case ENOTTY =>
+		return "ENOTTY";
+	case EPIPE =>
+		return "EPIPE";
+	case EPROTONOSUPPORT =>
+		return "EPROTONOSUPPORT";
+	case EPROTOTYPE =>
+		return "EPROTOTYPE";
+	case ESPIPE =>
+		return "ESPIPE";
+	case ESRCH =>
+		return "ESRCH";
+	case EWOULDBLOCK =>
+		return "EWOULDBLOCK";
+	case EXDEV =>
+		return "EXDEV";
+	case ECONNABORTED =>
+		return "ECONNABORTED";
+	case ENOLCK =>
+		return "ENOLCK";
+	case EOPNOTSUPP =>
+		return "EOPNOTSUPP";
 	case =>
 		return unknown_errno(err);
 	};
@@ -195,3 +331,37 @@ export def ETIMEDOUT: errno = 30;
 export def EINTR: errno = 31;
 export def EAGAIN: errno = 32;
 export def ECHILD: errno = 33;
+export def ENAMETOOLONG: errno = 34;
+export def EADDRINUSE: errno = 35;
+export def EADDRNOTAVAIL: errno = 36;
+export def EAFNOSUPPORT: errno = 37;
+export def EALREADY: errno = 38;
+export def ECONNRESET: errno = 39;
+export def EDEADLK: errno = 40;
+export def EDESTADDRREQ: errno = 41;
+export def EDOM: errno = 42;
+export def EHOSTUNREACH: errno = 43;
+export def EINPROGRESS: errno = 44;
+export def EISCONN: errno = 45;
+export def ELOOP: errno = 46;
+export def EMFILE: errno = 47;
+export def EMSGSIZE: errno = 48;
+export def ENETDOWN: errno = 49;
+export def ENETRESET: errno = 50;
+export def ENETUNREACH: errno = 51;
+export def ENFILE: errno = 52;
+export def ENOBUFS: errno = 53;
+export def ENOPROTOOPT: errno = 54;
+export def ENOTCONN: errno = 55;
+export def ENOTSOCK: errno = 56;
+export def ENOTTY: errno = 57;
+export def EPIPE: errno = 58;
+export def EPROTONOSUPPORT: errno = 59;
+export def EPROTOTYPE: errno = 60;
+export def ESPIPE: errno = 61;
+export def ESRCH: errno = 62;
+export def EWOULDBLOCK: errno = 63;
+export def EXDEV: errno = 64;
+export def ECONNABORTED: errno = 65;
+export def ENOLCK: errno = 66;
+export def EOPNOTSUPP: errno = 67;

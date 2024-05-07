@@ -72,5 +72,71 @@ export fn strerror(err: error) str = {
 		return "No child process";
 	case errno::NAMETOOLONG =>
 		return "Filename too long";
+	case errno::ADDRINUSE =>
+		return "Address in use";
+	case errno::ADDRNOTAVAIL =>
+		return "Address not available";
+	case errno::AFNOSUPPORT =>
+		return "Address family not supported by protocol";
+	case errno::ALREADY =>
+		return "Operation already in progress";
+	case errno::CONNRESET =>
+		return "Connection reset by peer";
+	case errno::DEADLK =>
+		return "Resource deadlock would occur";
+	case errno::DESTADDRREQ =>
+		return "Destination address required";
+	case errno::DOM =>
+		return "Domain error";
+	case errno::HOSTUNREACH =>
+		return "Host is unreachable";
+	case errno::INPROGRESS =>
+		return "Operation in progress";
+	case errno::ISCONN =>
+		return "Socket is connected";
+	case errno::LOOP =>
+		return "Symbolic link loop";
+	case errno::MFILE =>
+		return "No file descriptors available";
+	case errno::MSGSIZE =>
+		return "Message too large";
+	case errno::NETDOWN =>
+		return "Network is down";
+	case errno::NETRESET =>
+		return "Connection reset by network";
+	case errno::NETUNREACH =>
+		return "Network unreachable";
+	case errno::NFILE =>
+		return "Too many open files in system";
+	case errno::NOBUFS =>
+		return "No buffer space available";
+	case errno::NOPROTOOPT =>
+		return "Protocol not available";
+	case errno::NOTCONN =>
+		return "Socket not connected";
+	case errno::NOTSOCK =>
+		return "Not a socket";
+	case errno::NOTTY =>
+		return "Not a tty";
+	case errno::PIPE =>
+		return "Broken pipe";
+	case errno::PROTONOSUPPORT =>
+		return "Protocol not supported";
+	case errno::PROTOTYPE =>
+		return "Protocol wrong type for socket";
+	case errno::SPIPE =>
+		return "Invalid seek";
+	case errno::SRCH =>
+		return "No such process";
+	case errno::WOULDBLOCK =>
+		return "Resource temporarily unavailable";
+	case errno::XDEV =>
+		return "Cross-device link";
+	case errno::CONNABORTED =>
+		return "Connection aborted";
+	case errno::NOLCK =>
+		return "No locks available";
+	case errno::OPNOTSUPP =>
+		return "Not supported";
 	};
 };
