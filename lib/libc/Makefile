@@ -18,6 +18,15 @@ CFLAGS = -std=c11 -g -nostdinc -ffreestanding \
 CFLAGS += -D_XOPEN_SOURCE=700 -Isrc/include/ -Isrc/internal/ -Iout/include/ -Iarch/$(ARCH)/ -Iarch/generic/ -Iinclude/
 LDFLAGS = -Wl,--sort-section,alignment -Wl,--sort-common -Wl,--gc-sections -Wl,--hash-style=both -Wl,--no-undefined -Wl,--exclude-libs=ALL
 
+EMPTY_LIB_NAMES = m rt pthread crypt util xnet resolv dl
+EMPTY_LIBS = $(EMPTY_LIB_NAMES:%=lib%.a)
+
+all: $(EMPTY_LIBS)
+
+$(EMPTY_LIBS):
+	rm -f $@
+	$(AR) rc $@
+
 crt0.o: crt/crt1.c arch/$(ARCH)/crt_arch.h
 	@mkdir -p out
 	@printf "CC\t%s\n" "$@"
@@ -86,10 +95,13 @@ install-headers: include/bits/alltypes.h
 	install -Dm644 arch/generic/bits/*.h $(DESTDIR)$(INCLUDEDIR)/bits
 	install -Dm644 include/bits/*.h $(DESTDIR)$(INCLUDEDIR)/bits
 
-install-libc: libc.a crt0.o
+install-libc: libc.a crt0.o $(EMPTY_LIBS)
 	mkdir -p $(DESTDIR)$(LIBDIR)
 	install -Dm644 crt0.o $(DESTDIR)$(LIBDIR)
 	install -Dm644 libc.a $(DESTDIR)$(LIBDIR)
+	for lib in $(EMPTY_LIBS); do \
+		install -Dm644 $$lib $(DESTDIR)$(LIBDIR); \
+	done
 
 install: install-headers install-libc
 
