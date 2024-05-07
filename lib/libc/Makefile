@@ -72,6 +72,7 @@ DIRS=\
      process \
      regex \
      setjmp \
+     signal \
      stat \
      stdio \
      stdlib \
