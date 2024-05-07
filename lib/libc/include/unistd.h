@@ -79,6 +79,12 @@ int ftruncate(int, off_t);
 int access(const char *, int);
 int faccessat(int, const char *, int, int);
 
+struct __chdirat_options {
+	int dirfd;
+	__string_t path;
+	int flags;
+};
+
 int chdir(const char *);
 int fchdir(int);
 char *getcwd(char *, size_t);

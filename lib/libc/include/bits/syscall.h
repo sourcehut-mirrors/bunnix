@@ -23,6 +23,7 @@
 #define __NR_nanosleep		19
 #define __NR_fstatat		20
 #define __NR_pipe		21
+#define __NR_chdirat		22
 
 #endif
 #define SYS_readv		0
@@ -47,3 +48,4 @@
 #define SYS_nanosleep		19
 #define SYS_fstatat		20
 #define SYS_pipe		21
+#define SYS_chdirat		22

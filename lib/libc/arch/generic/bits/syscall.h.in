@@ -23,5 +23,6 @@
 #define __NR_nanosleep		19
 #define __NR_fstatat		20
 #define __NR_pipe		21
+#define __NR_chdirat		22
 
 #endif
