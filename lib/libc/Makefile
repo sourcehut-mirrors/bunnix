@@ -74,6 +74,7 @@ DIRS=\
      stdio \
      stdlib \
      string \
+     time \
      unistd
 
 OBJECTS = $(foreach dir,$(DIRS),$(patsubst %.c,%.o,$(wildcard src/$(dir)/*.c)))

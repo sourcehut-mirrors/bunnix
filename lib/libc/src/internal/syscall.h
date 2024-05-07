@@ -11,9 +11,7 @@
 typedef long syscall_arg_t;
 #endif
 
-hidden long __syscall_ret(unsigned long),
-	__syscall_cp(syscall_arg_t, syscall_arg_t, syscall_arg_t, syscall_arg_t,
-	             syscall_arg_t, syscall_arg_t, syscall_arg_t);
+hidden long __syscall_ret(unsigned long);
 
 #define __syscall1(n,a) __syscall1(n,__scc(a))
 #define __syscall2(n,a,b) __syscall2(n,__scc(a),__scc(b))
@@ -29,16 +27,6 @@ hidden long __syscall_ret(unsigned long),
 
 #define __syscall(...) __SYSCALL_DISP(__syscall,__VA_ARGS__)
 #define syscall(...) __syscall_ret(__syscall(__VA_ARGS__))
-
-#define __syscall_cp0(n) (__syscall_cp)(n,0,0,0,0,0,0)
-#define __syscall_cp1(n,a) (__syscall_cp)(n,__scc(a),0,0,0,0,0)
-#define __syscall_cp2(n,a,b) (__syscall_cp)(n,__scc(a),__scc(b),0,0,0,0)
-#define __syscall_cp3(n,a,b,c) (__syscall_cp)(n,__scc(a),__scc(b),__scc(c),0,0,0)
-#define __syscall_cp4(n,a,b,c,d) (__syscall_cp)(n,__scc(a),__scc(b),__scc(c),__scc(d),0,0)
-#define __syscall_cp5(n,a,b,c,d,e) (__syscall_cp)(n,__scc(a),__scc(b),__scc(c),__scc(d),__scc(e),0)
-
-#define __syscall_cp(...) __SYSCALL_DISP(__syscall_cp,__VA_ARGS__)
-#define syscall_cp(...) __syscall_ret(__syscall_cp(__VA_ARGS__))
 
 #define sys_string(s, n) (n == 0 ? (__string_t){0} : (__string_t){ s, n, n })
 
