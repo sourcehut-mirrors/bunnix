@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
 
 int main(int argc, char *argv[]) {
@@ -14,6 +15,13 @@ int main(int argc, char *argv[]) {
 		printf("argc[%d]: %s\n", i, argv[i]);
 	}
 
+	printf("sleep\n");
+	struct timespec ts = {
+		.tv_sec = 1,
+		.tv_nsec = 0,
+	};
+	nanosleep(&ts, NULL);
+
 	printf("[orig] fork\n");
 	pid_t pid = fork();
 	if (pid < 0) {
@@ -21,6 +29,8 @@ int main(int argc, char *argv[]) {
 		return 1;
 	} else if (pid == 0) {
 		printf("[child] execl /bin/echo Hello world!\n");
+		printf("[child] sleep 1s\n");
+		nanosleep(&ts, NULL);
 		execl("/bin/echo", "/bin/echo", "Hello world!", NULL);
 		return 0;
 	}

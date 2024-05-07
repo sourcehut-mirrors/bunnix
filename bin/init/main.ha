@@ -11,10 +11,30 @@ export fn main() void = {
 	};
 	fmt::println()!;
 
-	fmt::println("stat /usr/include/stdio.h")!;
-	const st = os::stat("/usr/include/stdio.h")!;
-	fmt::printfln("mode {:o}/{} owner {}:{} size {} bytes",
-		st.mode: uint, fs::mode_str(st.mode), st.uid, st.gid, st.sz)!;
+	fmt::println("Test pipe(2)")!;
+	const (rd, wr) = exec::pipe();
+	fmt::printfln("read fd: {}; write fd: {}", rd: int, wr: int)!;
+
+	fmt::println("fork")!;
+	match (exec::fork()!) {
+	case let proc: exec::process =>
+		io::close(rd)!;
+		fmt::println("[parent] write to pipe")!;
+
+		fmt::fprintln(wr, "Hello from the parent process!")!;
+		io::close(wr)!;
+
+		fmt::println("[parent] wait(child)")!;
+		exec::wait(&proc)!;
+	case =>
+		io::close(wr)!;
+		fmt::println("[child] read from pipe:")!;
+
+		io::copy(os::stdout, rd)!;
+
+		fmt::println("[child] exit")!;
+		os::exit(0);
+	};
 
 	fmt::println("[hare] exec /bin/test-c")!;
 	const cmd = exec::cmd("/bin/test-c", "Hello", "test-c")!;
