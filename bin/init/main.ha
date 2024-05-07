@@ -1,52 +1,41 @@
 use fmt;
 use fs;
 use io;
-use os::exec;
 use os;
+use os::exec;
+use strings;
 
 export fn main() void = {
-	fmt::print("[hare] Userspace args: ")!;
+	fmt::print("[init] Userspace args: ")!;
 	for (let arg .. os::args) {
 		fmt::printf("{} ", arg)!;
 	};
 	fmt::println()!;
 
-	fmt::println("Test pipe(2)")!;
+	fmt::println("[init] capture stdout of /bin/echo Hello world")!;
 	const (rd, wr) = exec::pipe();
-	fmt::printfln("read fd: {}; write fd: {}", rd: int, wr: int)!;
+	const cmd = exec::cmd("/bin/echo", "Hello world")!;
+	exec::addfile(&cmd, os::stdout_file, wr);
+	const proc = exec::start(&cmd)!;
 
-	fmt::println("fork")!;
-	match (exec::fork()!) {
-	case let proc: exec::process =>
-		io::close(rd)!;
-		fmt::println("[parent] write to pipe")!;
+	io::close(wr)!;
 
-		fmt::fprintln(wr, "Hello from the parent process!")!;
-		io::close(wr)!;
+	const data = io::drain(rd)!;
+	free(data);
+	io::close(rd)!;
+	exec::wait(&proc)!;
 
-		fmt::println("[parent] wait(child)")!;
-		exec::wait(&proc)!;
-	case =>
-		io::close(wr)!;
-		io::dup2(rd, os::stdin_file, io::dupflag::NONE)!;
-		io::close(rd)!;
-
-		fmt::println("[child] read from pipe:")!;
-
-		io::copy(os::stdout, os::stdin)!;
-
-		fmt::println("[child] exit")!;
-		os::exit(0);
-	};
+	const data = strings::fromutf8(data)!;
+	fmt::printf("[init] stdout from /bin/echo: {}", data)!;
 
 	os::chdir("/bin")!;
 
-	fmt::println("[hare] exec test-c")!;
+	fmt::println("[init] exec test-c")!;
 	const cmd = exec::cmd("./test-c", "Hello", "test-c")!;
 	const proc = exec::start(&cmd)!;
 	const st = exec::wait(&proc)!;
 	const exit = exec::exit(&st);
-	fmt::printfln("[hare] child (pid {}): {}",
+	fmt::printfln("[init] child (pid {}): {}",
 		proc: int, exec::exitstr(exit))!;
 
 	for (true) void;
