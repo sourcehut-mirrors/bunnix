@@ -59,6 +59,7 @@ let systab: [_]*opaque = [
 	&sys_linkat: *syscall_handler,
 	&sys_unlinkat: *syscall_handler,
 	&sys_getdents: *syscall_handler,
+	&sys_getcreds: *syscall_handler,
 	&sys_kill: *syscall_handler,
 	&sys_exit: *syscall_handler,
 	&sys_mmap: *syscall_handler,
@@ -71,5 +72,4 @@ let systab: [_]*opaque = [
 	&sys_nanosleep: *syscall_handler,
 	&sys_fstatat: *syscall_handler,
 	&sys_pipe: *syscall_handler,
-	&sys_getcreds: *syscall_handler,
 ];
