@@ -17,11 +17,8 @@ export type dupflag = enum {
 export fn dup(old: file, flags: dupflag) (file | error) = {
 	flags ^= dupflag::NOCLOEXEC; // Invert CLOEXEC
 
-	match (rt::dup(old)) {
+	match (rt::dup(old, flags)) {
 	case let fd: int =>
-		// TODO Bunnix
-		//const fl = rt::fcntl(fd, rt::F_GETFD, 0)!;
-		//rt::fcntl(fd, rt::F_SETFD, fl | flags)!;
 		return fd;
 	case let e: rt::errno =>
 		return errors::errno(e);

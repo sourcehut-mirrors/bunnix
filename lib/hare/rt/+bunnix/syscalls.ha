@@ -245,8 +245,8 @@ export fn fchdir(fd: int) (void | errno) = {
 	syswrap(syscall(sys::CHDIRAT, &opts))?;
 };
 
-export fn dup(fd: int) (int | errno) = {
-	return syswrap(syscall(sys::DUP, fd: i64, 0: i64))?: int;
+export fn dup(fd: int, flag: int = 0) (int | errno) = {
+	return syswrap(syscall(sys::DUP, fd: i64, flag: i64))?: int;
 };
 
 export fn dup2(oldfd: int, newfd: int) (int | errno) = {
