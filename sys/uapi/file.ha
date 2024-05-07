@@ -237,7 +237,7 @@ fn sys_getdents(fd: i64, buf: *[*]u8, bufsz: size) (u64 | error) = {
 		next.name[nameln] = 0;
 
 		n += next.reclen;
-		next.off = n;
+		next.off = n: i64;
 	};
 
 	return n: u64;
