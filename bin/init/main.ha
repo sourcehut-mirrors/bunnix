@@ -15,9 +15,6 @@ export fn main() void = {
 	const (rd, wr) = exec::pipe();
 	fmt::printfln("read fd: {}; write fd: {}", rd: int, wr: int)!;
 
-	const fd = os::open("dev/null")!;
-	io::close(fd)!;
-
 	fmt::println("fork")!;
 	match (exec::fork()!) {
 	case let proc: exec::process =>
@@ -39,8 +36,10 @@ export fn main() void = {
 		os::exit(0);
 	};
 
-	fmt::println("[hare] exec /bin/test-c")!;
-	const cmd = exec::cmd("/bin/test-c", "Hello", "test-c")!;
+	os::chdir("/bin")!;
+
+	fmt::println("[hare] exec test-c")!;
+	const cmd = exec::cmd("./test-c", "Hello", "test-c")!;
 	const proc = exec::start(&cmd)!;
 	const st = exec::wait(&proc)!;
 	const exit = exec::exit(&st);
