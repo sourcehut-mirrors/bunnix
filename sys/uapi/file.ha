@@ -297,3 +297,20 @@ fn sys_fstatat(opts: *fstatat_options) (u64 | error) = {
 
 	return 0u64;
 };
+
+fn sys_pipe(pair: *[2]int, flags: i64) (u64 | error) = {
+	validate_user_addr(pair, size([2]int))?;
+
+	// Only CLOEXEC is supported
+	const flags = (flags & ~O_CLOEXEC): io::flag;
+
+	const (rd, wr) = fs::mkpipe()?;
+
+	const cur = proc::current();
+	const fdrd = proc::installfd(cur, rd, io::flag::RDONLY | flags);
+	const fdwr = proc::installfd(cur, wr, io::flag::WRONLY | flags);
+	pair[0] = fdrd;
+	pair[1] = fdwr;
+
+	return 0u64;
+};
