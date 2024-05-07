@@ -226,7 +226,7 @@ struct timeval { time_t tv_sec; suseconds_t tv_usec; };
 #endif
 
 #if defined(__NEED_struct_timespec) && !defined(__DEFINED_struct_timespec)
-struct timespec { time_t tv_sec; int :8*(sizeof(time_t)-sizeof(long))*(__BYTE_ORDER==4321); long tv_nsec; int :8*(sizeof(time_t)-sizeof(long))*(__BYTE_ORDER!=4321); };
+struct timespec { time_t tv_sec; long tv_nsec;  };
 #define __DEFINED_struct_timespec
 #endif
 

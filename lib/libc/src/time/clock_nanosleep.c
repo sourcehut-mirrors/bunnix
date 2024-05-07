@@ -7,8 +7,8 @@
 
 int __clock_nanosleep(clockid_t clk, int flags, const struct timespec *req, struct timespec *rem)
 {
-	// TODO Bunnix
-	return -EOPNOTSUPP;
+	syscall(SYS_nanosleep, req);
+	return 0;
 }
 
 weak_alias(__clock_nanosleep, clock_nanosleep);
