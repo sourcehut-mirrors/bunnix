@@ -87,13 +87,58 @@ export fn getdents(fd: int, buf: *[*]u8, bufsz: size) (size | errno) = {
 	return syswrap(syscall(sys::GETDENTS, fd: i64, buf, bufsz))?: size;
 };
 
+export fn getcreds(out: *creds) void = {
+	syswrap(syscall(sys::GETCREDS, out))!;
+};
+
 export fn getpid() pid_t = {
-	return syswrap(syscall(sys::GETPID))!: pid_t;
+	let creds = creds { ... };
+	getcreds(&creds);
+	return creds.pid;
 };
 
 export fn getppid() pid_t = {
-	return syswrap(syscall(sys::GETPPID))!: pid_t;
+	let creds = creds { ... };
+	getcreds(&creds);
+	return creds.ppid;
 };
+
+export fn getpgid() pid_t = {
+	let creds = creds { ... };
+	getcreds(&creds);
+	return creds.pgid;
+};
+
+export fn getsid() pid_t = {
+	let creds = creds { ... };
+	getcreds(&creds);
+	return creds.sid;
+};
+
+export fn getuid() uid_t = {
+	let creds = creds { ... };
+	getcreds(&creds);
+	return creds.uid;
+};
+
+export fn geteuid() uid_t = {
+	let creds = creds { ... };
+	getcreds(&creds);
+	return creds.euid;
+};
+
+export fn getgid() gid_t = {
+	let creds = creds { ... };
+	getcreds(&creds);
+	return creds.gid;
+};
+
+export fn getegid() gid_t = {
+	let creds = creds { ... };
+	getcreds(&creds);
+	return creds.egid;
+};
+
 
 export fn exit(status: int) never = {
 	syscall(sys::EXIT, status: u64);

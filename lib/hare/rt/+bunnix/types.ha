@@ -8,6 +8,31 @@ export type uid_t = uint;
 export type gid_t = uint;
 export type pid_t = int;
 
+export def NGROUPS_MAX: size = 32;
+
+export type creds = struct {
+	// Process ID
+	pid: pid_t,
+	// Parent process ID
+	ppid: pid_t,
+	// Process group ID
+	pgid: pid_t,
+	// Session ID
+	sid: pid_t,
+	// User ID
+	uid: uid_t,
+	// Group ID
+	gid: gid_t,
+	// Effective user ID
+	euid: uid_t,
+	// Effective group ID
+	egid: gid_t,
+	// Number of supplementary group IDs
+	ngroup: size,
+	// Supplementary group IDs
+	groups: []gid_t,
+};
+
 export def STDIN_FILENO: int = 0;
 export def STDOUT_FILENO: int = 1;
 export def STDERR_FILENO: int = 2;
