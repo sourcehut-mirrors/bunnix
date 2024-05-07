@@ -137,9 +137,9 @@ export type unlinkat_options = struct {
 	flags: int,
 };
 
-export type dirent_meta = struct {
-	ino: uint,
-	off: size,
+export type dirent_meta = struct @packed {
+	ino: u64,
+	off: i64,
 	reclen: size,
 	mode: uint,
 };
