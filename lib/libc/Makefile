@@ -57,6 +57,7 @@ src/%.o: src/%.S
 
 DIRS=\
      ctype \
+     dirent \
      env \
      errno \
      exit \

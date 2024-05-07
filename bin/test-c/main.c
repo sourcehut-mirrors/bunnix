@@ -1,8 +1,10 @@
 #define _POSIX_C_SOURCE
 #include <assert.h>
+#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
@@ -14,6 +16,18 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < argc; ++i) {
 		printf("argc[%d]: %s\n", i, argv[i]);
 	}
+
+	printf("opendir /\n");
+	DIR *d = opendir("/");
+	if (d == NULL) {
+		perror("opendir");
+		return 1;
+	}
+	for (struct dirent *ent; (ent = readdir(d)) != NULL;) {
+		printf("/%s\n", ent->d_name);
+	}
+
+	closedir(d);
 
 	printf("sleep\n");
 	struct timespec ts = {

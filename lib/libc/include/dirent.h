@@ -9,9 +9,7 @@ extern "C" {
 
 #define __NEED_ino_t
 #define __NEED_off_t
-#if defined(_BSD_SOURCE) || defined(_GNU_SOURCE)
 #define __NEED_size_t
-#endif
 
 #include <bits/alltypes.h>
 
@@ -54,18 +52,6 @@ int getdents(int, struct dirent *, size_t);
 
 #ifdef _GNU_SOURCE
 int versionsort(const struct dirent **, const struct dirent **);
-#endif
-
-#if defined(_LARGEFILE64_SOURCE)
-#define dirent64 dirent
-#define readdir64 readdir
-#define readdir64_r readdir_r
-#define scandir64 scandir
-#define alphasort64 alphasort
-#define versionsort64 versionsort
-#define off64_t off_t
-#define ino64_t ino_t
-#define getdents64 getdents
 #endif
 
 #ifdef __cplusplus
