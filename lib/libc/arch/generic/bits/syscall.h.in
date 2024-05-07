@@ -24,5 +24,7 @@
 #define __NR_fstatat		20
 #define __NR_pipe		21
 #define __NR_chdirat		22
+#define __NR_dup		23
+#define __NR_dup2		24
 
 #endif

@@ -24,6 +24,8 @@
 #define __NR_fstatat		20
 #define __NR_pipe		21
 #define __NR_chdirat		22
+#define __NR_dup		23
+#define __NR_dup2		24
 
 #endif
 #define SYS_readv		0
@@ -49,3 +51,5 @@
 #define SYS_fstatat		20
 #define SYS_pipe		21
 #define SYS_chdirat		22
+#define SYS_dup		23
+#define SYS_dup2		24
