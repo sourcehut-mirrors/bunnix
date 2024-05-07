@@ -4,6 +4,21 @@ ROOT=./
 include mk/conf.mk
 include mk/$(ARCH).mk
 
+bootstrap:
+	mkdir -p $(SYSROOT)
+	make -C lib/libc install-headers DESTDIR=../../$(SYSROOT)
+	@echo
+	@echo ------====================================================================------
+	@echo
+	@echo Your bootstrap sysroot is now ready:
+	@echo
+	@echo sysroot=$$(readlink -f $$PWD/$(SYSROOT))
+	@echo
+	@echo ------====================================================================------
+	@echo
+
+.PHONY: bootstrap
+
 # Kernel
 KERNEL_SOURCES=$(call rwildcard,sys,*.ha *.s *.sc)
 

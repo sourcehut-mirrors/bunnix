@@ -2,14 +2,56 @@
 
 A simple monolithic Unix-like operating system.
 
+## Bunnix cross toolchain
+
+A GNU toolchain configured for an x86_64-bunnix target is required to compile
+Bunnix. Fetch the binutils and gcc trees from here:
+
+* [binutils](https://git.sr.ht/~sircmpwn/binutils) (bunnix branch)
+* [gcc](https://git.sr.ht/~sircmpwn/gcc) (bunnix branch)
+
+You must configure these with the Bunnix sysroot you will be using for your
+build. The build system places this at $srcdir/target/root/ by default.
+
+First run "make bootstrap" to initialize the sysroot. This will print the path
+to the configured sysroot. Assuming $sysroot refers to this path, an example
+binutils configuration could be:
+
+```
+./configure \
+    --target=x86_64-bunnix \
+    --prefix=/usr/local \
+    --with-sysroot=$sysroot \
+    --disable-werror \
+    --disable-nls
+make
+make install
+```
+
+And GCC:
+
+```
+./configure \
+    --target=x86_64-bunnix \
+    --prefix=/usr/local \
+    --with-sysroot=$sysroot \
+    --enable-languages=c,c++ \
+    --disable-gcov \
+    --disable-nlp
+make all-gcc all-target-libgcc
+make install-gcc install-target-libgcc
+make all-target-libstdc++-v3
+make install-target-libstdc++-v3
+```
+
 ## Building Bunnix
 
 You need the following:
 
-* GNU make
+* binutils and gcc configured for x86_64-bunnix (see above)
 * An up-to-date [Hare](https://harelang.org) toolchain. Bunnix tracks Hare
   master, not the latest stable release.
-* binutils and gcc configured for x86_64-elf
+* GNU make
 * e2fsprogs
 * mtools
 * sfdisk
