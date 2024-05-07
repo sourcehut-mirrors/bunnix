@@ -24,4 +24,5 @@ export type sys = enum u64 {
 	NANOSLEEP,
 	FSTATAT,
 	PIPE,
+	CHDIRAT,
 };

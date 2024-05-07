@@ -226,3 +226,21 @@ export fn fstatat(
 export fn pipe(pipefd: *[2]int, flags: int) (void | errno) = {
 	syswrap(syscall(sys::PIPE, pipefd, flags: i64))?;
 };
+
+export fn chdir(path: str) (void | errno) = {
+	let opts = chdirat_options {
+		dirfd = AT_FDCWD,
+		path = path,
+		flags = 0,
+	};
+	syswrap(syscall(sys::CHDIRAT, &opts))?;
+};
+
+export fn fchdir(fd: int) (void | errno) = {
+	let opts = chdirat_options {
+		dirfd = fd,
+		flags = AT_EMPTY_PATH,
+		...
+	};
+	syswrap(syscall(sys::CHDIRAT, &opts))?;
+};

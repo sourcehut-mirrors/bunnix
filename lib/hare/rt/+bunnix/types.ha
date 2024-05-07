@@ -189,3 +189,9 @@ export fn wifexited(s: int) bool = wtermsig(s) <= 0;
 export fn wifstopped(s: int) bool = (((s & 0xFFFF) * 0x10001) >> 8) > 0x7f00;
 export fn wifsignaled(s: int) bool = (s & 0xFFFF) - 1 < 0xFF;
 export fn wifcontinued(s: int) bool = s == 0xFFFF;
+
+export type chdirat_options = struct {
+	dirfd: int,
+	path: str,
+	flags: int, // AT_EMPTY_PATH
+};

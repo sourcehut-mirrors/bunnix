@@ -22,8 +22,12 @@ export fn getcwd() str = {
 };
 
 // Change the current working directory.
-export fn chdir(target: (*fs::fs | str)) (void | fs::error) = {
-	abort(); // TODO
+export fn chdir(path: str) (void | fs::error) = {
+	match (rt::chdir(path)) {
+	case let err: rt::errno =>
+		return errno_to_fs(err);
+	case void => void;
+	};
 };
 
 // Changes the root directory of the process. Generally requires the caller to
