@@ -23,6 +23,7 @@ export fn icache_get(ic: *icache, ino: uint) (*io::inode | error) = {
 	};
 	match (sort::search(ic.ino, size(*io::inode), &model, &ino_cmp)) {
 	case let i: size =>
+		io::inode_ref(ic.ino[i]);
 		return ic.ino[i];
 	case void =>
 		return errno::NOENT;

@@ -22,6 +22,13 @@ export fn inode_walk(
 	let cur = root;
 	let last_name = "";
 	for (true) {
+		match (cur.mountpoint) {
+		case let mp: *opaque =>
+			const mp = mp: *mountpoint;
+			cur = superblock_get_root(mp.sb);
+		case null => void;
+		};
+
 		const name = match (path::nextiter(iter)) {
 		case let n: str =>
 			yield n;
@@ -65,13 +72,13 @@ export fn inode_walk(
 
 // Walks a VFS from the root to find the node at a given path.
 export fn walk(
-	root: *vfs,
+	root: *io::inode,
 	path: str,
 	flag: walkflag = walkflag::NONE,
 ) ((*io::inode, str) | error) = {
+	assert(path::abs(path));
 	const p = path::init(path)!;
 	const iter = path::iter(&p);
-	const mp = find_mountpoint(root, &iter)?;
-	const root = superblock_get_root(mp.sb);
+	path::nextiter(&iter); // Skip /
 	return inode_walk(root, &iter, flag);
 };

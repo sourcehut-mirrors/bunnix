@@ -16,7 +16,10 @@ use strings;
 
 const KERN: str = "kern";
 
-let root = fs::vfs { ... };
+let vroot = fs::vfs {
+	root = null: *io::inode,
+	...
+};
 
 export fn main(ctx: *boot::context) void = {
 	log::kprintln(KERN, "Bunnix kernel boot");
@@ -65,7 +68,7 @@ export fn main(ctx: *boot::context) void = {
 	};
 
 	// Mount root
-	if (len(ctx.mods) == 0) {
+	const root = if (len(ctx.mods) == 0) {
 		log::kprintfln(KERN, "Mount root from {} as {}",
 			root_opts.device, root_opts.fstype);
 		const fs = match (fs::fs_open(&root_opts)) {
@@ -76,18 +79,18 @@ export fn main(ctx: *boot::context) void = {
 				strerror(err));
 			rt::halt();
 		};
-		fs::mount_root(&root, fs);
+		yield fs::mount_root(&vroot, fs);
 	} else {
-		mount_initrd(&root, &ctx.mods[0]);
+		yield mount_initrd(&vroot, &ctx.mods[0]);
 	};
 
 	// Populate /dev
-	mountdev(&root);
+	mountdev(root);
 
 	// Start /bin/init
 	log::kprintfln(KERN, "entering userspace: exec {}", init);
-	const proc = proc::new_proc(&root, null)!;
-	const (inode, _) = fs::walk(&root, init)!;
+	const proc = proc::new_proc(root, root, null)!;
+	const (inode, _) = fs::walk(root, init)!;
 
 	// TODO: Implement console device properly, i.e. /dev/cons
 	proc::installfd(proc, log::cons);	// stdin

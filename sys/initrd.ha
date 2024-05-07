@@ -9,15 +9,15 @@ use log;
 use memio;
 use path;
 
-fn mount_initrd(vfs: *fs::vfs, mod: *boot::module) void = {
+// Extracts an initrd into a memfs and returns the root inode.
+fn mount_initrd(vfs: *fs::vfs, mod: *boot::module) *io::inode = {
 	log::kprintf(KERN, "Mount root from initrd: ");
 	const base = arch::phys_tokernel(mod.phys): *[*]u8;
 	const data = base[..mod.length];
 	const in = memio::fixed(data);
 
 	const fs = memfs::new();
-	fs::mount_root(&root, fs);
-	const root = fs::superblock_get_root(fs);
+	const root = fs::mount_root(vfs, fs);
 
 	let nino = 0z;
 	const rd = tar::read(&in);
@@ -58,4 +58,6 @@ fn mount_initrd(vfs: *fs::vfs, mod: *boot::module) void = {
 	};
 
 	log::printfln("{} inodes", nino);
+
+	return root;
 };

@@ -8,6 +8,9 @@ export type inode = struct {
 	// Note the reference count is zero when one reference is held
 	refs: uint,
 
+	// See fs::mountpoint
+	mountpoint: nullable *opaque,
+
 	ino: u32,
 	dev: u64,
 	rdev: u64,
@@ -164,6 +167,8 @@ export fn inode_unref(ino: *inode) void = {
 	if (ino.refs == 0) {
 		match (ino.impl.finish) {
 		case let func: *fn_inode_finish =>
+			assert(ino.mountpoint == null,
+				"io::inode_unref freeing inode with active mount");
 			func(ino);
 		case null => void;
 		};

@@ -10,7 +10,8 @@ let procs: []*proc = [];
 // A process in userspace.
 export type proc = struct {
 	vmm: mman::vmm,
-	root: *fs::vfs,
+	root: *io::inode,
+	cwd: *io::inode,
 	fds: []filedesc,
 	creds: creds,
 	sig: sigproc,
@@ -25,7 +26,11 @@ export type proc = struct {
 };
 
 // Creates a new process.
-export fn new_proc(root: *fs::vfs, parent: nullable *proc) (*proc | error) = {
+export fn new_proc(
+	root: *io::inode,
+	cwd: *io::inode,
+	parent: nullable *proc,
+) (*proc | error) = {
 	static let nextpid: int = 1;
 	assert(nextpid + 1 > nextpid); // TODO
 	defer nextpid += 1;
@@ -35,6 +40,7 @@ export fn new_proc(root: *fs::vfs, parent: nullable *proc) (*proc | error) = {
 
 	let new_proc = alloc(proc {
 		root = root,
+		cwd = cwd,
 		creds = creds,
 		...
 	});

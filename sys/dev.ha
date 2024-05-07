@@ -4,7 +4,7 @@ use fs::memfs;
 use fs;
 use io;
 
-fn mountdev(root: *fs::vfs) void = {
+fn mountdev(root: *io::inode) void = {
 	// TODO: We should probably have a devtmpfs thing and deal with
 	// hotplugging and such
 	const dev = memfs::new();

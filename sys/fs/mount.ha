@@ -1,84 +1,42 @@
 use errors::{error, errno};
+use io;
 use path;
 use strings;
 
 export type vfs = struct {
-	mounts: []mountpoint,
+	root: nullable *io::inode,
 };
 
 // A mountpoint in a virtual filesystem.
 export type mountpoint = struct {
-	path: str,
 	sb: const *superblock,
 };
 
-// Mounts the root filesystem.
+// Mounts the root filesystem and return the root inode.
 export fn mount_root(
 	vfs: *vfs,
 	fs: const *superblock,
-) void = {
-	assert(len(vfs.mounts) == 0);
-	append(vfs.mounts, mountpoint {
-		path = strings::dup("/"),
+) *io::inode = {
+	assert(vfs.root == null);
+	let root = superblock_get_root(fs);
+	vfs.root = root;
+	root.mountpoint = alloc(mountpoint {
 		sb = fs,
 	});
+	return root;
 };
 
 // Mounts a filesystem at the given path.
 export fn mount_fs(
-	vfs: *vfs,
+	root: *io::inode,
 	fs: const *superblock,
 	path: str,
 ) (void | error) = {
-	for (let mnt &.. vfs.mounts) {
-		if (mnt.path == path) {
-			return errno::BUSY;
-		};
+	const (parent, _) = walk(root, path)?;
+	if (parent.mountpoint != null) {
+		return errno::BUSY;
 	};
-
-	// TODO: Check that mountpoint exists
-
-	append(vfs.mounts, mountpoint {
-		path = strings::dup(path),
+	parent.mountpoint = alloc(mountpoint {
 		sb = fs,
 	});
-};
-
-// Finds the mountpoint associated with the given path and trims off the leading
-// path components.
-export fn find_mountpoint(
-	vfs: *vfs,
-	iter: *path::iterator,
-) (*mountpoint | error) = {
-	const rem = path::iterrem(iter);
-	assert(path::abs(rem));
-
-	// TODO: make this better
-	let mp: nullable *mountpoint = null;
-	let max = 0z;
-	for (let mnt &.. vfs.mounts) {
-		if (!strings::hasprefix(rem, mnt.path)) {
-			continue;
-		};
-		if (len(mnt.path) <= max) {
-			continue;
-		};
-		mp = mnt;
-		max = len(mnt.path);
-	};
-
-	const mp = match (mp) {
-	case null =>
-		return errno::NOENT;
-	case let mp: *mountpoint =>
-		yield mp;
-	};
-
-	// Trim iterator
-	let mpath = path::init(mp.path)!;
-	let miter = path::iter(&mpath);
-	for (let x => path::nextiter(&miter)) {
-		path::nextiter(iter);
-	};
-	return mp;
 };
