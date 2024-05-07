@@ -25,4 +25,6 @@ export type sys = enum u64 {
 	FSTATAT,
 	PIPE,
 	CHDIRAT,
+	DUP,
+	DUP2,
 };
