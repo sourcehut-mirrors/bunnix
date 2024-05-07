@@ -178,3 +178,7 @@ export fn fstatat(
 	};
 	syswrap(syscall(sys::FSTATAT, &opts))?;
 };
+
+export fn pipe(pipefd: *[2]int, flags: int) (void | errno) = {
+	syswrap(syscall(sys::PIPE, pipefd, flags: i64))?;
+};

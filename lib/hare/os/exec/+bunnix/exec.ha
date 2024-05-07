@@ -54,7 +54,7 @@ export fn fork() (process | void | error) = {
 // 	io::close(pipe.0)!;
 // 	exec::wait(&proc)!;
 export fn pipe() (io::file, io::file) = {
-	abort(); // TODO: Bunnix
+	return unix::pipe()!;
 };
 
 fn open(path: str) (platform_cmd | error) = {
