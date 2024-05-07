@@ -4,6 +4,8 @@ use fs;
 use io;
 use proc;
 use sched;
+// XXX TEMP
+use log;
 
 fn sys_kill(status: int) (u64 | error) = {
 	abort(); // TODO
@@ -74,6 +76,26 @@ fn sys_getcreds(out: *creds) (u64 | error) = {
 		groups = groups[..len(out.groups)];
 	};
 	out.groups[..] = groups[..];
+
+	return 0u64;
+};
+
+fn sys_chdirat(opts: *chdirat_options) (u64 | error) = {
+	validate_user_addr(opts, size(chdirat_options))?;
+
+	const targ = if (opts.flags & AT_EMPTY_PATH == 1) {
+		const fd = validate_dirfd(opts.dirfd)?;
+		yield fd.inode as *io::inode;
+	} else {
+		validate_user_string(opts.path)?;
+
+		const (ino, _) = atwalk(opts.dirfd, opts.path)?;
+		yield ino;
+	};
+
+	let cur = proc::current();
+	io::inode_unref(cur.cwd);
+	cur.cwd = targ;
 
 	return 0u64;
 };

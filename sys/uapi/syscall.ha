@@ -45,6 +45,7 @@ export type sys = enum u64 {
 	NANOSLEEP,
 	FSTATAT,
 	PIPE,
+	CHDIRAT,
 };
 
 export type syscall_handler = fn(u64, u64, u64, u64, u64) (u64 | error);
@@ -72,4 +73,5 @@ let systab: [_]*opaque = [
 	&sys_nanosleep: *syscall_handler,
 	&sys_fstatat: *syscall_handler,
 	&sys_pipe: *syscall_handler,
+	&sys_chdirat: *syscall_handler,
 ];

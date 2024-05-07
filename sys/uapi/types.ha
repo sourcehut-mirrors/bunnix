@@ -149,3 +149,9 @@ export type creds = struct {
 	// Supplementary group IDs
 	groups: []int,
 };
+
+export type chdirat_options = struct {
+	dirfd: int,
+	path: str,
+	flags: int, // AT_EMPTY_PATH for fchdir
+};
