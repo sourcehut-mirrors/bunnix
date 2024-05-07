@@ -110,6 +110,22 @@ int execlp(const char *, const char *, ...);
 int fexecve(int, char *const [], char *const []);
 _Noreturn void _exit(int);
 
+// Bunnix syscall ABI
+struct __creds {
+	pid_t pid;
+	pid_t ppid;
+	pid_t pgid;
+	pid_t sid;
+	uid_t uid;
+	gid_t gid;
+	uid_t euid;
+	uid_t egid;
+	size_t ngroup;
+	__slice_t groups;
+};
+
+void getcreds(struct __creds *out);
+
 pid_t getpid(void);
 pid_t getppid(void);
 pid_t getpgrp(void);

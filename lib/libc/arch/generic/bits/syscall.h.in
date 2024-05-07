@@ -10,7 +10,7 @@
 #define __NR_linkat		6
 #define __NR_unlinkat		7
 #define __NR_getdents		8
-#define __NR_getpid		9
+#define __NR_getcreds		9
 #define __NR_kill		10
 #define __NR_exit		11
 #define __NR_mmap		12
@@ -19,10 +19,9 @@
 #define __NR_fork		15
 #define __NR_execve		16
 #define __NR_waitpid		17
-#define __NR_getppid		18
-#define __NR_gettime		19
-#define __NR_nanosleep		20
-#define __NR_fstatat		21
-#define __NR_pipe		22
+#define __NR_gettime		18
+#define __NR_nanosleep		19
+#define __NR_fstatat		20
+#define __NR_pipe		21
 
 #endif

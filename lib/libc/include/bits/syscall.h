@@ -10,7 +10,7 @@
 #define __NR_linkat		6
 #define __NR_unlinkat		7
 #define __NR_getdents		8
-#define __NR_getpid		9
+#define __NR_getcreds		9
 #define __NR_kill		10
 #define __NR_exit		11
 #define __NR_mmap		12
@@ -19,11 +19,10 @@
 #define __NR_fork		15
 #define __NR_execve		16
 #define __NR_waitpid		17
-#define __NR_getppid		18
-#define __NR_gettime		19
-#define __NR_nanosleep		20
-#define __NR_fstatat		21
-#define __NR_pipe		22
+#define __NR_gettime		18
+#define __NR_nanosleep		19
+#define __NR_fstatat		20
+#define __NR_pipe		21
 
 #endif
 #define SYS_readv		0
@@ -35,7 +34,7 @@
 #define SYS_linkat		6
 #define SYS_unlinkat		7
 #define SYS_getdents		8
-#define SYS_getpid		9
+#define SYS_getcreds		9
 #define SYS_kill		10
 #define SYS_exit		11
 #define SYS_mmap		12
@@ -44,8 +43,7 @@
 #define SYS_fork		15
 #define SYS_execve		16
 #define SYS_waitpid		17
-#define SYS_getppid		18
-#define SYS_gettime		19
-#define SYS_nanosleep		20
-#define SYS_fstatat		21
-#define SYS_pipe		22
+#define SYS_gettime		18
+#define SYS_nanosleep		19
+#define SYS_fstatat		20
+#define SYS_pipe		21
