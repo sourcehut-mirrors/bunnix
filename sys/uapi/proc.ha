@@ -5,14 +5,6 @@ use io;
 use proc;
 use sched;
 
-fn sys_getpid() (u64 | error) = {
-	return proc::current().creds.pid: u64;
-};
-
-fn sys_getppid() (u64 | error) = {
-	return proc::current().creds.ppid: u64;
-};
-
 fn sys_kill(status: int) (u64 | error) = {
 	abort(); // TODO
 };
@@ -60,4 +52,27 @@ fn sys_waitpid(pid: i64, wstatus: nullable *int, options: i64) (u64 | error) = {
 	};
 
 	return proc::waitpid(pid: int, wstatus, options: int)?: u64;
+};
+
+fn sys_getcreds(out: *creds) (u64 | error) = {
+	validate_user_addr(out, size(creds), true)?;
+	validate_user_slice(out.groups, size(int), true)?;
+
+	const cur = &proc::current().creds;
+	out.pid = cur.pid;
+	out.ppid = cur.ppid;
+	out.pgid = cur.pgid;
+	out.sid = cur.sid;
+	out.uid = cur.uid;
+	out.euid = cur.euid;
+	out.egid = cur.egid;
+	out.ngroup = len(cur.groups);
+
+	let groups = cur.groups;
+	if (len(groups) > len(out.groups)) {
+		groups = groups[..len(out.groups)];
+	};
+	out.groups[..] = groups[..];
+
+	return 0u64;
 };
