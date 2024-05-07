@@ -152,7 +152,7 @@ clean: clean-target
 
 # Disks for emulator use
 target/fs.fat.img: $(SYSROOT)
-	qemu-img create -f raw $@ 16M
+	qemu-img create -f raw $@ 24M
 	mkdosfs $@
 	mmd -i $@ ::EFI
 	mmd -i $@ ::EFI/boot
