@@ -93,6 +93,11 @@ fn sys_chdirat(opts: *chdirat_options) (u64 | error) = {
 		yield ino;
 	};
 
+	if (!io::isdir(targ.mode)) {
+		io::inode_unref(targ);
+		return errno::NOTDIR: error;
+	};
+
 	let cur = proc::current();
 	io::inode_unref(cur.cwd);
 	cur.cwd = targ;
