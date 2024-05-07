@@ -15,7 +15,7 @@ export fn main() void = {
 	const (rd, wr) = exec::pipe();
 	fmt::printfln("read fd: {}; write fd: {}", rd: int, wr: int)!;
 
-	const fd = os::open("/dev/null")!;
+	const fd = os::open("dev/null")!;
 	io::close(fd)!;
 
 	fmt::println("fork")!;

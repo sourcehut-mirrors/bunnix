@@ -76,9 +76,10 @@ export fn walk(
 	path: str,
 	flag: walkflag = walkflag::NONE,
 ) ((*io::inode, str) | error) = {
-	assert(path::abs(path));
 	const p = path::init(path)!;
 	const iter = path::iter(&p);
-	path::nextiter(&iter); // Skip /
+	if (path::abs(path)) {
+		path::nextiter(&iter); // Skip /
+	};
 	return inode_walk(root, &iter, flag);
 };

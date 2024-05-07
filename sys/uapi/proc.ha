@@ -34,7 +34,8 @@ fn sys_execve(opts: *exec_options) (u64 | error) = {
 		yield validate_file(opts.fd)?;
 	} else {
 		validate_user_string(opts.path)?;
-		const (inode, _) = fs::walk(current.root, opts.path)?;
+		// TODO: Should we have an fexecveat?
+		const (inode, _) = atwalk(AT_FDCWD, opts.path)?;
 		yield io::inode_open(inode)!;
 	};
 

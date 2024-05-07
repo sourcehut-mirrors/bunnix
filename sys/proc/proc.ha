@@ -38,6 +38,9 @@ export fn new_proc(
 	let creds = creds { ... };
 	creds.pid = nextpid;
 
+	io::inode_ref(root);
+	io::inode_ref(cwd);
+
 	let new_proc = alloc(proc {
 		root = root,
 		cwd = cwd,
@@ -89,6 +92,9 @@ fn cleanup(proc: *proc) void = {
 		};
 	};
 	free(proc.fds);
+
+	io::inode_unref(proc.root);
+	io::inode_unref(proc.cwd);
 };
 
 // Exits the calling process.

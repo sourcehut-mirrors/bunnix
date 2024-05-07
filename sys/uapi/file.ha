@@ -104,9 +104,7 @@ fn sys_openat(opts: *openat_options) (u64 | error) = {
 	// - O_DIRECTORY can only be opened O_RDONLY
 	validate_user_addr(opts, size(openat_options))?;
 	validate_user_string(opts.path)?;
-	assert(opts.dirfd == AT_FDCWD);
 
-	const current = proc::current();
 	let walkflag = fs::walkflag::NONE;
 	let oflag = opts.flags: io::flag;
 	if (oflag & io::flag::CREATE != 0) {
@@ -121,7 +119,7 @@ fn sys_openat(opts: *openat_options) (u64 | error) = {
 		};
 	};
 
-	let (inode, final) = fs::walk(current.root, opts.path, walkflag)?;
+	let (inode, final) = atwalk(opts.dirfd, opts.path, walkflag)?;
 	if (oflag & io::flag::CREATE != 0) {
 		const parent = inode;
 		defer io::inode_unref(parent);
@@ -169,17 +167,15 @@ fn sys_openat(opts: *openat_options) (u64 | error) = {
 		};
 	};
 
-	return proc::installfd(current, file, oflag, inode): u64;
+	return proc::installfd(proc::current(), file, oflag, inode): u64;
 };
 
 fn sys_mkdirat(opts: *mkdirat_options) (u64 | error) = {
 	validate_user_addr(opts, size(mkdirat_options))?;
 	validate_user_string(opts.path)?;
-	assert(opts.dirfd == AT_FDCWD);
 
-	const current = proc::current();
-	const walkflag = fs::walkflag::PARENT;
-	let (parent, final) = fs::walk(current.root, opts.path, walkflag)?;
+	let (parent, final) = atwalk(opts.dirfd, opts.path,
+		fs::walkflag::PARENT)?;
 	const child = io::inode_mkdir(parent, final, opts.mode: io::mode)?;
 	io::inode_unref(parent);
 	io::inode_unref(child);
@@ -202,9 +198,8 @@ fn sys_unlinkat(opts: *unlinkat_options) (u64 | error) = {
 	validate_user_string(opts.path)?;
 	assert(opts.dirfd == AT_FDCWD);
 
-	const current = proc::current();
-	const (parent, final) = fs::walk(current.root,
-		opts.path, fs::walkflag::PARENT)?;
+	const (parent, final) = atwalk(opts.dirfd, opts.path,
+		fs::walkflag::PARENT)?;
 	io::inode_unlink(parent, final)?;
 	io::inode_unref(parent);
 
@@ -271,7 +266,6 @@ fn sys_fstatat(opts: *fstatat_options) (u64 | error) = {
 	validate_user_addr(opts.stat, size(st), true)?;
 	validate_user_string(opts.path)?;
 
-	const current = proc::current();
 	let ino: nullable *io::inode = null;
 
 	if (opts.flags & AT_EMPTY_PATH != 0) {
@@ -285,8 +279,7 @@ fn sys_fstatat(opts: *fstatat_options) (u64 | error) = {
 			return errno::BADF: error;
 		};
 	} else {
-		assert(opts.dirfd == AT_FDCWD); // TODO
-		let (targ, _) = fs::walk(current.root, opts.path)?;
+		let (targ, _) = atwalk(opts.dirfd, opts.path)?;
 		ino = targ;
 	};
 
