@@ -312,17 +312,26 @@ fn sys_pipe(pair: *[2]int, flags: i64) (u64 | error) = {
 	return 0u64;
 };
 
-fn sys_dup(fd: i64) (u64 | error) = {
+fn sys_dup(fd: i64, flags: i64) (u64 | error) = {
+	const flags = flags: io::flag & io::flag::CLOEXEC;
 	const fd = validate_fd(fd)?;
 	const cur = proc::current();
 	const file = fd.file as *io::file;
-	return proc::installfd(cur, file, fd.oflag, fd.inode): u64;
+
+	let oflag = fd.oflag;
+	if (flags & io::flag::CLOEXEC == 0) {
+		oflag &= ~io::flag::CLOEXEC;
+	} else {
+		oflag |= io::flag::CLOEXEC;
+	};
+
+	return proc::installfd(cur, file, oflag, fd.inode): u64;
 };
 
 fn sys_dup2(oldfd: i64, newfd: i64, flags: i64) (u64 | error) = {
 	const oldfd = oldfd: int;
 	const newfd = newfd: int;
-	const flags = flags: io::flag & O_CLOEXEC;
+	const flags = flags: io::flag & io::flag::CLOEXEC;
 
 	const old = validate_fd(oldfd)?;
 	if (oldfd == newfd) {
@@ -335,8 +344,13 @@ fn sys_dup2(oldfd: i64, newfd: i64, flags: i64) (u64 | error) = {
 	let new = proc::getfd(cur, newfd, true)?;
 	assert(new.file == null); // invariant enforced by proc::closefd
 	new.file = old.file;
-	new.oflag = old.oflag | flags;
 	new.inode = old.inode;
+
+	if (flags & io::flag::CLOEXEC == 0) {
+		new.oflag = old.oflag & ~io::flag::CLOEXEC;
+	} else {
+		new.oflag = old.oflag | io::flag::CLOEXEC;
+	};
 
 	io::ref(new.file as *io::file);
 	return newfd: u64;
