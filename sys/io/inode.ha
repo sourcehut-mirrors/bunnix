@@ -14,6 +14,7 @@ export type inode = struct {
 	ino: u32,
 	dev: u64,
 	rdev: u64,
+	nlink: u64,
 	mode: mode,
 	uid: uint,
 	gid: uint,

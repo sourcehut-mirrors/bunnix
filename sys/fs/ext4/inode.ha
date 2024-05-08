@@ -47,6 +47,7 @@ fn inode_from_ref(sb: *superblock, ref: *lwext4::inode_ref) *inode = {
 	ino.dev = lwext4::inode_get_dev(ino.inode);
 	ino.bytes = lwext4::inode_get_size(&fs.sb, ino.inode);
 	ino.blocks = lwext4::inode_get_blocks_count(&fs.sb, ino.inode);
+	ino.nlink = lwext4::inode_get_links_cnt(ino.inode);
 	return ino;
 };
 
@@ -137,6 +138,8 @@ fn ext4_inode_link(
 	};
 
 	lwext4::fs_inode_links_count_inc(&child.ref);
+	child.nlink += 1;
+
 	r = lwext4::fs_put_inode_ref(&child.ref);
 	if (r != errno::NONE) {
 		return r;
@@ -250,7 +253,6 @@ fn ext4_inode_mkdir(
 	lwext4::fs_inode_blocks_init(fs, &child_ref);
 	lwext4::inode_set_mode(&fs.sb, child_ref.inode,
 		(io::mode_perm(mode) | io::mode::DIR): u32);
-	lwext4::fs_inode_links_count_inc(&child_ref);
 
 	const child = inode_from_ref(parent.sb, &child_ref);
 	const hardlinks = [

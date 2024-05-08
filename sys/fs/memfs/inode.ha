@@ -63,6 +63,7 @@ fn mkinode(
 		case null =>
 			inode_link(&ino, &ino, "..")!;
 		};
+		ino.nlink = 2;
 	};
 
 	return ino;
@@ -112,6 +113,7 @@ fn inode_mkchild(ino: *io::inode, name: str, mode: io::mode) (*io::inode | error
 	};
 	const i = sort::lbisect(parent.entries, size(dirent), &dent, &dent_cmp);
 	insert(parent.entries[i], dent);
+	child.nlink += 1;
 
 	return child;
 };
@@ -171,6 +173,8 @@ fn inode_link(
 	};
 	const i = sort::lbisect(parent.entries, size(dirent), &dent, &dent_cmp);
 	insert(parent.entries[i], dent);
+
+	child.nlink += 1;
 };
 
 fn inode_unlink(
@@ -186,6 +190,7 @@ fn inode_unlink(
 	};
 	match (sort::search(parent.entries, size(dirent), &model, &dent_cmp)) {
 	case let i: size =>
+		parent.entries[i].inode.nlink -= 1;
 		delete(parent.entries[i]);
 	case void =>
 		return errno::NOENT;

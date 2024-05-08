@@ -14,6 +14,7 @@ export @symbol("ext4_inode_get_blocks_count") fn inode_get_blocks_count(*sblock,
 export @symbol("ext4_inode_set_blocks_count") fn inode_set_blocks_count(*sblock, *inode, u64) errno;
 export @symbol("ext4_inode_get_dev") fn inode_get_dev(*inode) u32;
 export @symbol("ext4_inode_set_dev") fn inode_set_dev(*inode, u32) void;
+export @symbol("ext4_inode_get_links_cnt") fn inode_get_links_cnt(*inode) u16;
 
 //uint32_t ext4_inode_get_access_time(struct ext4_inode *inode);
 //void ext4_inode_set_access_time(struct ext4_inode *inode, uint32_t time);
@@ -23,8 +24,6 @@ export @symbol("ext4_inode_set_dev") fn inode_set_dev(*inode, u32) void;
 //void ext4_inode_set_modif_time(struct ext4_inode *inode, uint32_t time);
 //uint32_t ext4_inode_get_del_time(struct ext4_inode *inode);
 //void ext4_inode_set_del_time(struct ext4_inode *inode, uint32_t time);
-//uint16_t ext4_inode_get_links_cnt(struct ext4_inode *inode);
-//void ext4_inode_set_links_cnt(struct ext4_inode *inode, uint16_t cnt);
 //uint32_t ext4_inode_get_flags(struct ext4_inode *inode);
 //void ext4_inode_set_flags(struct ext4_inode *inode, uint32_t flags);
 //uint32_t ext4_inode_get_generation(struct ext4_inode *inode);
