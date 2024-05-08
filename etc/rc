@@ -1,0 +1,4 @@
+#!/bin/sh
+echo hello from /etc/rc!
+echo I guess this script should do something at some point
+echo I dunno, mount filesystems or something like that

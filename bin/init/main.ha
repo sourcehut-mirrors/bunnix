@@ -28,13 +28,10 @@ export fn main() void = {
 	const data = strings::fromutf8(data)!;
 	fmt::printf("[init] stdout from /bin/echo: {}", data)!;
 
-	fmt::println("[init] exec /bin/test-c")!;
-	const cmd = exec::cmd("/bin/test-c", "Hello C")!;
+	fmt::println("[init] exec /etc/rc")!;
+	// TODO: exec directly via shebang
+	const cmd = exec::cmd("/bin/sh", "/etc/rc")!;
 	const proc = exec::start(&cmd)!;
-	const st = exec::wait(&proc)!;
-	const exit = exec::exit(&st);
-	fmt::printfln("[init] child (pid {}): {}",
-		proc: int, exec::exitstr(exit))!;
 
 	for (true) void;
 };

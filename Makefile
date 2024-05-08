@@ -43,13 +43,18 @@ $(SYSROOT)/bin: $(SYSROOT)/usr/lib/libc.a
 
 .PHONY: $(SYSROOT)/bin
 
-$(SYSROOT): $(SYSROOT)/bin
+ETC_FILES=$(wildcard etc/*)
+
+$(SYSROOT)/etc: $(ETC_FILES)
+	mkdir -p $(SYSROOT)/etc
+	cp $(ETC_FILES) $(SYSROOT)/etc
+
+$(SYSROOT): $(SYSROOT)/bin $(SYSROOT)/etc
 	mkdir -p $(SYSROOT)
 	for d in \
 		bin \
 		boot \
 		dev \
-		etc \
 		lib \
 		proc \
 		tmp \
