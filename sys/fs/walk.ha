@@ -21,6 +21,7 @@ export fn inode_walk(
 ) ((*io::inode, str) | error) = {
 	let cur = root;
 	let last_name = "";
+
 	for (true) {
 		match (cur.mountpoint) {
 		case let mp: *opaque =>
@@ -65,7 +66,12 @@ export fn inode_walk(
 		};
 
 		const next = io::inode_lookup(cur, name)?;
-		io::inode_unref(cur);
+
+		// Don't unref root to avoid hosing the parent's reference
+		if (cur != root) {
+			io::inode_unref(cur);
+		};
+
 		cur = next;
 	};
 };
