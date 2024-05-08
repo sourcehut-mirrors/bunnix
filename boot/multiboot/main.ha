@@ -24,6 +24,15 @@ fn bmain_mb2(mb: *mb::multiboot) never = {
 	mmu_init();
 
 	let bctx = bootctx_init(mb);
+	if (mb.flags & mb::INFO_VIDEO_INFO != 0) {
+		const minfo = mb.vbe_mode_info: uintptr: *mb::vbe_mode_info;
+		bctx.fb.fb_base = minfo.framebuffer: uintptr;
+		bctx.fb.fb_size = minfo.pitch: size * minfo.height: size;
+		bctx.fb.fmt = boot::pixel_format::RGBX8; // TODO
+		bctx.fb.width = minfo.width;
+		bctx.fb.height = minfo.height;
+		bctx.fb.stride = minfo.pitch;
+	};
 
 	const mods = mb.mods_addr: uintptr: *[*]mb::module;
 	const mods = mods[..mb.mods_count];

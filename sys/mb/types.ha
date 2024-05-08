@@ -101,3 +101,41 @@ export def INFO_CONFIG_TABLE: u32 = 1 << 8;
 export def INFO_BOOT_LOADER_NAME: u32 = 1 << 9;
 export def INFO_APM_TABLE: u32 = 1 << 10;
 export def INFO_VIDEO_INFO: u32 = 1 << 11;
+
+export type vbe_mode_info = struct @packed {
+	attributes: u16,
+	window_a: u8,
+	window_b: u8,
+	granularity: u16,
+	window_size: u16,
+	segment_a: u16,
+	segment_b: u16,
+	win_func_ptr: u32,
+	pitch: u16,
+	width: u16,
+	height: u16,
+	w_char: u8,
+	y_char: u8,
+	planes: u8,
+	bpp: u8,
+	banks: u8,
+	memory_model: u8,
+	bank_size: u8,
+	image_pages: u8,
+	reserved0: u8,
+
+	red_mask: u8,
+	red_position: u8,
+	green_mask: u8,
+	green_position: u8,
+	blue_mask: u8,
+	blue_position: u8,
+	reserved_mask: u8,
+	reserved_position: u8,
+	direct_color_attributes: u8,
+
+	framebuffer: u32,
+	off_screen_mem_off: u32,
+	off_screen_mem_size: u16,
+	reserved: [206]u8,
+};
