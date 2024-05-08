@@ -48,6 +48,7 @@ export type sys = enum u64 {
 	CHDIRAT,
 	DUP,
 	DUP2,
+	GETCWD,
 };
 
 export type syscall_handler = fn(u64, u64, u64, u64, u64) (u64 | error);
@@ -78,6 +79,7 @@ let systab: [_]*opaque = [
 	&sys_chdirat: *syscall_handler,
 	&sys_dup: *syscall_handler,
 	&sys_dup2: *syscall_handler,
+	&sys_getcwd: *syscall_handler,
 ];
 
 const sysname = [
@@ -106,4 +108,5 @@ const sysname = [
 	"chdirat",
 	"dup",
 	"dup2",
+	"getcwd",
 ];

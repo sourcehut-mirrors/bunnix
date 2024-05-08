@@ -2,10 +2,10 @@ use arch;
 use errors::{error, errno};
 use fs;
 use io;
+use path;
 use proc;
 use sched;
-// XXX TEMP
-use log;
+use strings;
 
 fn sys_kill(status: int) (u64 | error) = {
 	abort(); // TODO
@@ -82,16 +82,12 @@ fn sys_getcreds(out: *creds) (u64 | error) = {
 
 fn sys_chdirat(opts: *chdirat_options) (u64 | error) = {
 	validate_user_addr(opts, size(chdirat_options))?;
+	assert(opts.flags & AT_EMPTY_PATH == 0); // TODO
+	assert(opts.dirfd == AT_FDCWD); // TODO
 
-	const targ = if (opts.flags & AT_EMPTY_PATH == 1) {
-		const fd = validate_dirfd(opts.dirfd)?;
-		yield fd.inode as *io::inode;
-	} else {
-		validate_user_string(opts.path)?;
+	validate_user_string(opts.path)?;
 
-		const (ino, _) = atwalk(opts.dirfd, opts.path)?;
-		yield ino;
-	};
+	const (targ, _) = atwalk(opts.dirfd, opts.path)?;
 
 	if (!io::isdir(targ.mode)) {
 		io::inode_unref(targ);
@@ -102,5 +98,29 @@ fn sys_chdirat(opts: *chdirat_options) (u64 | error) = {
 	io::inode_unref(cur.cwd);
 	cur.cwd = targ;
 
+	const path = path::init(cur.cwd_str)!;
+	if (path::abs(opts.path)) {
+		path::set(&path, opts.path)!;
+	} else {
+		path::push(&path, opts.path)!;
+	};
+	free(cur.cwd_str);
+	cur.cwd_str = strings::dup(path::string(&path));
+
+	return 0u64;
+};
+
+fn sys_getcwd(buf: *[*]u8, bufsz: size) (u64 | error) = {
+	validate_user_addr(buf, bufsz)?;
+
+	const cwd = proc::current().cwd_str;
+
+	let buf = buf[..bufsz];
+	if (bufsz < len(cwd) + 1) {
+		return errno::RANGE: error;
+	};
+
+	buf[..len(cwd)] = strings::toutf8(cwd)[..];
+	buf[len(cwd)] = 0;
 	return 0u64;
 };

@@ -4,6 +4,7 @@ use fs;
 use io;
 use mman;
 use sched;
+use strings;
 
 let procs: []*proc = [];
 
@@ -15,6 +16,9 @@ export type proc = struct {
 	fds: []filedesc,
 	creds: creds,
 	sig: sigproc,
+
+	// XXX HACK
+	cwd_str: str,
 
 	status: int,
 	exited: bool,
@@ -29,6 +33,7 @@ export type proc = struct {
 export fn new_proc(
 	root: *io::inode,
 	cwd: *io::inode,
+	cwd_str: str,
 	parent: nullable *proc,
 ) (*proc | error) = {
 	static let nextpid: int = 1;
@@ -44,6 +49,7 @@ export fn new_proc(
 	let new_proc = alloc(proc {
 		root = root,
 		cwd = cwd,
+		cwd_str = strings::dup(cwd_str),
 		creds = creds,
 		...
 	});
@@ -95,6 +101,8 @@ fn cleanup(proc: *proc) void = {
 
 	io::inode_unref(proc.root);
 	io::inode_unref(proc.cwd);
+
+	free(proc.cwd_str);
 };
 
 // Exits the calling process.
