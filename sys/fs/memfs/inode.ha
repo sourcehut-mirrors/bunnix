@@ -41,7 +41,12 @@ fn dir_findchild(parent: *inode, name: str) nullable *dirent = {
 	};
 };
 
-fn mkinode(sb: *superblock, ino: uint, mode: io::mode) inode = {
+fn mkinode(
+	sb: *superblock,
+	ino: uint,
+	mode: io::mode,
+	parent: nullable *inode,
+) inode = {
 	const ino = inode {
 		impl = &inode_dir_impl,
 		sb = sb,
@@ -49,6 +54,17 @@ fn mkinode(sb: *superblock, ino: uint, mode: io::mode) inode = {
 		mode = mode,
 		...
 	};
+
+	if (io::isdir(mode)) {
+		inode_link(&ino, &ino, ".")!;
+		match (parent) {
+		case let p: *inode =>
+			inode_link(&ino, p, "..")!;
+		case null =>
+			inode_link(&ino, &ino, "..")!;
+		};
+	};
+
 	return ino;
 };
 
@@ -59,6 +75,8 @@ const inode_dir_impl = io::inode_iface {
 	lookup = &inode_lookup,
 	mkdir = &inode_mkdir,
 	mknod = &inode_mknod,
+	link = &inode_link,
+	unlink = &inode_unlink,
 	...
 };
 
@@ -87,7 +105,7 @@ fn inode_mkchild(ino: *io::inode, name: str, mode: io::mode) (*io::inode | error
 
 	const sb = parent.sb;
 	const ino = sb_get_ino(sb);
-	const child = alloc(mkinode(sb, ino, mode));
+	const child = alloc(mkinode(sb, ino, mode, parent));
 	const dent = dirent {
 		name = strings::dup(name),
 		inode = child,
@@ -133,4 +151,43 @@ fn inode_mknod(
 	let child = inode_mkchild(ino, name, mode)?;
 	child.rdev = rdev;
 	return child;
+};
+
+fn inode_link(
+	parent: *io::inode,
+	child: *io::inode,
+	name: str,
+) (void | error) = {
+	let parent = parent: *inode;
+	let child = child: *inode;
+
+	if (dir_findchild(parent, name) != null) {
+		return errno::EXIST;
+	};
+
+	const dent = dirent {
+		name = strings::dup(name),
+		inode = child,
+	};
+	const i = sort::lbisect(parent.entries, size(dirent), &dent, &dent_cmp);
+	insert(parent.entries[i], dent);
+};
+
+fn inode_unlink(
+	parent: *io::inode,
+	name: str,
+) (void | error) = {
+	let parent = parent: *inode;
+	assert(io::isdir(parent.mode));
+
+	const model = dirent {
+		name = name,
+		inode = null: *inode,
+	};
+	match (sort::search(parent.entries, size(dirent), &model, &dent_cmp)) {
+	case let i: size =>
+		delete(parent.entries[i]);
+	case void =>
+		return errno::NOENT;
+	};
 };

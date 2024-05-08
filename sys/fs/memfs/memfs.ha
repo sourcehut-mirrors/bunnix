@@ -18,6 +18,7 @@ export fn new() *fs::superblock = {
 			null: *superblock,
 			ROOT_INODE,
 			io::mode::DIR | 0o755,
+			null,
 		),
 	});
 	sb.root.sb = sb;
