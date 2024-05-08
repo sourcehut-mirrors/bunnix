@@ -26,6 +26,7 @@
 #define __NR_chdirat		22
 #define __NR_dup		23
 #define __NR_dup2		24
+#define __NR_getcwd		25
 
 #endif
 #define SYS_readv		0
@@ -53,3 +54,4 @@
 #define SYS_chdirat		22
 #define SYS_dup		23
 #define SYS_dup2		24
+#define SYS_getcwd		25
