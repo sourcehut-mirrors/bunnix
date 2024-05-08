@@ -21,7 +21,7 @@ export fn main() void = {
 	io::close(wr)!;
 
 	const data = io::drain(rd)!;
-	free(data);
+	defer free(data);
 	io::close(rd)!;
 	exec::wait(&proc)!;
 
