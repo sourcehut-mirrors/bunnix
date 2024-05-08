@@ -15,6 +15,8 @@ export fn fork(orig: *vmm, new: *vmm) (void | error) = {
 	const old_l4 = phys_tokernel(orig.pml4): *pml4;
 	const new_l4 = phys_tokernel(new.pml4): *pml4;
 
+	new.brk = orig.brk;
+
 	// Only copies mappings in the lower half (hence len / 2)
 	let vaddr = 0: uintptr;
 	for (let i = 0z; i < len(old_l4) / 2; i += 1) {

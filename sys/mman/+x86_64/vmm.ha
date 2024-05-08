@@ -4,7 +4,6 @@ use arch::x86_64::{pml4e, pdpte, pde, pte};
 use arch::x86_64::{PAGESIZE, UPAGESIZE, PADDR_MASK};
 use bytes;
 use errors::{error, errno};
-use log;
 
 def UBRK_INIT: uintptr = 0x400000000000u64: uintptr;
 def GUARD: uintptr = UPAGESIZE * 2;
