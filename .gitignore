@@ -17,3 +17,4 @@ config.mk
 /bin/echo/echo
 /bin/env/env
 /bin/test-c/test-c
+/vendor/dash/src/sh

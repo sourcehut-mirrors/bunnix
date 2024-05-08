@@ -17,6 +17,8 @@ clean-test-c:
 clean: clean-test-c
 # EOF
 
+include sh/sh.mk
+
 HAREPROGS=\
 	echo \
 	env \
