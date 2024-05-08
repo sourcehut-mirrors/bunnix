@@ -45,6 +45,15 @@ export def O_NONBLOCK: int	= 0o4000;
 export def O_PATH: int		= 0o10000000;
 export def O_TRUNC: int		= 0o1000;
 
+export def F_DUPFD: int = 0;
+export def F_DUPFD_CLOEXEC: int = 1030;
+export def F_GETFD: int = 1;
+export def F_SETFD: int = 2;
+export def F_GETFL: int = 3;
+export def F_SETFL: int = 4;
+
+export def FD_CLOEXEC: int = 1;
+
 export def DT_UNKNOWN = 0;
 export def DT_FIFO = 0o010000;
 export def DT_DIR = 0o040000;

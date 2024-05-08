@@ -39,7 +39,7 @@ export fn getfd(
 	fd: int,
 	allocate: bool = false,
 ) (*filedesc | error) = {
-	if (allocate && fd: size > len(proc.fds)) {
+	if (allocate && fd: size >= len(proc.fds)) {
 		append(proc.fds, [filedesc { ... }...], len(proc.fds) - fd: size);
 	};
 
@@ -50,6 +50,27 @@ export fn getfd(
 		return errno::BADF;
 	};
 	return &proc.fds[fd];
+};
+
+// Returns a reference to an available file descriptor whose fd number is
+// greater than or equal to the min argument.
+export fn getavailfd(
+	proc: *proc,
+	min: *int,
+) (*filedesc | error) = {
+	for (true) {
+		if (*min: size >= len(proc.fds)) {
+			append(proc.fds,
+				[filedesc { ... }...],
+				len(proc.fds) - *min: size);
+		};
+
+		if (proc.fds[*min].file != null) {
+			return &proc.fds[*min];
+		};
+
+		*min += 1;
+	};
 };
 
 // Closes a file descriptor in this process's file table.

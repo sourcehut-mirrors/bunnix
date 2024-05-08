@@ -49,6 +49,7 @@ export type sys = enum u64 {
 	DUP,
 	DUP2,
 	GETCWD,
+	FCNTL,
 };
 
 export type syscall_handler = fn(u64, u64, u64, u64, u64) (u64 | error);
@@ -80,6 +81,7 @@ let systab: [_]*opaque = [
 	&sys_dup: *syscall_handler,
 	&sys_dup2: *syscall_handler,
 	&sys_getcwd: *syscall_handler,
+	&sys_fcntl: *syscall_handler,
 ];
 
 const sysname = [
@@ -109,4 +111,5 @@ const sysname = [
 	"dup",
 	"dup2",
 	"getcwd",
+	"fcntl",
 ];
