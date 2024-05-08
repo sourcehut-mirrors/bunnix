@@ -68,8 +68,24 @@ fn fbcons_putc(cons: *fb_console, char: rune) void = {
 		cons.row += 1;
 	};
 	if (cons.row >= cons.rows) {
-		cons.row = 0; // TODO: Scroll
+		cons.row = cons.rows - 1;
+		fbcons_scroll(cons);
 	};
+};
+
+fn fbcons_scroll(cons: *fb_console) void = {
+	let buffer = cons.fb_base: *[*]u32;
+	const wstride = cons.stride / size(u32);
+
+	// Scroll buffer
+	const ncopy = HEIGHT * (cons.rows - 1) * wstride;
+	const start = HEIGHT * wstride;
+	rt::memmove(&buffer[0], &buffer[start], ncopy * size(u32));
+
+	// Clear out last row
+	const ncopy = HEIGHT * wstride;
+	const start = HEIGHT * (cons.rows - 1) * wstride;
+	rt::memset(&buffer[start], 0, ncopy * size(u32));
 };
 
 fn fbcons_blitchar(cons: *fb_console, x: uint, y: uint, char: rune) void = {
