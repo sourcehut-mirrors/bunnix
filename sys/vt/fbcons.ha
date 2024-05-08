@@ -54,7 +54,7 @@ export fn fbcons_lateinit(cons: *fb_console) void = {
 	const front = mman::mmap(&mman::kernel,
 		front_phys, 0, length,
 		mman::prot::READ | mman::prot::WRITE,
-		mman::flag::WT)!;
+		mman::flag::WT | mman::flag::CD)!;
 	const back = mman::mmap(&mman::kernel, 0, 0, length,
 		mman::prot::READ | mman::prot::WRITE,
 		mman::flag::ANON)!;
