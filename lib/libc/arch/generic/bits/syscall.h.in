@@ -27,5 +27,6 @@
 #define __NR_dup		23
 #define __NR_dup2		24
 #define __NR_getcwd		25
+#define __NR_fcntl		26
 
 #endif
