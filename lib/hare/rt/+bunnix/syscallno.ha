@@ -27,4 +27,5 @@ export type sys = enum u64 {
 	CHDIRAT,
 	DUP,
 	DUP2,
+	GETCWD,
 };

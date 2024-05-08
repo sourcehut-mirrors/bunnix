@@ -3,6 +3,8 @@
 
 fn syscall(sysno: u64, ...) (u64, u64);
 
+export def PATH_MAX: size = 4096z;
+
 export fn readv(fd: int, vec: const *[*]iovec, iovcnt: int) (size | errno) = {
 	return syswrap(syscall(sys::READV,
 			fd: i64, &vec[0], iovcnt: i64))?: size;
@@ -255,4 +257,14 @@ export fn dup2(oldfd: int, newfd: int) (int | errno) = {
 
 export fn dup3(oldfd: int, newfd: int, flags: int) (int | errno) = {
 	return syswrap(syscall(sys::DUP2, oldfd: i64, newfd: i64, flags))?: int;
+};
+
+// The return value is statically allocated and must be duplicated before
+// calling getcwd again.
+export fn getcwd() (*const u8 | errno) = {
+	static let pathbuf: [PATH_MAX]u8 = [0...];
+	syswrap(syscall(sys::GETCWD,
+		&pathbuf: *[*]u8: uintptr: u64,
+		PATH_MAX))?;
+	return &pathbuf: *const u8;
 };

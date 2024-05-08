@@ -17,9 +17,7 @@ type os_filesystem = struct {
 // Returns the current working directory. The return value is statically
 // allocated and must be duplicated (see [[strings::dup]]) before calling getcwd
 // again.
-export fn getcwd() str = {
-	return "/"; // TODO
-};
+export fn getcwd() str = c::tostr(rt::getcwd() as *const u8: *const c::char)!;
 
 // Change the current working directory.
 export fn chdir(path: str) (void | fs::error) = {
