@@ -83,7 +83,7 @@ export fn signal(head: *wq_head, user: nullable *opaque = null) void = {
 
 // Unlinks this wait queue entry from the wait list, without waking or signaling
 // it.
-export fn wq_unlink(head: *wq_head, link: *wq_link) void = {
+export fn wq_unlink(link: *wq_link) void = {
 	// Don't double unlink wqs
 	if (link.prev == null) {
 		assert(link.next == null);
