@@ -31,7 +31,7 @@ export fn logctx(ctx: *context) void = {
 
 	let orig = fp;
 	let nframe = 1z;
-	for (true; nframe += 1) {
+	for (nframe < MAX_FRAMES; nframe += 1) {
 		match (debug::next(fp)) {
 		case let next: debug::stackframe =>
 			fp = next;
