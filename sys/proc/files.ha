@@ -58,4 +58,5 @@ export fn closefd(proc: *proc, fd: int) (void | error) = {
 	let file = fd.file: *io::file;
 	io::unref(file);
 	fd.file = null;
+	fd.inode = null;
 };
