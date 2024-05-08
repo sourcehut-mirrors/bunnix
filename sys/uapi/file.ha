@@ -325,6 +325,7 @@ fn sys_dup(fd: i64, flags: i64) (u64 | error) = {
 		oflag |= io::flag::CLOEXEC;
 	};
 
+	io::ref(file);
 	return proc::installfd(cur, file, oflag, fd.inode): u64;
 };
 
