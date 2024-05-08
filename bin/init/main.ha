@@ -28,8 +28,8 @@ export fn main() void = {
 	const data = strings::fromutf8(data)!;
 	fmt::printf("[init] stdout from /bin/echo: {}", data)!;
 
-	fmt::println("[init] exec /bin/sh -x /test.sh")!;
-	const cmd = exec::cmd("/bin/sh", "-x", "/test.sh")!;
+	fmt::println("[init] exec /bin/test-c")!;
+	const cmd = exec::cmd("/bin/test-c", "Hello C")!;
 	const proc = exec::start(&cmd)!;
 	const st = exec::wait(&proc)!;
 	const exit = exec::exit(&st);

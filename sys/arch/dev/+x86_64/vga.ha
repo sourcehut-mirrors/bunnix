@@ -12,7 +12,7 @@ export def VGA_COLS: size = 80;
 export def VGA_CELLS: size = VGA_ROWS * VGA_COLS;
 
 // Physical address of the VGA console buffer.
-export const VGA_CONSBASE: *[VGA_CELLS]u16 = 0xb8000: uintptr: *[VGA_CELLS]u16;
+export const VGA_BASE: *[VGA_CELLS]u16 = 0xb8000: uintptr: *[VGA_CELLS]u16;
 
 export type vga_console = struct {
 	io::file,
@@ -42,10 +42,10 @@ export type vga_color = enum u8 {
 };
 
 // Initializes a new VGA console.
-export fn vga_init(cons: *vga_console, base: *[VGA_CELLS]u16) void = {
+export fn vga_init(cons: *vga_console) void = {
 	*cons = vga_console {
 		vtable = &vga_vtable,
-		base = base,
+		base = VGA_BASE,
 		...
 	};
 	curdisable();

@@ -10,50 +10,8 @@ use vt;
 @symbol("main") fn kmain(ctx: *boot::context) never;
 
 export fn main(ctx: *boot::context) never = {
-	// Set up a working console as early as possible
-	// TODO: refactor consoles generally
-	static let vgacons = dev::vga_console {
-		vtable = null: *io::vtable,
-		...
-	};
-	const vgabase = arch::phys_tokernel(dev::VGA_CONSBASE: uintptr);
-	dev::vga_init(&vgacons, vgabase: *[dev::VGA_CELLS]u16);
-
-	static let serialcons = dev::serial_console {
-		vtable = null: *io::vtable,
-		...
-	};
-	dev::serial_init(&serialcons, dev::SERIAL_PORT_A);
-
-	static let cons = io::teefile {
-		vtable = null: *io::vtable,
-		primary = null: *io::file,
-		secondary = null: *io::file,
-		...
-	};
-	cons = io::tee(&vgacons, &serialcons);
-
-	if (ctx.fb.fb_base != 0) {
-		static let fbcons = vt::fb_console {
-			vtable = null: *io::vtable,
-			...
-		};
-		vt::fbcons_init(&fbcons, &ctx.fb);
-
-		static let cons2 = io::teefile {
-			vtable = null: *io::vtable,
-			primary = null: *io::file,
-			secondary = null: *io::file,
-			...
-		};
-		cons2 = io::tee(&fbcons, &cons);
-
-		log::setcons(&cons2);
-	} else {
-		log::setcons(&cons);
-	};
-
-	rt::abortcons(&log::write);
+	// Set up early console(s)
+	dev::earlyinit(ctx);
 
 	ctx = arch::mmu_init(ctx);
 
