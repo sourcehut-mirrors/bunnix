@@ -30,6 +30,7 @@
 #define __NR_fcntl		26
 #define __NR_setcreds		27
 #define __NR_setgroups		28
+#define __NR_mount		29
 
 #endif
 #define SYS_readv		0
@@ -61,3 +62,4 @@
 #define SYS_fcntl		26
 #define SYS_setcreds		27
 #define SYS_setgroups		28
+#define SYS_mount		29
