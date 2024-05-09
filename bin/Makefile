@@ -22,7 +22,8 @@ include sh/sh.mk
 HAREPROGS=\
 	echo \
 	env \
-	init
+	init \
+	mount
 
 install-bin:
 	for f in $^; \
