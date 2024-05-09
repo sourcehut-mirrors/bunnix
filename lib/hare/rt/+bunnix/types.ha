@@ -195,3 +195,11 @@ export type chdirat_options = struct {
 	path: str,
 	flags: int, // AT_EMPTY_PATH
 };
+
+export type mount_options = struct {
+	device: str,
+	fstype: str,
+	mountpoint: str,
+	readonly: bool,
+	misc: []str,
+};

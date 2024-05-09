@@ -300,3 +300,7 @@ export fn setegid(egid: gid_t) (void | errno) = {
 export fn setgroups(gids: []gid_t) (void | errno) = {
 	syswrap(syscall(sys::SETGROUPS, &gids[0], len(gids)))?;
 };
+
+export fn mount(opts: *mount_options) (void | errno) = {
+	syswrap(syscall(sys::MOUNT, opts))?;
+};
