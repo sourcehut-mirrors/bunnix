@@ -80,6 +80,40 @@ fn sys_getcreds(out: *creds) (u64 | error) = {
 	return 0u64;
 };
 
+fn sys_setcreds(in: *creds) (u64 | error) = {
+	validate_user_addr(in, size(creds))?;
+	validate_user_slice(in.groups, size(int))?;
+
+	const cur = &proc::current().creds;
+	if (cur.euid != 0) {
+		// TODO: This is probably more complex in practice
+		return errno::PERM: error;
+	};
+	cur.uid = in.uid;
+	cur.euid = in.euid;
+	cur.gid = in.gid;
+	cur.egid = in.egid;
+
+	return 0u64;
+};
+
+fn sys_setgroups(groups: *[*]int, ngroup: size) (u64 | error) = {
+	validate_user_addr(groups, size(int) * ngroup)?;
+	const groups = groups[..ngroup];
+
+	const cur = &proc::current().creds;
+	if (cur.euid != 0) {
+		// TODO: This is probably more complex in practice
+		return errno::PERM: error;
+	};
+
+	free(cur.groups);
+	cur.groups = alloc([], len(groups));
+	append(cur.groups, groups...);
+
+	return 0u64;
+};
+
 fn sys_chdirat(opts: *chdirat_options) (u64 | error) = {
 	validate_user_addr(opts, size(chdirat_options))?;
 	assert(opts.flags & AT_EMPTY_PATH == 0); // TODO
