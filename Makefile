@@ -48,6 +48,7 @@ ETC_FILES=$(wildcard etc/*)
 $(SYSROOT)/etc: $(ETC_FILES)
 	mkdir -p $(SYSROOT)/etc
 	cp $(ETC_FILES) $(SYSROOT)/etc
+	chmod 600 $(SYSROOT)/etc/shadow
 
 $(SYSROOT): $(SYSROOT)/bin $(SYSROOT)/etc
 	mkdir -p $(SYSROOT)
@@ -57,6 +58,7 @@ $(SYSROOT): $(SYSROOT)/bin $(SYSROOT)/etc
 		dev \
 		lib \
 		proc \
+		root \
 		tmp \
 		var; \
 	do mkdir -p $(SYSROOT)/$$d; \
