@@ -1,4 +1,5 @@
 use errors::{error, errno};
+use log;
 
 const UAPI: str = "uapi";
 
@@ -52,6 +53,7 @@ export type sys = enum u64 {
 	FCNTL,
 	SETCREDS,
 	SETGROUPS,
+	MOUNT,
 };
 
 export type syscall_handler = fn(u64, u64, u64, u64, u64) (u64 | error);
@@ -86,6 +88,7 @@ let systab: [_]*opaque = [
 	&sys_fcntl: *syscall_handler,
 	&sys_setcreds: *syscall_handler,
 	&sys_setgroups: *syscall_handler,
+	&sys_mount: *syscall_handler,
 ];
 
 const sysname = [
@@ -118,4 +121,5 @@ const sysname = [
 	"fcntl",
 	"setcreds",
 	"setgroups",
+	"mount",
 ];

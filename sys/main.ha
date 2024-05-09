@@ -47,7 +47,6 @@ export fn main(ctx: *boot::context) void = {
 	defer strings::freeall(args);
 
 	let root_opts = fs::fs_opts {
-		device = "",
 		fstype = "ext4",
 		...
 	};

@@ -356,3 +356,33 @@ fn sys_dup2(oldfd: i64, newfd: i64, flags: i64) (u64 | error) = {
 	io::ref(new.file as *io::file);
 	return newfd: u64;
 };
+
+fn sys_mount(opts: *mount_options) (u64 | error) = {
+	validate_user_addr(opts, size(mount_options))?;
+	validate_user_string(opts.device)?;
+	validate_user_string(opts.fstype)?;
+	validate_user_string(opts.mountpoint)?;
+	validate_user_slice(opts.misc, size(str))?;
+	for (let i = 0z; i < len(opts.misc); i += 1) {
+		validate_user_string(opts.misc[i])?;
+	};
+
+	const cur = proc::current();
+	if (cur.creds.euid != 0) {
+		// TODO: Unprivileged mounts
+		return errno::PERM: error;
+	};
+
+	let fsopts = fs::fs_opts {
+		device = opts.device,
+		fstype = opts.fstype,
+		readonly = opts.readonly,
+		misc = opts.misc,
+	};
+
+	const root = cur.root;
+	const fs = fs::fs_open(&fsopts)?;
+	fs::mount_fs(root, fs, opts.mountpoint)?;
+
+	return 0u64;
+};

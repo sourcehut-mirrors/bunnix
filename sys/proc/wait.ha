@@ -1,5 +1,6 @@
 use errors::{error, errno};
 use sched;
+use log;
 
 export def WNOHANG: int = 1;
 export def WUNTRACED: int = 2;
@@ -30,6 +31,7 @@ export fn waitpid(
 			if (options & WNOHANG == 1) {
 				return 0;
 			} else {
+				log::printfln("[pid {}]: wait for specific pid", parent.creds.pid);
 				sched::wait(&parent.wq, &link);
 			};
 		};
@@ -55,6 +57,7 @@ export fn waitpid(
 			return 0;
 		};
 
+		log::printfln("[pid {}]: wait for any child", parent.creds.pid);
 		sched::wait(&parent.wq, &link);
 	};
 
