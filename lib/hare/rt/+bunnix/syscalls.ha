@@ -268,3 +268,35 @@ export fn getcwd() (*const u8 | errno) = {
 		PATH_MAX))?;
 	return &pathbuf: *const u8;
 };
+
+export fn setuid(uid: uid_t) (void | errno) = {
+	let creds = creds { ... };
+	getcreds(&creds);
+	creds.uid = uid;
+	syswrap(syscall(sys::SETCREDS, &creds))?;
+};
+
+export fn seteuid(euid: uid_t) (void | errno) = {
+	let creds = creds { ... };
+	getcreds(&creds);
+	creds.euid = euid;
+	syswrap(syscall(sys::SETCREDS, &creds))?;
+};
+
+export fn setgid(gid: gid_t) (void | errno) = {
+	let creds = creds { ... };
+	getcreds(&creds);
+	creds.gid = gid;
+	syswrap(syscall(sys::SETCREDS, &creds))?;
+};
+
+export fn setegid(egid: gid_t) (void | errno) = {
+	let creds = creds { ... };
+	getcreds(&creds);
+	creds.egid = egid;
+	syswrap(syscall(sys::SETCREDS, &creds))?;
+};
+
+export fn setgroups(gids: []gid_t) (void | errno) = {
+	syswrap(syscall(sys::SETGROUPS, &gids[0], len(gids)))?;
+};

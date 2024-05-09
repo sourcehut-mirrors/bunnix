@@ -28,4 +28,6 @@ export type sys = enum u64 {
 	DUP,
 	DUP2,
 	GETCWD,
+	SETCREDS,
+	SETGROUPS,
 };
