@@ -28,5 +28,7 @@
 #define __NR_dup2		24
 #define __NR_getcwd		25
 #define __NR_fcntl		26
+#define __NR_setcreds		27
+#define __NR_setgroups		28
 
 #endif

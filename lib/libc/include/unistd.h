@@ -131,6 +131,7 @@ struct __creds {
 };
 
 void getcreds(struct __creds *out);
+int setcreds(struct __creds *in);
 
 pid_t getpid(void);
 pid_t getppid(void);

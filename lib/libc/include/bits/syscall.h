@@ -28,6 +28,8 @@
 #define __NR_dup2		24
 #define __NR_getcwd		25
 #define __NR_fcntl		26
+#define __NR_setcreds		27
+#define __NR_setgroups		28
 
 #endif
 #define SYS_readv		0
@@ -57,3 +59,5 @@
 #define SYS_dup2		24
 #define SYS_getcwd		25
 #define SYS_fcntl		26
+#define SYS_setcreds		27
+#define SYS_setgroups		28
