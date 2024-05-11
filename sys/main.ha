@@ -4,6 +4,7 @@ use uapi;		// link
 use arch;
 use boot;
 use dev;
+use dev::block;
 use errors::{error, errno, strerror};
 use fs;
 use io;
@@ -55,7 +56,14 @@ export fn main(ctx: *boot::context) void = {
 		const (key, val) = strings::cut(args[i], "=");
 		switch (key) {
 		case "root" =>
-			root_opts.device = val;
+			match (block::open(val)) {
+			case let bdev: *block::blockdev =>
+				root_opts.device = bdev;
+			case let err: error =>
+				log::printfln("Error opening root device: {}",
+					strerror(err));
+				rt::halt();
+			};
 		case "rootfstype" =>
 			root_opts.fstype = val;
 		case "ro" =>

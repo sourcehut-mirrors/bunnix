@@ -36,6 +36,9 @@ export fn mount_fs(
 	if (parent.mountpoint != null) {
 		return errno::BUSY;
 	};
+	if (!io::isdir(parent.mode)) {
+		return errno::NOTDIR;
+	};
 	parent.mountpoint = alloc(mountpoint {
 		sb = fs,
 	});

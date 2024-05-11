@@ -16,7 +16,12 @@ cat <<"EOF"
 EOF
 
 info "Booting Bunnix userspace"
-info "mount memfs on /tmp"
-mount -t memfs none /tmp
+
+info "Mounting filesystems"
+while read dev mnt fstype
+do
+	echo "Mount $dev on $mnt ($fstype)"
+	mount -t $fstype $dev $mnt
+done </etc/fstab
 
 echo Nothing else to do, bye...

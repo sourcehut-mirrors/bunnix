@@ -32,8 +32,9 @@ export fn main() void = {
 		};
 	};
 
+	const dev = cmd.args[0];
 	let opts = rt::mount_options {
-		device = cmd.args[0],
+		device = if (dev == "-") "" else cmd.args[0],
 		mountpoint = cmd.args[1],
 		fstype = fstype,
 		misc = misc,

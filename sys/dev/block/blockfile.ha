@@ -1,24 +1,8 @@
 use errors::{error, errno};
 use io;
 
-// Opens a block device as a file.
-export fn opendev(major: u32, minor: u32) (*io::file | error) = {
-	for (let bdev .. blockdevs) {
-		if (bdev.major == major && bdev.minor == minor) {
-			return mkblockfile(bdev);
-		};
-
-		for (let part &.. bdev.parts) {
-			if (part.major == major && part.minor == minor) {
-				return mkblockfile(part);
-			};
-		};
-	};
-
-	return errno::NXIO;
-};
-
-fn mkblockfile(bdev: *blockdev) *io::file = {
+// Opens a block device as an [[io::file]].
+export fn openfile(bdev: *blockdev) *io::file = {
 	return alloc(blockfile {
 		vtable = &block_file_impl,
 		bdev = bdev,

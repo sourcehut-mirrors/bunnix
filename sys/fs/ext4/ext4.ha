@@ -31,12 +31,13 @@ let driver = fs::driver {
 
 // Opens a block device as an ext4 filesystem.
 fn open(opts: *fs::fs_opts) (*fs::superblock | error) = {
-	if (opts.device == "") {
+	const bdev = match (opts.device) {
+	case let dev: *block::blockdev =>
+		yield dev;
+	case null =>
 		log::kprintfln(EXT4, "Attempted to open ext4 filesystem from null device");
 		return errno::INVAL: error;
 	};
-
-	const bdev = block::open(opts.device)?;
 
 	// TODO:
 	// - Verify block dev not in use by another filesystem

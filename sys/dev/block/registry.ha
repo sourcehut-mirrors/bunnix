@@ -104,6 +104,23 @@ export fn open(name: str) (*blockdev | error) = {
 	return &bdev.parts[part];
 };
 
+// Locates a block device by its major and minor device numbers.
+export fn opendev(major: u32, minor: u32) (*blockdev | error) = {
+	for (let bdev .. blockdevs) {
+		if (bdev.major == major && bdev.minor == minor) {
+			return bdev;
+		};
+
+		for (let part &.. bdev.parts) {
+			if (part.major == major && part.minor == minor) {
+				return part;
+			};
+		};
+	};
+
+	return errno::NXIO;
+};
+
 // Populates /dev with block device nodes
 export fn mknodes(root: *io::inode) (void | error) = {
 	for (let bdev .. blockdevs) {

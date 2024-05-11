@@ -1,3 +1,4 @@
+use dev::block;
 use errors::{error, errno};
 
 // Filesystem driver implementation.
@@ -8,7 +9,7 @@ export type driver = struct {
 };
 
 export type fs_opts = struct {
-	device: str,
+	device: nullable *block::blockdev,
 	fstype: str,
 	readonly: bool,
 	misc: []str,

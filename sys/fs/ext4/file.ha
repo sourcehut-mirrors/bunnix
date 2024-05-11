@@ -25,7 +25,8 @@ fn mkfile(ino: *inode) (*io::file | error) = {
 		} else if (io::isblockdev(ino.mode)) {
 			const major = (ino.rdev >> 32): u32;
 			const minor = ino.rdev: u32;
-			return block::opendev(major, minor);
+			const bdev = block::opendev(major, minor)?;
+			return block::openfile(bdev);
 		} else {
 			return errno::NOTSUP;
 		};

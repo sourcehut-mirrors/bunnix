@@ -2,7 +2,6 @@ use errors::{error, errno, strerror};
 use fs;
 use io;
 use lib::lwext4;
-use log;
 use types::c;
 
 export type inode = struct {
