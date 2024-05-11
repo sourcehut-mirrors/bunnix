@@ -5,7 +5,7 @@ use log;
 // Magic sigreturn instruction pointer.
 //
 // On x86_64 this casues a GP fault.
-export def SIGRETURN_MAGIC: uintptr = 0x00008123456789AB;
+export def SIGRETURN_MAGIC: uintptr = 0xFFFFFFFFFFFFFFF0: uintptr;
 
 // Forward declaration
 fn proc::return_signal(ctx: *context) void;
@@ -63,17 +63,18 @@ fn irq_handler_dispatch(ctx: *context, irq: u8) void = {
 };
 
 fn gp_fault(ctx: *context) void = {
-	if (ctx.rip: uintptr == SIGRETURN_MAGIC) {
-		proc::return_signal(ctx);
-		return;
-	};
-
 	log::printfln("General protection fault @ 0x{:x}:0x{:x}",
 		ctx.cs, ctx.rip);
 	panic("general protection fault", ctx);
 };
 
 fn page_fault(ctx: *context) void = {
+	const cr2 = x86_64::rdcr2(): uintptr;
+	if (cr2 == SIGRETURN_MAGIC) {
+		proc::return_signal(ctx);
+		return;
+	};
+
 	if (ctx.errcode & 1u64 << 2 != 0) {
 		log::printf("Page fault at ");
 	} else {
@@ -88,7 +89,7 @@ fn page_fault(ctx: *context) void = {
 	if (ctx.errcode & 1u64 << 4 != 0) {
 		log::printf("instruction ");
 	};
-	log::printfln("address 0x{:x} @ 0x{:x}", x86_64::rdcr2(), ctx.rip);
+	log::printfln("address 0x{:x} @ 0x{:x}", cr2, ctx.rip);
 	panic("page fault", ctx);
 };
 
