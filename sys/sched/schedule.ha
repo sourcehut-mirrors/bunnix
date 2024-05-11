@@ -76,9 +76,11 @@ export fn task_link(link: *task) void = {
 	case null =>
 		head = link;
 		link.prev = &head;
-	case let task: *task =>
-		link.prev = &task.next;
-		task.next = link;
+	case let next: *task =>
+		next.prev = &link.next;
+		link.next = next;
+		link.prev = &head;
+		head = link;
 	};
 };
 

@@ -47,9 +47,11 @@ export fn wait(
 	case null =>
 		head.head = link;
 		link.prev = &head.head;
-	case let wq: *wq_link =>
-		link.prev = &wq.next;
-		wq.next = link;
+	case let next: *wq_link =>
+		next.prev = &link.next;
+		link.next = next;
+		link.prev = &head.head;
+		head.head = link;
 	};
 
 	return schedule();
