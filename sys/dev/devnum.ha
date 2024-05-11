@@ -4,13 +4,21 @@
 // Device major number assignments.
 export type devmajor = enum u32 {
 	RESERVED = 0,
+	// dev/null, dev/zero, etc
 	MEM,
+	// dev/console et al
 	TTY_ALT,
+	// dev/tty*, dev/ttyS*
 	TTY,
+	// dev/kbd, etc
 	INPUT,
+	// dev/fb
 	FB,
+	// dev/sata*
 	SATA,
+	// dev/atapi*
 	ATAPI,
+	// dev/nvme*
 	NVME,
 };
 
