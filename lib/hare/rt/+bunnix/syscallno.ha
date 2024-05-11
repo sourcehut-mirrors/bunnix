@@ -14,6 +14,7 @@ export type sys = enum u64 {
 	GETCREDS,
 	KILL,
 	EXIT,
+	SIGACTION,
 	MMAP,
 	MUNMAP,
 	MPROTECT,

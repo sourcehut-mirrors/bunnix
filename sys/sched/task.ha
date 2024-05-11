@@ -9,7 +9,7 @@ static assert((KSTACK_SIZE) % 8 == 0);
 
 export type kstack = [KSTACK_SIZE]u8;
 
-export type task_state = enum {
+export type task_state = enum uint {
 	STARTUP,
 	RUNNING,
 	WAIT,

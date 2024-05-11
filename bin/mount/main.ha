@@ -11,7 +11,6 @@ export fn main() void = {
 		('o', "opts", "options list, comma separated"),
 		"<device> <dir>",
 	];
-	fmt::println("mount(1) parse options")!;
 	const cmd = getopt::parse(os::args, help...);
 	defer getopt::finish(&cmd);
 

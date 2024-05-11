@@ -141,7 +141,6 @@ export fn getegid() gid_t = {
 	return creds.egid;
 };
 
-
 export fn exit(status: int) never = {
 	for (true) syscall(sys::EXIT, status: u64);
 };

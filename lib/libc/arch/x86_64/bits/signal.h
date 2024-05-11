@@ -110,38 +110,36 @@ typedef struct __ucontext {
 #define SA_RESTART    0x10000000
 #define SA_NODEFER    0x40000000
 #define SA_RESETHAND  0x80000000
-#define SA_RESTORER   0x04000000
 
 #endif
 
-#define SIGABRT   6
-#define SIGIOT    SIGABRT
-#define SIGALRM   14
-#define SIGBUS    7
-#define SIGCHLD   17
-#define SIGCONT   18
-#define SIGFPE    8
-#define SIGHUP    1
-#define SIGILL    4
-#define SIGINT    2
-#define SIGKILL   9
-#define SIGPIPE   13
-#define SIGQUIT   3
-#define SIGSEGV   11
-#define SIGSTOP   19
+#define SIGABRT   1
+#define SIGALRM   2
+#define SIGBUS    3
+#define SIGCHLD   4
+#define SIGCONT   5
+#define SIGFPE    6
+#define SIGHUP    7
+#define SIGILL    8
+#define SIGINT    9
+#define SIGKILL   10
+#define SIGPIPE   11
+#define SIGQUIT   12
+#define SIGSEGV   13
+#define SIGSTOP   14
 #define SIGTERM   15
-#define SIGTSTP   20
-#define SIGTTIN   21
-#define SIGTTOU   22
-#define SIGUSR1   10
-#define SIGUSR2   12
-#define SIGPROF   27
-#define SIGSYS    31
-#define SIGTRAP   5
-#define SIGURG    23
-#define SIGVTALRM 26
-#define SIGXCPU   24
-#define SIGXFSZ   25
+#define SIGTSTP   16
+#define SIGTTIN   17
+#define SIGTTOU   18
+#define SIGUSR1   19
+#define SIGUSR2   20
+#define SIGPROF   21
+#define SIGSYS    22
+#define SIGTRAP   23
+#define SIGURG    24
+#define SIGVTALRM 25
+#define SIGXCPU   26
+#define SIGXFSZ   27
 
 #define _NSIG 65
 

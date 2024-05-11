@@ -114,7 +114,7 @@ let sigdefault: [_]action = [
 	action::ABRT,	// SIGQUIT
 	action::ABRT,	// SIGSEGV
 	action::STOP,	// SIGSTOP
-	action::TERM,	// SIGTERm
+	action::TERM,	// SIGTERM
 	action::STOP,	// SIGTSTP
 	action::STOP,	// SIGTTIN
 	action::STOP,	// SIGTTOU
@@ -130,40 +130,46 @@ let sigdefault: [_]action = [
 	action::ABRT,	// SIGXFSZ
 ];
 
-export type sigset = struct {
-	__val: [1]u64,
-};
+export type sigset = u64;
 
+// Initializes an empty signal set.
 export fn sigemptyset(set: *sigset) void = {
-	set.__val[0] = 0;
+	*set = 0;
 };
 
+// Returns true if this signal set is empty.
+export fn sigisemptyset(set: *sigset) bool = {
+	return *set == 0;
+};
+
+// Adds the given signal to a signal set.
 export fn sigaddset(set: *sigset, signum: int) (void | error) = {
 	if (signum < 1 || signum > NSIG) {
 		return errno::INVAL;
 	};
 	signum -= 1;
-	set.__val[0] |= (1 << signum): u64;
+	*set |= (1 << signum): u64;
 };
 
+// Deletes the given signals from a signal set.
 export fn sigdelset(set: *sigset, signum: int) (void | error) = {
 	if (signum < 1 || signum > NSIG) {
 		return errno::INVAL;
 	};
 	signum -= 1;
-	set.__val[0] &= ~(1 << signum: u64);
+	*set &= ~(1 << signum: u64);
 };
 
-export fn sigismember(set: *sigset, signum: int) (bool | error) = {
-	if (signum < 1 || signum > NSIG) {
-		return errno::INVAL;
-	};
+// Returns true if this signal is a member of this signal set.
+export fn sigismember(set: *sigset, signum: int) bool = {
+	assert(signum >= 1 && signum <= NSIG);
 	signum -= 1;
-	return (set.__val[0] & (1 << signum: u64)) != 0;
+	return (*set & (1 << signum: u64)) != 0;
 };
 
+// Fills all signals in this signal set.
 export fn sigfillset(set: *sigset) void = {
-	set.__val[0] = ~0u64;
+	*set = ~0u64;
 };
 
 export type siginfo = union {
@@ -173,14 +179,13 @@ export type siginfo = union {
 	// TODO: add more stuff here
 };
 
-export def SA_NOCLDSTOP: u64 = 0x00000001;
-export def SA_NOCLDWAIT: u64 = 0x00000002;
-export def SA_SIGINFO: u64 = 0x00000004;
-export def SA_ONSTACK: u64 = 0x08000000;
-export def SA_RESTART: u64 = 0x10000000;
-export def SA_NODEFER: u64 = 0x40000000;
-export def SA_RESETHAND: u64 = 0x80000000;
-export def SA_RESTORER: u64 = 0x04000000;
+export def SA_NOCLDSTOP = 0x00000001;
+export def SA_NOCLDWAIT = 0x00000002;
+export def SA_SIGINFO = 0x00000004;
+export def SA_ONSTACK = 0x08000000;
+export def SA_RESTART = 0x10000000;
+export def SA_NODEFER = 0x40000000;
+export def SA_RESETHAND = 0x80000000;
 
 export def SIG_ERR: uintptr = -1;
 export def SIG_DFL: uintptr = 0;

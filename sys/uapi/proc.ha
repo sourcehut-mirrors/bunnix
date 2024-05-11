@@ -7,12 +7,75 @@ use proc;
 use sched;
 use strings;
 
-fn sys_kill(status: int) (u64 | error) = {
-	abort(); // TODO
+fn sys_kill(pid: i64, sig: i64) (u64 | error) = {
+	if (sig < 1 || sig > proc::sig::SIGMAX) {
+		return errno::INVAL: error;
+	};
+
+	assert(pid > 0); // TODO
+	const cur = proc::current();
+	const targ = proc::getproc(pid: int)?;
+
+	const tests = [
+		cur.creds.uid == 0,
+		cur.creds.euid == 0,
+		cur.creds.uid == targ.creds.uid,
+		cur.creds.uid == targ.creds.euid,
+		cur.creds.euid == targ.creds.uid,
+		cur.creds.euid == targ.creds.euid,
+	];
+	let valid = false;
+	for (let test .. tests) {
+		valid ||= test;
+	};
+	if (!valid) {
+		return errno::PERM: error;
+	};
+
+	proc::signal(targ, sig: proc::sig);
+
+	return 0u64;
 };
 
-fn sys_exit(status: int) (u64 | error) = {
-	proc::exit(status);
+fn sys_exit(status: i64) (u64 | error) = {
+	proc::exit(status: int);
+};
+
+fn sys_sigaction(
+	sig: i64,
+	new: nullable *proc::sigaction,
+	old: nullable *proc::sigaction,
+) (u64 | error) = {
+	if (new != null) {
+		validate_user_addr(new, size(proc::sigaction))?;
+	};
+	if (old != null) {
+		validate_user_addr(old, size(proc::sigaction))?;
+	};
+
+	const sig = sig: proc::sig;
+	if (sig < 1 || sig >= proc::sig::SIGMAX) {
+		return errno::INVAL: error;
+	};
+	if (sig == proc::sig::SIGKILL || sig == proc::sig::SIGSTOP) {
+		return errno::INVAL: error;
+	};
+
+	const cur = proc::current();
+	let sigproc = &cur.sig;
+	match (old) {
+	case let sa: *proc::sigaction =>
+		*sa = sigproc.action[sig];
+	case null => void;
+	};
+
+	match (new) {
+	case let sa: *proc::sigaction =>
+		sigproc.action[sig] = *sa;
+	case null => void;
+	};
+
+	return 0u64;
 };
 
 fn sys_fork() (u64 | error) = {
