@@ -7,6 +7,9 @@ use log;
 // On x86_64 this casues a GP fault.
 export def SIGRETURN_MAGIC: uintptr = 0x00008123456789AB;
 
+// Forward declaration
+fn proc::return_signal(ctx: *context) void;
+
 let irq_handlers: [256]nullable *irq_handler = [null...];
 
 // An IRQ handler can be registered with [[install_irq]] to be called upon
@@ -60,6 +63,11 @@ fn irq_handler_dispatch(ctx: *context, irq: u8) void = {
 };
 
 fn gp_fault(ctx: *context) void = {
+	if (ctx.rip: uintptr == SIGRETURN_MAGIC) {
+		proc::return_signal(ctx);
+		return;
+	};
+
 	log::printfln("General protection fault @ 0x{:x}:0x{:x}",
 		ctx.cs, ctx.rip);
 	panic("general protection fault", ctx);

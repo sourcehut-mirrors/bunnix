@@ -16,5 +16,6 @@ config.mk
 /bin/init/init
 /bin/echo/echo
 /bin/env/env
+/bin/mount/mount
 /bin/test-c/test-c
 /vendor/dash/src/sh

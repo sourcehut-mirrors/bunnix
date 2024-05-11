@@ -75,9 +75,25 @@ export fn resume_signal(task: *sched::task) bool = {
 
 	let frame = sp: *signal_stack;
 	frame.sigreturn = arch::SIGRETURN_MAGIC;
+	frame.ctx = task.ctx;
 
 	arch::context_set_sp(&task.ctx, sp);
 	arch::context_set_ip(&task.ctx, act.sa_handler: uintptr);
 	arch::context_set_abi(&task.ctx, signo: u64);
 	arch::enter_user(&task.ctx);
+};
+
+export fn return_signal(ctx: *arch::context) void = {
+	const task = sched::task_fromctx(ctx);
+	const proc = task.user: *proc;
+
+	let sp = arch::context_get_sp(ctx);
+	if (!mman::isvalid(&proc.vmm, sp, size(signal_stack), true)) {
+		abort(); // TODO: Do something here
+	};
+
+	sp -= size(uintptr): uintptr;
+	let frame = sp: *signal_stack;
+	assert(frame.sigreturn == arch::SIGRETURN_MAGIC);
+	*ctx = frame.ctx;
 };

@@ -67,7 +67,8 @@ export fn task_finish(which: *task) void = {
 	mman::munmap(&mman::kernel, which: uintptr, size(task))!;
 };
 
-fn task_fromctx(ctx: *arch::context) *task = {
+// Returns a [[task]] from an [[arch::context]].
+export fn task_fromctx(ctx: *arch::context) *task = {
 	return (ctx: uintptr - size(kstack): uintptr): *task;
 };
 
