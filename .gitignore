@@ -13,9 +13,10 @@ config.mk
 
 # Binaries in /bin
 # TODO: Can I be made more general please
-/bin/init/init
+/bin/cat/cat
 /bin/echo/echo
 /bin/env/env
+/bin/init/init
 /bin/mount/mount
 /bin/test-c/test-c
 /vendor/dash/src/sh

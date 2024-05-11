@@ -20,6 +20,7 @@ clean: clean-test-c
 include sh/sh.mk
 
 HAREPROGS=\
+	cat \
 	echo \
 	env \
 	init \

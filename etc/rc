@@ -1,7 +1,22 @@
 #!/bin/sh
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin
+info() {
+        echo $*
+}
 
+cat <<"EOF"
+
+           welcome to
+ _                       _      
+| |__  _   _ _ __  _ __ (_)_  __
+| '_ \| | | | '_ \| '_ \| \ \/ /
+| |_) | |_| | | | | | | | |>  < 
+|_.__/ \__,_|_| |_|_| |_|_/_/\_\
+
+EOF
+
+info "Booting Bunnix userspace"
+info "mount memfs on /tmp"
 mount -t memfs none /tmp
-echo /*
 
 echo Nothing else to do, bye...
