@@ -117,8 +117,7 @@ export fn exit(status: int) never = {
 	proc.exited = true;
 
 	const parent = getproc(proc.creds.ppid)!;
-	sched::wake(&parent.wq);
-
+	signal(parent, sig::SIGCHLD);
 	cleanup(proc);
 
 	sched::schedule();

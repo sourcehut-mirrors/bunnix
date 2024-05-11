@@ -5,9 +5,19 @@ export fn context_set_ip(ctx: *context, ip: uintptr) void = {
 	ctx.rip = ip;
 };
 
+// Sets the instruction pointer register in a [[context]].
+export fn context_get_ip(ctx: *context) uintptr = {
+	return ctx.rip: uintptr;
+};
+
 // Sets the stack pointer register in a [[context]].
 export fn context_set_sp(ctx: *context, sp: uintptr) void = {
 	ctx.rsp = sp;
+};
+
+// Sets the stack pointer register in a [[context]].
+export fn context_get_sp(ctx: *context) uintptr = {
+	return ctx.rsp: uintptr;
 };
 
 // Sets the ABI registers in a [[context]].

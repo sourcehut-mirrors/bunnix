@@ -2,6 +2,11 @@ use arch::x86_64;
 use arch::x86_64::{irq};
 use log;
 
+// Magic sigreturn instruction pointer.
+//
+// On x86_64 this casues a GP fault.
+export def SIGRETURN_MAGIC: uintptr = 0x00008123456789AB;
+
 let irq_handlers: [256]nullable *irq_handler = [null...];
 
 // An IRQ handler can be registered with [[install_irq]] to be called upon

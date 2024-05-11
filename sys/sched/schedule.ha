@@ -4,6 +4,9 @@ use mman;
 // Linked list of schedulable tasks
 let head: nullable *task = null;
 
+// Forward declaration
+fn proc::resume_signal(task: *task) bool;
+
 // Switches to the next available task. Returns true if we context switched as a
 // result of the call.
 export fn schedule() bool = {
@@ -23,21 +26,26 @@ export fn schedule() bool = {
 		yield null;
 	};
 
-	const next = match (task_next()) {
-	case let t: *task =>
-		yield t;
-	case null =>
-		switch_idle();
+	for (true) {
+		const next = match (task_next()) {
+		case let t: *task =>
+			yield t;
+		case null =>
+			switch_idle();
+		};
+
+		// Ensure that the task is linked and runnable
+		assert(next.next != null || next.prev != null);
+
+		if (next == prev) {
+			return false;
+		};
+
+		if (!proc::resume_signal(next)) {
+			continue; // Select another task
+		};
+		switch_task(next);
 	};
-
-	// Ensure that the task is linked and runnable
-	assert(next.next != null || next.prev != null);
-
-	if (next == prev) {
-		return false;
-	};
-
-	switch_task(next);
 };
 
 // Switches to the given task.
