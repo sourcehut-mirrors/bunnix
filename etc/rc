@@ -1,7 +1,6 @@
 #!/bin/sh
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin
-env
-#mount -t memfs none /tmp
+mount -t memfs none /tmp
 echo /*
 
 echo Nothing else to do, bye...

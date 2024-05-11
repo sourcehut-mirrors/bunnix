@@ -1,5 +1,4 @@
 use errors::{error, errno};
-use log;
 
 const UAPI: str = "uapi";
 
