@@ -21,6 +21,11 @@ export def URANDOM_MINOR: u32 = 3;
 
 export def CONS_MINOR: u32 = 0;
 
+// TTY_MAJOR
+
+// Minor number of the first /dev/ttyS* serial terminal
+export def TTYS_MINOR: u32 = 128;
+
 // INPUT_MAJOR
 
 export def KBD_MINOR: u32 = 0;

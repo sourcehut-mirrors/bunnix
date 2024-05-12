@@ -23,6 +23,7 @@ HAREPROGS=\
 	cat \
 	echo \
 	env \
+	getty \
 	init \
 	mount \
 	scancodes

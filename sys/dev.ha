@@ -28,6 +28,9 @@ fn mountdev(root: *io::inode) void = {
 			dev::mkdev(dev::INPUT_MAJOR, dev::KBD_MINOR))!;
 	};
 
+	// TTY devices
+	chr::mounttty(devroot);
+
 	// Block devices
 	block::mknodes(devroot)!;
 };

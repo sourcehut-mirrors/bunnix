@@ -18,9 +18,9 @@ fn mkfile(ino: *inode) (*io::file | error) = {
 		} else if (io::isdir(ino.mode)) {
 			yield &file_impl_dir;
 		} else if (io::ischdev(ino.mode)) {
-			return fs::openchr(ino.rdev);
+			return fs::openchr(ino.rdev, ino);
 		} else if (io::isblockdev(ino.mode)) {
-			return fs::openblk(ino.rdev);
+			return fs::openblk(ino.rdev, ino);
 		} else {
 			return errno::NOTSUP;
 		};

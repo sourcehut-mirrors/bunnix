@@ -22,6 +22,8 @@ export type kbd_evdata = struct {
 	state: key_state,
 };
 
+export type kbd_onproc_cb = fn(scancode: u32, state: key_state, user: nullable *opaque) void;
+
 // Keyboard device.
 export type kbd = struct {
 	chardev,
@@ -30,6 +32,12 @@ export type kbd = struct {
 	buf: []kbd_evdata,
 	wq: sched::wq_head,
 	refs: int,
+
+	// Used by drivers which make use of the keyboard internally to the
+	// kernel, i.e. the vt driver. Just passes keyboard events straight
+	// through.
+	onproc: nullable *kbd_onproc_cb,
+	onproc_user: nullable *opaque,
 };
 
 // Keyboard device implementation.
@@ -47,8 +55,24 @@ export fn kbd_init(kbd: *kbd) void = {
 	register(kbd);
 };
 
+// Registers a kernel-internal callback for events from this keyboard device.
+export fn kbd_onproc(
+	kbd: *kbd,
+	cb: *kbd_onproc_cb,
+	user: nullable *opaque = null,
+) void = {
+	kbd.onproc = cb;
+	kbd.onproc_user = user;
+};
+
 // Process input from a keyboard device.
 export fn kbd_keyproc(kbd: *kbd, scancode: u32, state: key_state) void = {
+	match (kbd.onproc) {
+	case let func: *kbd_onproc_cb =>
+		func(scancode, state, kbd.onproc_user);
+	case null => void;
+	};
+
 	if (kbd.refs == 0) {
 		// Don't buffer keyboard events if there's no one to read them
 		return;

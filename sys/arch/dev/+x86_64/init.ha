@@ -63,4 +63,8 @@ export fn init() void = {
 	dev::bus_register(&legacy_pci_bus);
 
 	ps2_init();
+
+	if (fbcons.vtable != null) {
+		vt::tty_init(&fbcons);
+	};
 };
