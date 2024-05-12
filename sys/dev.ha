@@ -13,13 +13,13 @@ fn mountdev(root: *io::inode) void = {
 	// Character devices
 	const devroot = fs::superblock_get_root(dev);
 	io::inode_mknod(devroot, "full", 0o666 | io::mode::CHR,
-		dev::mkdev(dev::devmajor::MEM, dev::devminor_mem::NOSPC))!;
+		dev::mkdev(dev::MEM_MAJOR, dev::NOSPC_MINOR))!;
 	io::inode_mknod(devroot, "null", 0o666 | io::mode::CHR,
-		dev::mkdev(dev::devmajor::MEM, dev::devminor_mem::NULL))!;
+		dev::mkdev(dev::MEM_MAJOR, dev::NULL_MINOR))!;
 	io::inode_mknod(devroot, "zero", 0o666 | io::mode::CHR,
-		dev::mkdev(dev::devmajor::MEM, dev::devminor_mem::ZERO))!;
+		dev::mkdev(dev::MEM_MAJOR, dev::ZERO_MINOR))!;
 	io::inode_mknod(devroot, "cons", 0o220 | io::mode::CHR,
-		dev::mkdev(dev::devmajor::TTY_ALT, dev::devminor_tty_alt::CONS))!;
+		dev::mkdev(dev::TTY_ALT_MAJOR, dev::CONS_MINOR))!;
 
 	// Block devices
 	block::mknodes(devroot)!;

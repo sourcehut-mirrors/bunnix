@@ -1,5 +1,5 @@
 use bytes;
-use dev::{devmajor, devminor_mem};
+use dev;
 use errors::{error, errno};
 use io;
 
@@ -9,8 +9,8 @@ let devnospc_chardev_impl = chardev_iface {
 
 let devnospc = chardev {
 	iface = &devnospc_chardev_impl,
-	major = devmajor::MEM,
-	minor = devminor_mem::NOSPC,
+	major = dev::MEM_MAJOR,
+	minor = dev::NOSPC_MINOR,
 };
 
 @init fn devnospc() void = {

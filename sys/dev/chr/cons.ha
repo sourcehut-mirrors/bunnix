@@ -1,4 +1,4 @@
-use dev::{devmajor, devminor_tty_alt};
+use dev;
 use errors::{error, errno};
 use io;
 
@@ -16,8 +16,8 @@ const console_impl = chardev_iface {
 
 let cons = console {
 	iface = &console_impl,
-	major = devmajor::TTY_ALT,
-	minor = devminor_tty_alt::CONS,
+	major = dev::TTY_ALT_MAJOR,
+	minor = dev::CONS_MINOR,
 	out = [],
 };
 

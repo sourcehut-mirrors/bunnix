@@ -24,4 +24,10 @@ do
 	mount -t $fstype $dev $mnt
 done </etc/fstab
 
+echo Contents of /dev:
+ls -l /dev
+
+echo Test write to kernel console...
+echo Hello world >/dev/cons
+
 echo Nothing else to do, bye...

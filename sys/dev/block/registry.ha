@@ -20,11 +20,11 @@ export fn register(bdev: *blockdev) void = {
 
 	bdev.major = switch (bdev.iface) {
 	case interface::SATA =>
-		yield dev::devmajor::SATA;
+		yield dev::SATA_MAJOR;
 	case interface::ATAPI =>
-		yield dev::devmajor::ATAPI;
+		yield dev::ATAPI_MAJOR;
 	case interface::NVME =>
-		yield dev::devmajor::NVME;
+		yield dev::NVME_MAJOR;
 	case => abort();
 	};
 	bdev.major += bdev.serial: u32;

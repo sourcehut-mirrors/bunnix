@@ -1,5 +1,5 @@
 use bytes;
-use dev::{devmajor, devminor_mem};
+use dev;
 use errors::{error, errno};
 use io;
 
@@ -9,8 +9,8 @@ let devzero_chardev_impl = chardev_iface {
 
 let devzero = chardev {
 	iface = &devzero_chardev_impl,
-	major = devmajor::MEM,
-	minor = devminor_mem::ZERO,
+	major = dev::MEM_MAJOR,
+	minor = dev::ZERO_MINOR,
 };
 
 @init fn devzero() void = {

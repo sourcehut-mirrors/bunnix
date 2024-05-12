@@ -99,10 +99,11 @@ export fn main(ctx: *boot::context) void = {
 	const proc = proc::new_proc(root, root, "/", null)!;
 	const (inode, _) = fs::walk(root, init)!;
 
-	// TODO: Implement console device properly, i.e. /dev/cons
-	proc::installfd(proc, log::cons);	// stdin
-	proc::installfd(proc, log::cons);	// stdout
-	proc::installfd(proc, log::cons);	// stderr
+	const consdev = dev::mkdev(dev::TTY_ALT_MAJOR, dev::CONS_MINOR);
+	const cons = fs::openchr(consdev)!;
+	proc::installfd(proc, cons);	// stdin
+	proc::installfd(proc, cons);	// stdout
+	proc::installfd(proc, cons);	// stderr
 
 	const file = io::inode_open(inode)!;
 

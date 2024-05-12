@@ -128,6 +128,12 @@ export fn ischdev(mode: mode) bool = mode & IFMT == mode::CHR;
 // Returns true if this item is a block device.
 export fn isblockdev(mode: mode) bool = mode & IFMT == mode::BLK;
 
+// Returns true if this item is a block or character device.
+export fn isdev(mode: mode) bool = {
+	return mode & IFMT == mode::CHR
+		|| mode & IFMT == mode::BLK;
+};
+
 // Returns true if this item is a symbolic link.
 export fn islink(mode: mode) bool = mode & IFMT == mode::LINK;
 

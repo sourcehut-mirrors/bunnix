@@ -1,4 +1,4 @@
-use dev::{devmajor, devminor_mem};
+use dev;
 use errors::{error, errno};
 use io;
 
@@ -8,8 +8,8 @@ let devnull_chardev_impl = chardev_iface {
 
 let devnull = chardev {
 	iface = &devnull_chardev_impl,
-	major = devmajor::MEM,
-	minor = devminor_mem::NULL,
+	major = dev::MEM_MAJOR,
+	minor = dev::NULL_MINOR,
 };
 
 @init fn devnull() void = {
