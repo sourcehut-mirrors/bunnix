@@ -1,4 +1,5 @@
 use arch::x86_64;
+use dev::chr;
 use errors::{error, errno};
 use io;
 
@@ -25,6 +26,7 @@ export fn serial_init(cons: *serial_console, port: u16) void = {
 	x86_64::outb(port + 1, 0x00); // Div High: 00
 	x86_64::outb(port + 3, 0x03); // Disable divisor mode, set parity
 	x86_64::outb(port + 2, 0xC7); // Enable FIFO and clear
+	chr::cons_register(cons);
 };
 
 const serial_vtable = io::vtable {

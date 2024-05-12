@@ -6,7 +6,7 @@ export type devmajor = enum u32 {
 	RESERVED = 0,
 	// dev/null, dev/zero, etc
 	MEM,
-	// dev/console et al
+	// dev/cons et al
 	TTY_ALT,
 	// dev/tty*, dev/ttyS*
 	TTY,
@@ -28,6 +28,10 @@ export type devminor_mem = enum u32 {
 	ZERO,		// /dev/zero
 	NOSPC,		// /dev/nospc
 	URANDOM,	// /dev/urandom
+};
+
+export type devminor_tty_alt = enum u32 {
+	CONS,		// /dev/cons
 };
 
 // Makes a device number from its major and minor components.

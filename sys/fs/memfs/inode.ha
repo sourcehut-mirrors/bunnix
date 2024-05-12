@@ -87,7 +87,9 @@ fn inode_open(ino: *io::inode) (*io::file | error) = {
 
 fn inode_trunc(ino: *io::inode, length: size) (void | error) = {
 	const ino = ino: *inode;
-	assert(io::isfile(ino.mode));
+	if (!io::isfile(ino.mode)) {
+		return;
+	};
 	if (len(ino.data) == length) {
 		return;
 	} else if (len(ino.data) > length) {

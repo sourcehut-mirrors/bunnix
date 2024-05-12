@@ -9,6 +9,8 @@ fn mountdev(root: *io::inode) void = {
 	// hotplugging and such
 	const dev = memfs::new();
 	fs::mount_fs(root, dev, "/dev")!;
+
+	// Character devices
 	const devroot = fs::superblock_get_root(dev);
 	io::inode_mknod(devroot, "full", 0o666 | io::mode::CHR,
 		dev::mkdev(dev::devmajor::MEM, dev::devminor_mem::NOSPC))!;
@@ -16,5 +18,9 @@ fn mountdev(root: *io::inode) void = {
 		dev::mkdev(dev::devmajor::MEM, dev::devminor_mem::NULL))!;
 	io::inode_mknod(devroot, "zero", 0o666 | io::mode::CHR,
 		dev::mkdev(dev::devmajor::MEM, dev::devminor_mem::ZERO))!;
+	io::inode_mknod(devroot, "cons", 0o220 | io::mode::CHR,
+		dev::mkdev(dev::devmajor::TTY_ALT, dev::devminor_tty_alt::CONS))!;
+
+	// Block devices
 	block::mknodes(devroot)!;
 };

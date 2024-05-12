@@ -1,5 +1,6 @@
 use arch;
 use boot;
+use dev::chr;
 use errors::{error, errno};
 use io;
 use mman;
@@ -43,6 +44,8 @@ export fn fbcons_init(cons: *fb_console, fb: *boot::bootfb) void = {
 
 	// Clear to black
 	rt::memset(cons.back: *opaque, 0, fb.fb_size);
+
+	chr::cons_register(cons);
 };
 
 // Post-MMU initialization

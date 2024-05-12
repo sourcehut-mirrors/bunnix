@@ -1,4 +1,5 @@
 use arch::x86_64;
+use dev::chr;
 use errors::{error, errno};
 use io;
 
@@ -50,6 +51,7 @@ export fn vga_init(cons: *vga_console) void = {
 	};
 	curdisable();
 	initpos(cons);
+	chr::cons_register(cons);
 };
 
 const vga_vtable = io::vtable {
