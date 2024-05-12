@@ -16,8 +16,7 @@ int __fstatat(int fd, const char *restrict path, struct stat *restrict st, int f
 		.st = st,
 		.flags = flag,
 	};
-	int ret = syscall(SYS_fstatat, &opts);
-	return __syscall_ret(ret);
+	return syscall(SYS_fstatat, &opts);
 }
 
 weak_alias(__fstatat, fstatat);

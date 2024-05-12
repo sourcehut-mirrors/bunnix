@@ -11,6 +11,5 @@ int chdir(const char *path)
 		.flags = 0,
 	};
 
-	int ret = __syscall(SYS_chdirat, &opts);
-	return __syscall_ret(ret);
+	return syscall(SYS_chdirat, &opts);
 }

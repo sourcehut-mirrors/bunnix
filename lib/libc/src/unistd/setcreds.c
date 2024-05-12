@@ -3,7 +3,6 @@
 
 int setcreds(struct __creds *in)
 {
-	int ret = syscall(SYS_getcreds, in);
-	return __syscall_ret(ret);
+	return syscall(SYS_getcreds, in);
 }
 

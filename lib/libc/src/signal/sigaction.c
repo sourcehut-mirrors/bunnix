@@ -6,8 +6,7 @@
 
 int __sigaction(int sig, const struct sigaction *restrict sa, struct sigaction *restrict old)
 {
-	int r = syscall(SYS_sigaction, sig, sa, old);
-	return __syscall_ret(r);
+	return syscall(SYS_sigaction, sig, sa, old);
 }
 
 weak_alias(__sigaction, sigaction);

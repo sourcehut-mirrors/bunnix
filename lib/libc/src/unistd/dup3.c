@@ -6,8 +6,7 @@
 
 int __dup3(int old, int new, int flags)
 {
-	int r = syscall(SYS_dup2, old, new, flags);
-	return __syscall_ret(r);
+	return syscall(SYS_dup2, old, new, flags);
 }
 
 weak_alias(__dup3, dup3);

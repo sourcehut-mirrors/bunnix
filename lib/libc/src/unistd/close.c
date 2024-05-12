@@ -4,7 +4,7 @@
 
 int close(int fd)
 {
-	int r = syscall(SYS_close, fd);
+	int r = __syscall(SYS_close, fd);
 	if (r == -EINTR) r = 0;
 	return __syscall_ret(r);
 }

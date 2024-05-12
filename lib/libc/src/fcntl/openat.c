@@ -21,6 +21,5 @@ int openat(int fd, const char *filename, int flags, ...)
 		.mode = mode,
 	};
 
-	int r = syscall(SYS_openat, &opts);
-	return __syscall_ret(r);
+	return syscall(SYS_openat, &opts);
 }

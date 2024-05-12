@@ -10,6 +10,5 @@ int fchdir(int fd)
 		.flags = AT_EMPTY_PATH,
 	};
 
-	int ret = __syscall(SYS_chdirat, &opts);
-	return __syscall_ret(ret);
+	return syscall(SYS_chdirat, &opts);
 }

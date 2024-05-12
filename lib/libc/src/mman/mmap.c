@@ -22,7 +22,7 @@ void *__mmap(void *start, size_t len, int prot, int flags, int fd, off_t off)
 		.off = off,
 	};
 
-	ret = syscall(SYS_mmap, &opts);
+	ret = __syscall(SYS_mmap, &opts);
 
 	return (void *)__syscall_ret(ret);
 }
