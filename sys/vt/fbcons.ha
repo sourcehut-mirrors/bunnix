@@ -24,6 +24,7 @@ export type fb_console = struct {
 		w: uint,
 		h: uint,
 	},
+	cursor: (int, int),
 };
 
 // Pre-MMU initialization
@@ -39,6 +40,7 @@ export fn fbcons_init(cons: *fb_console, fb: *boot::bootfb) void = {
 		col = 0,
 		cols = fb.width / (WIDTH + 1): u32,
 		rows = fb.height / HEIGHT: u32,
+		cursor = (-1, -1),
 		...
 	};
 
@@ -71,6 +73,23 @@ export fn fbcons_lateinit(cons: *fb_console) void = {
 	cons.back = back;
 };
 
+// Moves the cursor on screen.
+export fn fbcons_movecursor(cons: *fb_console, row: int, col: int) void = {
+	fbcons_blitcursor(cons, blit_op::XOR);
+	cons.cursor = (row, col);
+	fbcons_blitcursor(cons, blit_op::XOR);
+};
+
+fn fbcons_blitcursor(cons: *fb_console, op: blit_op) void = {
+	if (cons.cursor.0 != -1 && cons.cursor.1 != -1) {
+		const (row, col) = cons.cursor;
+		const x = col: uint * (WIDTH + 1);
+		const y = row: uint * HEIGHT;
+		fbcons_blitchar(cons, x, y, '_', op);
+		fbcons_damage(cons, x, y, WIDTH + 1, HEIGHT);
+	};
+};
+
 const fb_vtable = io::vtable {
 	write = &fbcons_write,
 	...
@@ -86,6 +105,8 @@ fn fbcons_write(file: *io::file, buf: const []u8) (size | error) = {
 };
 
 fn fbcons_putc(cons: *fb_console, char: rune) void = {
+	fbcons_blitcursor(cons, blit_op::XOR);
+
 	switch (char) {
 	case '\n' =>
 		cons.row += 1;
@@ -97,6 +118,7 @@ fn fbcons_putc(cons: *fb_console, char: rune) void = {
 	case =>
 		const x = cons.col * (WIDTH + 1);
 		const y = cons.row * HEIGHT;
+		fbcons_clearcell(cons, x, y);
 		fbcons_blitchar(cons, x, y, char);
 		fbcons_damage(cons, x, y, WIDTH, HEIGHT);
 		cons.col += 1;
@@ -109,6 +131,9 @@ fn fbcons_putc(cons: *fb_console, char: rune) void = {
 		cons.row = cons.rows - 1;
 		fbcons_scroll(cons);
 	};
+
+	cons.cursor = (cons.row: int, cons.col: int);
+	fbcons_blitcursor(cons, blit_op::XOR);
 };
 
 fn fbcons_scroll(cons: *fb_console) void = {
@@ -128,7 +153,30 @@ fn fbcons_scroll(cons: *fb_console) void = {
 	fbcons_damage(cons, 0, 0, cons.width, cons.height);
 };
 
-fn fbcons_blitchar(cons: *fb_console, x: uint, y: uint, char: rune) void = {
+fn fbcons_clearcell(cons: *fb_console, x: uint, y: uint) void = {
+	let buffer = cons.back: *[*]u32;
+	for (let gy = 0u; gy < HEIGHT; gy += 1) {
+		for (let gx = 0u; gx < WIDTH + 1; gx += 1) {
+			let pixel = &buffer[(y + gy) * (cons.stride / 4) + (x + gx)];
+			*pixel = 0;
+		};
+	};
+};
+
+type blit_op = enum {
+	OVER,
+	XOR,
+	OR,
+	AND,
+};
+
+fn fbcons_blitchar(
+	cons: *fb_console,
+	x: uint,
+	y: uint,
+	char: rune,
+	op: blit_op = blit_op::OVER,
+) void = {
 	let buffer = cons.back: *[*]u32;
 	const glyph = getchar(char);
 
@@ -136,10 +184,25 @@ fn fbcons_blitchar(cons: *fb_console, x: uint, y: uint, char: rune) void = {
 		for (let gx = 0u; gx < WIDTH + 1; gx += 1) {
 			let pixel = &buffer[(y + gy) * (cons.stride / 4) + (x + gx)];
 			const mask = 1 << (WIDTH - gx);
-			if (glyph[gy] & mask != 0) {
-				*pixel = 0xFFFFFFFF;
-			} else {
-				*pixel = 0;
+			switch (op) {
+			case blit_op::OVER =>
+				if (glyph[gy] & mask != 0) {
+					*pixel = 0xFFFFFFFF;
+				} else {
+					*pixel = 0;
+				};
+			case blit_op::XOR =>
+				if (glyph[gy] & mask != 0) {
+					*pixel ^= 0xFFFFFFFF;
+				};
+			case blit_op::OR =>
+				if (glyph[gy] & mask != 0) {
+					*pixel |= 0xFFFFFFFF;
+				};
+			case blit_op::AND =>
+				if (glyph[gy] & mask != 0) {
+					*pixel &= 0xFFFFFFFF;
+				};
 			};
 		};
 	};
