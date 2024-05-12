@@ -16,6 +16,7 @@ export type proc = struct {
 	fds: []filedesc,
 	creds: creds,
 	sig: sigproc,
+	args: []str,
 
 	// XXX HACK
 	cwd_str: str,
@@ -27,6 +28,14 @@ export type proc = struct {
 
 	// TODO: Multithreading
 	tasks: []*sched::task,
+};
+
+// Returns the name of the active process.
+export fn procname() str = {
+	if (sched::current() == null) {
+		return "<kernel>";
+	};
+	return current().args[0];
 };
 
 // Creates a new process.

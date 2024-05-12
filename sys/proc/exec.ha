@@ -21,7 +21,6 @@ export fn exec(
 	// Stash these in the kernel heap before switching vmms
 	// XXX: This is probably avoidable if we were clever
 	const args = strings::dupall(args);
-	defer strings::freeall(args);
 	const env = strings::dupall(env);
 	defer strings::freeall(env);
 
@@ -80,6 +79,7 @@ export fn exec(
 	};
 
 	proc.sig = sigproc { ... };
+	proc.args = args;
 
 	let task = proc.tasks[0];
 	arch::context_set_sp(&task.ctx, STACK_TOP);

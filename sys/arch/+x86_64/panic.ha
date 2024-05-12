@@ -5,6 +5,8 @@ use debug;
 use log;
 use rt;
 
+fn proc::procname() str;
+
 def MAX_FRAMES_TOP: size = 16z;
 def MAX_FRAMES_BOTTOM: size = 16z;
 def MAX_FRAMES: size = MAX_FRAMES_TOP + MAX_FRAMES_BOTTOM;
@@ -63,7 +65,7 @@ export fn logctx(ctx: *context) void = {
 
 // Kernel panic, print panic details to log and halt kernel.
 export fn panic(reason: str, ctx: *context) never = {
-	log::printfln("!! panic !! {}", reason);
+	log::printfln("!! panic !! {} via {}", reason, proc::procname());
 	logctx(ctx);
 	log::println("System halted.");
 	rt::halt();
