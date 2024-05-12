@@ -1,7 +1,7 @@
 DASH=$(ROOT)/vendor/dash
 
 $(DASH)/Makefile: $(DASH)/configure $(SYSROOT)/usr/lib/libc.a
-	cd $(DASH) && ./configure --host=$(TRIPLET)
+	cd $(DASH) && ./configure --host=$(TRIPLET) CFLAGS="-g"
 
 DASH_SOURCES=$(call rwildcard,$(DASH)/src,*.c *.h)
 
