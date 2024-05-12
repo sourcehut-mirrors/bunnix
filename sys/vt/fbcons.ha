@@ -5,7 +5,12 @@ use errors::{error, errno};
 use io;
 use mman;
 use rt;
+use sched;
 use types;
+
+// XXX TEMP
+use fmt;
+let arch::dev::serial: *io::file;
 
 export type fb_console = struct {
 	io::file,
@@ -25,6 +30,8 @@ export type fb_console = struct {
 		h: uint,
 	},
 	cursor: (int, int),
+	cursor_shown: bool,
+	next_tick: u64,
 };
 
 // Pre-MMU initialization
@@ -48,6 +55,23 @@ export fn fbcons_init(cons: *fb_console, fb: *boot::bootfb) void = {
 	rt::memset(cons.back: *opaque, 0, fb.fb_size);
 
 	chr::cons_register(cons);
+
+	static let link = sched::tick_link { ... };
+	sched::ontick(&link, &fbcons_tick, cons);
+};
+
+fn fbcons_tick(tick: u64, user: nullable *opaque) void = {
+	let cons = user: *fb_console;
+	const rate = arch::getrate();
+
+	if (tick < cons.next_tick) {
+		return;
+	};
+
+	cons.cursor_shown = !cons.cursor_shown;
+	fbcons_blitcursor(cons, blit_op::XOR);
+	fbcons_present(cons);
+	cons.next_tick = tick + rate;
 };
 
 // Post-MMU initialization
@@ -105,7 +129,9 @@ fn fbcons_write(file: *io::file, buf: const []u8) (size | error) = {
 };
 
 fn fbcons_putc(cons: *fb_console, char: rune) void = {
-	fbcons_blitcursor(cons, blit_op::XOR);
+	if (cons.cursor_shown) {
+		fbcons_blitcursor(cons, blit_op::XOR);
+	};
 
 	switch (char) {
 	case '\n' =>
@@ -133,7 +159,9 @@ fn fbcons_putc(cons: *fb_console, char: rune) void = {
 	};
 
 	cons.cursor = (cons.row: int, cons.col: int);
-	fbcons_blitcursor(cons, blit_op::XOR);
+	if (cons.cursor_shown) {
+		fbcons_blitcursor(cons, blit_op::XOR);
+	};
 };
 
 fn fbcons_scroll(cons: *fb_console) void = {
