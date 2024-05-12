@@ -121,18 +121,29 @@ const fb_vtable = io::vtable {
 
 fn fbcons_write(file: *io::file, buf: const []u8) (size | error) = {
 	let cons = file: *fb_console;
+	if (cons.cursor_shown) {
+		fbcons_blitcursor(cons, blit_op::XOR);
+	};
+
 	for (let i = 0z; i < len(buf); i += 1) {
 		fbcons_putc(cons, buf[i]: rune);
 	};
+
+	cons.cursor = (cons.row: int, cons.col: int);
+
+	if (cons.cursor_shown) {
+		fbcons_blitcursor(cons, blit_op::XOR);
+	} else {
+		cons.cursor_shown = true;
+		fbcons_blitcursor(cons, blit_op::XOR);
+	};
+	cons.next_tick = arch::gettime() + arch::getrate();
+
 	fbcons_present(cons);
 	return len(buf);
 };
 
 fn fbcons_putc(cons: *fb_console, char: rune) void = {
-	if (cons.cursor_shown) {
-		fbcons_blitcursor(cons, blit_op::XOR);
-	};
-
 	switch (char) {
 	case '\n' =>
 		cons.row += 1;
@@ -156,11 +167,6 @@ fn fbcons_putc(cons: *fb_console, char: rune) void = {
 	if (cons.row >= cons.rows) {
 		cons.row = cons.rows - 1;
 		fbcons_scroll(cons);
-	};
-
-	cons.cursor = (cons.row: int, cons.col: int);
-	if (cons.cursor_shown) {
-		fbcons_blitcursor(cons, blit_op::XOR);
 	};
 };
 
