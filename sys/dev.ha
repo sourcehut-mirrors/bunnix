@@ -1,4 +1,5 @@
 use dev;
+use dev::chr;
 use dev::block;
 use fs::memfs;
 use fs;
@@ -20,6 +21,12 @@ fn mountdev(root: *io::inode) void = {
 		dev::mkdev(dev::MEM_MAJOR, dev::ZERO_MINOR))!;
 	io::inode_mknod(devroot, "cons", 0o220 | io::mode::CHR,
 		dev::mkdev(dev::TTY_ALT_MAJOR, dev::CONS_MINOR))!;
+
+	// dev/kbd, if available
+	if (chr::lookup(dev::INPUT_MAJOR, dev::KBD_MINOR) is *chr::chardev) {
+		io::inode_mknod(devroot, "kbd", 0o660 | io::mode::CHR,
+			dev::mkdev(dev::INPUT_MAJOR, dev::KBD_MINOR))!;
+	};
 
 	// Block devices
 	block::mknodes(devroot)!;

@@ -30,4 +30,7 @@ ls -l /dev
 echo Test write to kernel console...
 echo Hello world >/dev/cons
 
+echo Test /dev/kbd
+scancodes
+
 echo Nothing else to do, bye...

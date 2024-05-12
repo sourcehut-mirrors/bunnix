@@ -29,12 +29,18 @@ export fn register(dev: *chardev) void = {
 	static append(devs, dev);
 };
 
-// Opens a character device with the given major/minor number assignment.
-export fn open(major: u32, minor: u32) (*io::file | error) = {
+// Finds a character device with the given device number.
+export fn lookup(major: u32, minor: u32) (*chardev | error) = {
 	for (let dev .. devs) {
 		if (dev.major == major && dev.minor == minor) {
-			return dev.iface.open(dev);
+			return dev;
 		};
 	};
 	return errno::NXIO;
+};
+
+// Opens a character device with the given major/minor number assignment.
+export fn open(major: u32, minor: u32) (*io::file | error) = {
+	const dev = lookup(major, minor)?;
+	return dev.iface.open(dev);
 };

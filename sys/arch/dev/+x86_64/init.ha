@@ -55,10 +55,12 @@ export fn earlyinit(ctx: *boot::context) void = {
 
 // Initialize architecture-specific devices.
 export fn init() void = {
-	// TODO: Grab ACPI and look for PCIe
-	dev::bus_register(&legacy_pci_bus);
-
 	if (fbcons.vtable != null) {
 		vt::fbcons_lateinit(&fbcons);
 	};
+
+	// TODO: Grab ACPI and look for PCIe
+	dev::bus_register(&legacy_pci_bus);
+
+	ps2_init();
 };

@@ -24,7 +24,8 @@ HAREPROGS=\
 	echo \
 	env \
 	init \
-	mount
+	mount \
+	scancodes
 
 install-bin:
 	for f in $^; \

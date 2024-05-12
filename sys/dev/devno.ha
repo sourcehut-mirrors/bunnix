@@ -21,6 +21,10 @@ export def URANDOM_MINOR: u32 = 3;
 
 export def CONS_MINOR: u32 = 0;
 
+// INPUT_MAJOR
+
+export def KBD_MINOR: u32 = 0;
+
 // Makes a device number from its major and minor components.
 export fn mkdev(major: u32, minor: u32) u64 = {
 	return major << 32u64 | minor;

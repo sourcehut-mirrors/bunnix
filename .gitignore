@@ -18,5 +18,6 @@ config.mk
 /bin/env/env
 /bin/init/init
 /bin/mount/mount
+/bin/scancodes/scancodes
 /bin/test-c/test-c
 /vendor/dash/src/sh
