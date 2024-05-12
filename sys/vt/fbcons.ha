@@ -152,6 +152,14 @@ fn fbcons_putc(cons: *fb_console, char: rune) void = {
 		cons.col = 0;
 	case '\t' =>
 		cons.col += 8 - cons.col % 8;
+	case '\b' =>
+		if (cons.col == 0) {
+			return;
+		};
+		cons.col -= 1;
+		const x = cons.col * (WIDTH + 1);
+		const y = cons.row * HEIGHT;
+		fbcons_clearcell(cons, x, y);
 	case =>
 		const x = cons.col * (WIDTH + 1);
 		const y = cons.row * HEIGHT;

@@ -55,7 +55,22 @@ export fn tty_putc(tty: *tty, c: u8) void = {
 		return; // Drop input
 	};
 
-	static append(tty.avail, c);
+	let add = true;
+	switch (c) {
+	case '\r' =>
+		c = '\n';
+	case '\b' =>
+		if (len(tty.avail) == 0) {
+			return;
+		};
+		static delete(tty.avail[len(tty.avail)-1]);
+		add = false;
+	case => void;
+	};
+
+	if (add) {
+		static append(tty.avail, c);
+	};
 
 	// TODO:
 	// - More sophisticated line editing
