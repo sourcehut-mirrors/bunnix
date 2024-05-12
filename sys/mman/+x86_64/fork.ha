@@ -72,15 +72,7 @@ fn fork_page(old_pt: *pt, new_pt: *pt, i: size, vaddr: uintptr) (void | error) =
 	let new_pte = &new_pt[i];
 
 	const old_phys = old_pte: uintptr & PADDR_MASK;
-	if (old_pte & pte::W == 0) {
-		match (ref(old_phys, PAGESIZE)) {
-		case void =>
-			// Re-use existing mapping if we haven't exceeded the
-			// maximum number of refs
-			*new_pte = old_pte;
-		case error => void;
-		};
-	};
+	// TODO: Re-use existing read-only mappings
 
 	// Copy to a new page
 	// TODO: Copy on write
