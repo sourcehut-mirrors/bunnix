@@ -90,6 +90,15 @@ fn cleanup(proc: *proc) void = {
 		sched::task_block(t);
 	};
 
+	const nchild = len(proc.children);
+	const init = procs[0];
+	assert(init.creds.pid == 1);
+	for (let child .. proc.children) {
+		child.creds.ppid = 1;
+		append(init.children, child);
+	};
+	free(proc.children);
+
 	for (let fd .. proc.fds) {
 		match (fd.file) {
 		case let f: *io::file =>
