@@ -58,6 +58,7 @@ export fn main() void = {
 	};
 
 	os::setenv("TERM", "bunnix")!;
+	os::chdir("/root")!;
 
 	// TODO: call /bin/login
 	const cmd = match (exec::cmd("/bin/sh")) {
