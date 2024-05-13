@@ -12,7 +12,7 @@ fn proc::resume_signal(task: *task) bool;
 export fn schedule() bool = {
 	const prev = match (current()) {
 	case let prev: *task =>
-		if (arch::save(&prev.restore)) {
+		if (arch::save(&prev.restore) == 1) {
 			// Return from context switch
 			return true;
 		};
@@ -57,7 +57,7 @@ fn switch_task(task: *task) never = {
 	arch::set_kernel_stack(kstack);
 	mman::vmm_map(task.vmm);
 
-	arch::restore(&task.restore);
+	arch::restore(&task.restore, 1);
 };
 
 fn task_next() nullable *task = {

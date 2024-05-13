@@ -31,5 +31,5 @@ arch.restore:
 	movq 48(%rdi), %r13	/* %r13 */
 	movq 56(%rdi), %r14	/* %r14 */
 	movq 64(%rdi), %r15	/* %r15 */
-	movq $1, %rax
+	movq %rsi, %rax
 	jmpq *16(%rdi)		/* %rip */
