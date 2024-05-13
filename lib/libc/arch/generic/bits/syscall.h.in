@@ -32,5 +32,6 @@
 #define __NR_setcreds		28
 #define __NR_setgroups		29
 #define __NR_mount		30
+#define __NR_faccessat		31
 
 #endif
