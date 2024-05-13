@@ -56,6 +56,9 @@ export fn main(ctx: *boot::context) void = {
 		const (key, val) = strings::cut(args[i], "=");
 		switch (key) {
 		case "root" =>
+			// Don't mount root if there is an initramfs
+			if (len(ctx.mods) != 0) yield;
+
 			match (block::open(val)) {
 			case let bdev: *block::blockdev =>
 				root_opts.device = bdev;
