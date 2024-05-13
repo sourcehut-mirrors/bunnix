@@ -59,6 +59,12 @@ int fchown(int, uid_t, gid_t);
 int lchown(const char *, uid_t, gid_t);
 int fchownat(int, const char *, uid_t, gid_t, int);
 
+struct __unlinkat_options {
+	int dirfd;
+	__string_t path;
+	int flags;
+};
+
 struct __faccessat_options {
 	int dirfd;
 	__string_t path;

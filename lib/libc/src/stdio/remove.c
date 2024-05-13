@@ -5,6 +5,7 @@
 
 int remove(const char *path)
 {
-	// TODO
-	return ENOTSUP;
+	int r = __syscall(SYS_unlinkat, AT_FDCWD, path, 0);
+	if (r==-EISDIR) r = __syscall(SYS_unlinkat, AT_FDCWD, path, AT_REMOVEDIR);
+	return __syscall_ret(r);
 }
