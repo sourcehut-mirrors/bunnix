@@ -8,10 +8,6 @@ use rt;
 use sched;
 use types;
 
-// XXX TEMP
-use fmt;
-let arch::dev::serial: *io::file;
-
 export type fb_console = struct {
 	io::file,
 	front: uintptr,
