@@ -9,6 +9,11 @@ ISO_TARGETS=\
 
 MKISOFSFLAGS=
 
+# Update tools/mkdisk-* if you edit these
+DISK_SZ=128M
+FAT_PARTSZ=24M
+EXT4_PARTSZ=100M
+
 # Legacy boot support
 ifeq ($(ENABLE_LEGACY),1)
 
@@ -152,7 +157,7 @@ clean: clean-target
 
 # Disks for emulator use
 target/fs.fat.img: $(SYSROOT)
-	qemu-img create -f raw $@ 24M
+	qemu-img create -f raw $@ $(FAT_PARTSZ)
 	mkdosfs $@
 	mmd -i $@ ::EFI
 	mmd -i $@ ::EFI/boot
@@ -162,21 +167,21 @@ target/fs.fat.img: $(SYSROOT)
 	mcopy -i $@ target/initrd ::modules/initrd
 
 target/fs.ext4.img: $(SYSROOT)
-	qemu-img create -f raw $@ 48M
+	qemu-img create -f raw $@ $(EXT4_PARTSZ)
 	mkfs.ext4 -d $(SYSROOT) -O^metadata_csum $@
 
 .PHONY: target/fs.ext4.img
 .PHONY: target/fs.fat.img
 
 target/disk.mbr.img: target/fs.fat.img target/fs.ext4.img
-	qemu-img create -f raw $@ 128M
+	qemu-img create -f raw $@ $(DISK_SZ)
 	sfdisk $@ < tools/mkdisk-mbr
 	dd if=$(MBR) conv=notrunc of=$@
 	dd if=target/fs.fat.img conv=notrunc of=$@ seek=2048
 	dd if=target/fs.ext4.img conv=notrunc of=$@ seek=133120
 
 target/disk.gpt.img: target/fs.fat.img target/fs.ext4.img
-	qemu-img create -f raw $@ 128M
+	qemu-img create -f raw $@ $(DISK_SZ)
 	sfdisk $@ < tools/mkdisk-gpt
 	dd if=target/fs.fat.img conv=notrunc of=$@ seek=2048
 	dd if=target/fs.ext4.img conv=notrunc of=$@ seek=133120
