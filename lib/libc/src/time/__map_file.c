@@ -1,11 +1,13 @@
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <stdio.h>
 #include <sys/stat.h>
 #include "syscall.h"
 
 const char unsigned *__map_file(const char *pathname, size_t *size)
 {
-	errno = EOPNOTSUPP;
+	fprintf(stderr, "__map_file: ENOSYS\n");
+	errno = ENOSYS;
 	return 0;
 
 	/* TODO Bunnix
