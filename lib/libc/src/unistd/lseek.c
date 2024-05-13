@@ -4,8 +4,7 @@
 
 off_t __lseek(int fd, off_t offset, int whence)
 {
-	errno = ENOSYS;
-	return (off_t)-1;
+	return syscall(SYS_lseek, fd, offset, whence);
 }
 
 weak_alias(__lseek, lseek);
