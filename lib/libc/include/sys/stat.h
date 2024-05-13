@@ -100,6 +100,12 @@ struct __fstatat_options {
 #define UTIME_NOW  0x3fffffff
 #define UTIME_OMIT 0x3ffffffe
 
+struct __mkdirat_options {
+	int dirfd;
+	__string_t path;
+	unsigned int mode;
+};
+
 int stat(const char *__restrict, struct stat *__restrict);
 int fstat(int, struct stat *);
 int lstat(const char *__restrict, struct stat *__restrict);
