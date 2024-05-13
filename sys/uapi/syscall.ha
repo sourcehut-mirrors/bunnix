@@ -1,4 +1,5 @@
 use errors::{error, errno};
+use sched;
 
 const UAPI: str = "uapi";
 
@@ -13,8 +14,13 @@ export fn syscall(
 	if (sysno: size >= len(systab)) {
 		return (errno::NOSYS, 0);
 	};
+	let task = sched::current() as *sched::task;
+	task.syscall = sysno: int;
+	defer task.syscall = -1;
+
 	const func = systab[sysno]: *syscall_handler;
-	match (func(a1, a2, a3, a4, a5)) {
+	const rval = func(a1, a2, a3, a4, a5);
+	match (rval) {
 	case let e: error =>
 		return (e: errno, 0);
 	case let u: u64 =>

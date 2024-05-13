@@ -1,9 +1,13 @@
 use arch;
+use errors::{error, errno};
 use mman;
 use sched;
 
 // Delivers a signal to the specified process.
-export fn signal(proc: *proc, signo: sig) void = {
+//
+// Returns true if the signal was queued, and false if it was ignored or
+// blocked.
+export fn signal(proc: *proc, signo: sig) bool = {
 	assert(signo >= 1 && signo <= sig::SIGMAX);
 	assert(sigdefault[signo] != action::CONT); // TODO
 
@@ -16,13 +20,14 @@ export fn signal(proc: *proc, signo: sig) void = {
 
 	if (!awaited && !blocked && ignored) {
 		// Do nothing
-		return;
+		return false;
 	};
 
 	sigaddset(&sigproc.pending, signo)!;
 
-	// TODO: interrupt processes blocked on syscalls more generally
 	sched::wake(&proc.wq);
+
+	return true;
 };
 
 // Called by the scheduler to handle any pending signals for this task. Returns
@@ -43,6 +48,8 @@ export fn resume_signal(task: *sched::task) bool = {
 	if (signo == 0) {
 		return true;
 	};
+
+	sigdelset(&proc.sig.pending, signo)!;
 
 	const act = &proc.sig.action[signo];
 	assert(act.flags & SA_SIGINFO == 0); // TODO
@@ -66,7 +73,7 @@ export fn resume_signal(task: *sched::task) bool = {
 	sp -= size(signal_stack): uintptr;
 
 	// Deliver signal
-	mman::vmm_map(&proc.vmm);
+	sched::prepare_task(task);
 
 	if (!mman::isvalid(&proc.vmm, sp, size(signal_stack), true)) {
 		// TODO: Exit with segfault
@@ -76,13 +83,16 @@ export fn resume_signal(task: *sched::task) bool = {
 	let frame = sp: *signal_stack;
 	frame.sigreturn = arch::SIGRETURN_MAGIC;
 	frame.ctx = task.ctx;
+	frame.restore = task.restore;
+	frame.syscall = task.syscall;
 
 	arch::context_set_sp(&task.ctx, sp);
 	arch::context_set_ip(&task.ctx, act.sa_handler: uintptr);
 	arch::context_set_abi(&task.ctx, signo: u64);
-	arch::enter_user(&task.ctx);
+	sched::enter_user(task);
 };
 
+// Called by the ISR's magic signal return routine.
 export fn return_signal(ctx: *arch::context) void = {
 	const task = sched::task_fromctx(ctx);
 	const proc = task.user: *proc;
@@ -96,4 +106,11 @@ export fn return_signal(ctx: *arch::context) void = {
 	let frame = sp: *signal_stack;
 	assert(frame.sigreturn == arch::SIGRETURN_MAGIC);
 	*ctx = frame.ctx;
+
+	if (frame.syscall != -1) {
+		// Return from syscall with EINTR
+		arch::context_set_rval(&task.ctx, errno::INTR, 0);
+		arch::set_restore_point(&frame.restore, &arch::sysret: uintptr);
+		arch::restore(&frame.restore);
+	};
 };

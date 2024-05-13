@@ -9,6 +9,9 @@ export type cpu = struct {
 	// Current task, kernel virtual address
 	task: nullable *context,	// 16
 
+	// syscall handler that is currently active, or -1
+	syscall: int,
+
 	tss: x86_64::tss,
 	gdt: [NGDT]u64,
 };

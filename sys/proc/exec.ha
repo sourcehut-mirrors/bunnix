@@ -85,7 +85,7 @@ export fn exec(
 	arch::context_set_sp(&task.ctx, STACK_TOP);
 	arch::context_set_ip(&task.ctx, ip);
 	sched::task_activate(task);
-	arch::enter_user(&task.ctx);
+	sched::enter_user(task);
 };
 
 fn populate_argv(proc: *proc, args: []str, env: []str) (void | error) = {

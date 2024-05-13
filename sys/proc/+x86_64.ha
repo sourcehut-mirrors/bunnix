@@ -8,4 +8,6 @@ type signal_stack = struct {
 	// %rsp
 	sigreturn: uintptr,
 	ctx: arch::context,
+	restore: arch::restore_point,
+	syscall: int,
 };

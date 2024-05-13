@@ -1,4 +1,5 @@
 use arch;
+use errors::{error, errno};
 
 export type wq_func = fn(link: *wq_link, user: nullable *opaque) void;
 

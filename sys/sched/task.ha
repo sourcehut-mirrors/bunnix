@@ -25,6 +25,7 @@ export type taskstate = struct {
 	vmm: *mman::vmm,
 	state: task_state,
 	restore: arch::restore_point,
+	syscall: int,
 	next: nullable *task,
 	prev: nullable *nullable *task,
 	user: nullable *opaque,

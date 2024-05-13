@@ -7,12 +7,11 @@ let head: nullable *task = null;
 // Forward declaration
 fn proc::resume_signal(task: *task) bool;
 
-// Switches to the next available task. Returns true if we context switched as a
-// result of the call.
+// Switches to the next available task. Returns true if we switched contexts.
 export fn schedule() bool = {
 	const prev = match (current()) {
 	case let prev: *task =>
-		if (arch::save(&prev.restore) == 1) {
+		if (arch::save(&prev.restore)) {
 			// Return from context switch
 			return true;
 		};
@@ -44,20 +43,26 @@ export fn schedule() bool = {
 		if (!proc::resume_signal(next)) {
 			continue; // Select another task
 		};
-		switch_task(next);
+
+		prepare_task(next);
+		arch::restore(&next.restore);
 	};
 };
 
-// Switches to the given task.
-fn switch_task(task: *task) never = {
+// Prepares a task for running in userspace.
+export fn prepare_task(task: *task) void = {
 	let cpu = arch::getcpu();
 	cpu.task = &task.ctx;
 
 	const kstack = &(&task.ctx: *[*]arch::context)[1];
 	arch::set_kernel_stack(kstack);
 	mman::vmm_map(task.vmm);
+};
 
-	arch::restore(&task.restore, 1);
+// Immediately enters userspace.
+export fn enter_user(task: *task) never = {
+	task.syscall = -1;
+	arch::enter_user(&task.ctx);
 };
 
 fn task_next() nullable *task = {
