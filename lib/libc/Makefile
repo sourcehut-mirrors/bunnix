@@ -79,6 +79,7 @@ DIRS=\
      stdio \
      stdlib \
      string \
+     temp \
      time \
      unistd
 
