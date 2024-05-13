@@ -356,3 +356,9 @@ fn sys_dup2(oldfd: i64, newfd: i64, flags: i64) (u64 | error) = {
 	io::ref(new.file as *io::file);
 	return newfd: u64;
 };
+
+fn sys_faccessat(opts: *faccessat_options) (u64 | error) = {
+	let (inode, _) = atwalk(opts.dirfd, opts.path)?;
+	io::inode_unref(inode);
+	return 0u64;
+};

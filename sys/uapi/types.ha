@@ -172,3 +172,9 @@ export type mount_options = struct {
 	readonly: bool,
 	misc: []str,
 };
+
+export type faccessat_options = struct {
+	dirfd: int,
+	path: str,
+	flags: int,
+};
