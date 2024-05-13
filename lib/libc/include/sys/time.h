@@ -15,7 +15,7 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
-int gettimeofday (struct timeval *restrict tv, void *restrict tz);
+int gettimeofday (struct timeval *__restrict tv, void *__restrict tz);
 
 #define ITIMER_REAL    0
 #define ITIMER_VIRTUAL 1
