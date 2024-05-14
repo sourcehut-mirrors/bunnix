@@ -38,6 +38,8 @@ endef
 
 $(foreach prog,$(HAREPROGS),$(eval $(call hare_prog,$(prog))))
 
+### sbase (core utils)
+
 SBASE=$(ROOT)/vendor/sbase
 SBASE_SOURCES=$(call rwildcard,$(SBASE),*.c *.h)
 
@@ -152,3 +154,23 @@ all: $1
 endef
 
 $(foreach prog,$(SBASE_PROGS),$(eval $(call sbase_prog,$(prog))))
+
+### lok (awk)
+
+LOK=$(ROOT)/vendor/lok
+LOK_SOURCES=$(call rwildcard,$(LOK),*.c *.h)
+
+clean-lok:
+	make -C $(SBASE) clean
+
+.PHONY: clean-lok
+
+clean: clean-lok
+
+awk: $(LOK)/awk
+	cp $(LOK)/awk awk
+
+$(LOK)/awk: $(LOK_SOURCES)
+	make -C $(LOK) CC=$(CC)
+
+install-bin: awk

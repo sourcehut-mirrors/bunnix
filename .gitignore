@@ -22,3 +22,5 @@ config.mk
 /bin/scancodes/scancodes
 /bin/test-c/test-c
 /vendor/dash/src/sh
+/vendor/lok/awk
+/bin/awk
