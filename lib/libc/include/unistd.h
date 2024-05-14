@@ -65,6 +65,14 @@ struct __unlinkat_options {
 	int flags;
 };
 
+struct __linkat_options {
+	int olddirfd;
+	__string_t oldpath;
+	int newdirfd;
+	__string_t newpath;
+	int flags;
+};
+
 struct __faccessat_options {
 	int dirfd;
 	__string_t path;
