@@ -64,6 +64,7 @@ DIRS=\
      exit \
      fcntl \
      internal \
+     legacy \
      locale \
      malloc \
      math \
