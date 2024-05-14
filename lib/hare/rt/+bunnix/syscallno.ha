@@ -35,4 +35,5 @@ export type sys = enum u64 {
 	MOUNT,
 	UNAME,
 	SETHOSTNAME,
+	CHROOTAT,
 };
