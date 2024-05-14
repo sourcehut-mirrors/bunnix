@@ -4,20 +4,20 @@
 ARCH = x86_64
 
 # Sane defaults, feel free to configure:
-TRIPLET = x86_64-bunnix-
+TRIPLET = x86_64-bunnix
 HARE = hare
 HAREC = harec
 QBE = qbe
-AS = $(TRIPLET)as
-LD = $(TRIPLET)ld
-OBJCOPY = $(TRIPLET)objcopy
-STRIP = $(TRIPLET)strip
-GDB = $(TRIPLET)gdb
-DTC = $(TRIPLET)dtc
-CC = $(TRIPLET)gcc
-CXX = $(TRIPLET)g++
-AR = $(TRIPLET)ar
-RANLIB = $(TRIPLET)ranlib
+AS = $(TRIPLET)-as
+LD = $(TRIPLET)-ld
+OBJCOPY = $(TRIPLET)-objcopy
+STRIP = $(TRIPLET)-strip
+GDB = $(TRIPLET)-gdb
+DTC = $(TRIPLET)-dtc
+CC = $(TRIPLET)-gcc
+CXX = $(TRIPLET)-g++
+AR = $(TRIPLET)-ar
+RANLIB = $(TRIPLET)-ranlib
 
 #
 # Bootloader configuration
