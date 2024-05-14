@@ -57,6 +57,7 @@ You need the following:
 * sfdisk
 * xorriso
 * qemu-system-x86\_64 and qemu-img
+* yacc
 
 To build with EFI support:
 
@@ -79,3 +80,15 @@ Use `make` to compile Bunnix. The following targets are available:
 * make nographic-gdb: nographic but waits for gdb
 * make gdb: run but waits for gdb
 * make gdbc: connect gdbc to a waiting qemu instance
+
+## Included third-party software
+
+Bunnix includes (often patched versions of) the following third-party software:
+
+* [lwext4](https://github.com/gkostka/lwext4): ext4 implementation (kernel)
+* [dash](https://git.sr.ht/~sircmpwn/dash): /bin/sh
+* [sbase](https://git.sr.ht/~sircmpwn/sbase): core utilities*
+* [lok](https://github.com/dimkr/lok): /bin/awk
+
+\* sbase is good software written by questionable people. I do not endorse
+   suckless.
