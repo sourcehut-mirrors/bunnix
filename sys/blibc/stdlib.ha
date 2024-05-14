@@ -34,3 +34,7 @@ export @symbol("qsort") fn qsort(
 	let slice = (base: *[*]u8)[..nmemb];
 	sort::sort(slice, sz, compar);
 };
+
+export @symbol("abort") fn _abort() void = {
+	abort();
+};

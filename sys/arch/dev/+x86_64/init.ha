@@ -62,9 +62,6 @@ export fn init() void = {
 
 	if (fbcons.vtable != null) {
 		vt::fbcons_finish(&fbcons);
-
-		let vt = vt::vt_init(&fbdev);
-		vt.row = fbcons.row;
-		vt.col = fbcons.col;
+		vt::vt_init(&fbdev);
 	};
 };

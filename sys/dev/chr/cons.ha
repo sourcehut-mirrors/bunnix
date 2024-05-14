@@ -63,11 +63,11 @@ export fn cons_write(buf: const []u8) void = {
 	};
 
 	// TODO: This could/should be a proper ring buffer but I can't be arsed
-	if (len(cons.log) + len(buf) >= STATIC_LOG) {
-		const diff = STATIC_LOG - (len(cons.log) + len(buf));
-		static delete(cons.log[..diff]);
-	};
-	static append(cons.log, buf...);
+	//if (len(cons.log) + len(buf) >= STATIC_LOG) {
+	//	const diff = STATIC_LOG - (len(cons.log) + len(buf));
+	//	static delete(cons.log[..diff]);
+	//};
+	//static append(cons.log, buf...);
 };
 
 // Returns the contents of the kernel log buffer.

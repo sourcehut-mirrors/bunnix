@@ -1,10 +1,17 @@
 use arch;
+use bytes;
 use dev;
 use dev::chr;
 use dev::chr::{key_state};
 use errors::{error, errno};
+use fmt;
 use io;
+use lib::vterm;
+use rt;
 use sched;
+use strings;
+use time;
+use types::c;
 use types;
 
 export type vt = struct {
@@ -32,6 +39,10 @@ export type vt = struct {
 		cols: uint,
 	},
 
+	// Terminal state
+	vterm: *vterm::VTerm,
+	vscreen: *vterm::VTermScreen,
+
 	// Cursor
 	cursor: (int, int),
 	cursor_shown: bool,
@@ -47,20 +58,43 @@ export type vtcons = struct {
 // Allocates a virtual terminal with the given [[chr::fb]]. Will open /dev/kbd
 // if available.
 export fn vt_init(fb: *chr::fb) *vt = {
+	const rows = fb.height / FONT_HEIGHT;
+	const cols = fb.width / FONT_WIDTH;
+
+	const builder = vterm::VTermBuilder {
+		rows = rows: int,
+		cols = cols: int,
+		allocator = &vterm_allocator,
+		...
+	};
+	const vterm = vterm::vterm_build(&builder);
+	vterm::vterm_set_utf8(vterm, 1);
+
+	const vscreen = vterm::vterm_obtain_screen(vterm);
+	vterm::vterm_screen_reset(vscreen, 1);
+	vterm::vterm_screen_enable_altscreen(vscreen, 1);
+
 	const term = alloc(vt {
 		tty_iface = &tty_impl,
-		cols = fb.width / FONT_WIDTH,
-		rows = fb.height / FONT_HEIGHT,
+		rows = rows,
+		cols = cols,
 		cons = vtcons {
 			vtable = &cons_impl,
 			...
 		},
 		cursor = (-1, -1),
+		vterm = vterm,
+		vscreen = vscreen,
 		...
 	});
 	pixbuf_init_mapped(&term.front, fb);
 	pixbuf_init_back(&term.back, fb);
 	pixbuf_copy(&term.back, &term.front);
+
+	term.vscreen = vscreen;
+	term.vterm = vterm;
+
+	vterm::vterm_screen_set_callbacks(vscreen, &vterm_screen_cb, term);
 
 	match (chr::lookup(dev::INPUT_MAJOR, dev::KBD_MINOR)) {
 	case let dev: *chr::chardev =>
@@ -80,29 +114,72 @@ export fn vt_init(fb: *chr::fb) *vt = {
 	return term;
 };
 
+const vterm_allocator = vterm::VTermAllocatorFunctions {
+	malloc = &vterm_malloc,
+	_free = &vterm_free,
+};
+
+fn vterm_malloc(n: size, user: nullable *opaque) nullable *opaque = {
+	return rt::malloc(n);
+};
+
+fn vterm_free(p: *opaque, user: nullable *opaque) void = {
+	return rt::free_(p);
+};
+
+const vterm_screen_cb = vterm::VTermScreenCallbacks {
+	damage = &vterm_damage,
+	moverect = &vterm_moverect,
+	movecursor = &vterm_movecursor,
+	...
+};
+
+fn vterm_damage(r: vterm::VTermRect, user: nullable *opaque) int = {
+	const vt = user: *vt;
+	const rows = r.end_row - r.start_row;
+	const cols = r.end_col - r.start_col;
+	vt_damage(vt,
+		r.start_row: uint,
+		r.start_col: uint,
+		rows: uint,
+		cols: uint);
+	return 1;
+};
+
+fn vterm_moverect(
+	dest: vterm::VTermRect,
+	src: vterm::VTermRect,
+	user: nullable *opaque,
+) int = {
+	abort(); // TODO
+};
+
+fn vterm_movecursor(
+	pos: vterm::VTermPos,
+	old: vterm::VTermPos,
+	visible: int,
+	user: nullable *opaque,
+) int = {
+	const vt = user: *vt;
+	// TODO
+	return 1;
+};
+
 const tty_impl = chr::tty_iface {
 	write = &vt_write,
 	getwinsz = &vt_getwinsz,
 };
 
 fn vt_write(tty: *chr::tty, buf: const []u8) (size | error) = {
-	let vt = tty: *vt;
-	if (vt.cursor_shown) {
-		vt_blitcursor(vt);
-	};
+	const vt = tty: *vt;
+	const vterm = vt.vterm;
 
 	for (let i = 0z; i < len(buf); i += 1) {
-		vt_putc(vt, buf[i]: rune);
+		vterm::vterm_input_write(vterm, &buf[i]: *c::char, 1);
+		if (buf[i] == '\n') {
+			vterm::vterm_input_write(vterm, &('\r': u8): *c::char, 1);
+		};
 	};
-
-	vt.cursor = (vt.row: int, vt.col: int);
-	if (vt.cursor_shown) {
-		vt_blitcursor(vt);
-	} else {
-		vt.cursor_shown = true;
-		vt_blitcursor(vt);
-	};
-	vt.next_tick = arch::gettime() + arch::getrate();
 
 	vt_present(vt);
 	return len(buf);
@@ -160,16 +237,10 @@ fn vt_tick(tick: u64, user: nullable *opaque) void = {
 		return;
 	};
 
-	vt.cursor_shown = !vt.cursor_shown;
-	vt_blitcursor(vt);
-	vt_present(vt);
+	//vt.cursor_shown = !vt.cursor_shown;
+	//vt_blitcursor(vt);
+	//vt_present(vt);
 	vt.next_tick = tick + rate;
-};
-
-fn vt_movecursor(vt: *vt, row: int, col: int) void = {
-	vt_blitcursor(vt);
-	vt.cursor = (row, col);
-	vt_blitcursor(vt);
 };
 
 fn vt_blitchar(
@@ -194,38 +265,6 @@ fn vt_blitcursor(vt: *vt) void = {
 		const col = col: uint;
 		vt_blitchar(vt, row, col, '_', COLOR, blit_op::XOR);
 		vt_damage(vt, row, col);
-	};
-};
-
-fn vt_putc(vt: *vt, char: rune) void = {
-	switch (char) {
-	case '\n' =>
-		vt.row += 1;
-		vt.col = 0;
-	case '\r' =>
-		vt.col = 0;
-	case '\t' =>
-		vt.col += 8 - vt.col % 8;
-	case '\b' =>
-		if (vt.col == 0) {
-			return;
-		};
-		vt.col -= 1;
-		vt_blitchar(vt, vt.row, vt.col, ' ');
-		vt_damage(vt, vt.row, vt.col);
-	case =>
-		vt_blitchar(vt, vt.row, vt.col, char);
-		vt_damage(vt, vt.row, vt.col);
-		vt.col += 1;
-	};
-	if (vt.col >= vt.cols) {
-		vt.col = 0;
-		vt.row += 1;
-	};
-	if (vt.row >= vt.rows) {
-		vt.row = vt.rows - 1;
-		scroll(&vt.back, FONT_HEIGHT);
-		vt_damage(vt, 0, 0, vt.rows, vt.cols);
 	};
 };
 
@@ -257,10 +296,39 @@ fn vt_damage(
 };
 
 fn vt_present(vt: *vt) void = {
-	let damage = &vt.damage;
+	const vscreen = vt.vscreen;
+	vterm::vterm_screen_flush_damage(vscreen);
 
+	let damage = &vt.damage;
 	if (damage.rows == 0 || damage.cols == 0) {
 		return;
+	};
+
+	const fb = vt.front.fb: *chr::fb;
+	for (let row = damage.row; row < damage.row + damage.rows; row += 1)
+	for (let col = damage.col; col < damage.col + damage.cols; col += 1) {
+		let cell = vterm::VTermScreenCell { ... };
+		vterm::vterm_screen_get_cell(vscreen, vterm::VTermPos {
+			row = row: int,
+			col = col: int,
+		}, &cell);
+
+		const x = col: uint * FONT_WIDTH;
+		const y = row: uint * FONT_HEIGHT;
+		blitrect(&vt.back, x, y, FONT_WIDTH, FONT_HEIGHT);
+
+		if (cell.chars[0] == 0) {
+			continue;
+		};
+
+		vterm::vterm_screen_convert_color_to_rgb(vscreen, &cell.fg);
+		const fg =
+			0xFF000000 |
+			cell.fg.rgb.red: u32	<< 16 |
+			cell.fg.rgb.green: u32	<< 8 |
+			cell.fg.rgb.blue: u32	<< 0;
+
+		vt_blitchar(vt, row, col, cell.chars[0]: rune, fg);
 	};
 
 	pixbuf_copyrect(&vt.front, &vt.back, &rect {

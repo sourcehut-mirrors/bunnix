@@ -82,3 +82,18 @@ export @symbol("strcpy") fn strcpy(
 	d[..slen] = s[..slen];
 	return dest;
 };
+
+export @symbol("strncpy") fn strncpy(
+	dst: *c::char,
+	src: const *c::char,
+	dsize: size,
+) *c::char = {
+	let slen = c::strlen(src);
+	if (slen < dsize) {
+		slen = dsize;
+	};
+	const d = dst: *[*]u8;
+	const s = src: *[*]u8;
+	d[..slen] = s[..slen];
+	return dst;
+};
