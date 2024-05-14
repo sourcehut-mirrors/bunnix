@@ -752,15 +752,24 @@ dowrite(const char *fname, int trunc)
 	size_t bytecount = 0;
 	int i, r, line;
 	FILE *aux;
+	static int sh;
 	static FILE *fp;
 
 	if (fp) {
-		fclose(fp);
+		sh ? pclose(fp) : fclose(fp);
 		fp = NULL;
 	}
 
-	if ((fp = fopen(fname, "w")) == NULL)
-		error("cannot open input file");
+	if(fname[0] == '!') {
+		sh = 1;
+		fname++;
+		if((fp = popen(fname, "w")) == NULL)
+			error("bad exec");
+	} else {
+		sh = 0;
+		if ((fp = fopen(fname, "w")) == NULL)
+			error("cannot open input file");
+	}
 
 	line = curln;
 	for (i = line1; i <= line2; ++i) {
@@ -775,7 +784,7 @@ dowrite(const char *fname, int trunc)
 
 	aux = fp;
 	fp = NULL;
-	r = fclose(aux);
+	r = sh ? pclose(aux) : fclose(aux);
 	if (r)
 		error("input/output error");
 	strcpy(savfname, fname);
@@ -1044,6 +1053,52 @@ copy(int where)
 }
 
 static void
+execsh(void)
+{
+	static String cmd;
+	char *p;
+	int c, repl = 0;
+
+	skipblank();
+	if ((c = input()) != '!') {
+		back(c);
+		string(&cmd);
+	} else if (cmd.siz) {
+		--cmd.siz;
+		repl = 1;
+	} else {
+		error("no previous command");
+	}
+
+	while ((c = input()) != '\0') {
+		switch (c) {
+		case '%':
+			if (savfname[0] == '\0')
+				error("no current filename");
+			repl = 1;
+			for (p = savfname; *p; ++p)
+				addchar(*p, &cmd);
+			break;
+		case '\\':
+			c = input();
+			if (c != '%') {
+				back(c);
+				c = '\\';
+			}
+		default:
+			addchar(c, &cmd);
+		}
+	}
+	addchar('\0', &cmd);
+
+	if (repl)
+		puts(cmd.str);
+	system(cmd.str);
+	if (optdiag)
+		puts("!");
+}
+
+static void
 getrhs(int delim)
 {
 	int c;
@@ -1209,6 +1264,9 @@ repeat:
 		setinput(ocmdline);
 		getlst();
 		goto repeat;
+	case '!':
+		execsh();
+		break;
 	case '\0':
 		num = gflag ? curln : curln+1;
 		deflines(num, num);
