@@ -17,6 +17,12 @@ EOF
 
 info "Booting Bunnix userspace"
 
+if [ -e /etc/hostname ]
+then
+	info "Set system hostname"
+	hostname $(cat /etc/hostname)
+fi
+
 info "Mounting filesystems"
 while read dev mnt fstype
 do
