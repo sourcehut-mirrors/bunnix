@@ -67,4 +67,6 @@ export fn init() void = {
 	if (fbcons.vtable != null) {
 		vt::tty_init(&fbcons);
 	};
+
+	cmos_init();
 };
