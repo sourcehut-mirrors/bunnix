@@ -33,4 +33,6 @@ export type sys = enum u64 {
 	SETCREDS,
 	SETGROUPS,
 	MOUNT,
+	UNAME,
+	SETHOSTNAME,
 };

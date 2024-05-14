@@ -53,3 +53,64 @@ export fn cpucount() (size | errors::error) = {
 	return 1; // TODO Bunnix
 };
 
+let uts: rt::utsname = rt::utsname { ... };
+let uts_valid: bool = false;
+
+// Returns the host kernel name
+export fn sysname() const str = {
+	if (!uts_valid) {
+		rt::uname(&uts) as void;
+		uts_valid = true;
+	};
+	return c::tostr(&uts.sysname: *const c::char)!;
+};
+
+// Returns the host system hostname
+export fn hostname() const str = {
+	if (!uts_valid) {
+		rt::uname(&uts) as void;
+		uts_valid = true;
+	};
+	return c::tostr(&uts.nodename: *const c::char)!;
+};
+
+// Returns the host kernel version
+export fn release() const str = {
+	if (!uts_valid) {
+		rt::uname(&uts) as void;
+		uts_valid = true;
+	};
+	return c::tostr(&uts.release: *const c::char)!;
+};
+
+// Returns the host operating system version
+export fn version() const str = {
+	if (!uts_valid) {
+		rt::uname(&uts) as void;
+		uts_valid = true;
+	};
+	return c::tostr(&uts.version: *const c::char)!;
+};
+
+// Returns the host CPU architecture, in a platform-specific format. See
+// [[architecture]] for a more portable wrapper.
+export fn machine() const str = {
+	if (!uts_valid) {
+		rt::uname(&uts) as void;
+		uts_valid = true;
+	};
+	return c::tostr(&uts.machine: *const c::char)!;
+};
+
+// Returns the host CPU architecture.
+export fn architecture() arch = {
+	switch (machine()) {
+	case "aarch64" =>
+		return arch::AARCH64;
+	case "riscv64" =>
+		return arch::RISCV64;
+	case "x86_64" =>
+		return arch::X86_64;
+	case => abort(); // unreachable
+	};
+};

@@ -303,3 +303,7 @@ export fn setgroups(gids: []gid_t) (void | errno) = {
 export fn mount(opts: *mount_options) (void | errno) = {
 	syswrap(syscall(sys::MOUNT, opts))?;
 };
+
+export fn uname(uts: *utsname) (void | errno) = {
+	syswrap(syscall(sys::UNAME, uts: uintptr: u64))?;
+};

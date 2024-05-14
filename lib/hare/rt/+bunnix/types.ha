@@ -203,3 +203,11 @@ export type mount_options = struct {
 	readonly: bool,
 	misc: []str,
 };
+
+export type utsname = struct {
+	sysname: [65]u8,
+	nodename: [65]u8,
+	release: [65]u8,
+	version: [65]u8,
+	machine: [65]u8,
+};
