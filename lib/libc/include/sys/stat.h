@@ -120,6 +120,13 @@ int mkdirat(int, const char *, mode_t);
 int mkfifoat(int, const char *, mode_t);
 
 #if defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
+struct __mknodat_options {
+	int dirfd;
+	__string_t path;
+	mode_t mode;
+	dev_t dev;
+};
+
 int mknod(const char *, mode_t, dev_t);
 int mknodat(int, const char *, mode_t, dev_t);
 #endif

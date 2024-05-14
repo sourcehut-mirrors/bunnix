@@ -36,6 +36,7 @@
 #define __NR_uname		32
 #define __NR_sethostname	33
 #define __NR_chrootat		34
+#define __NR_mknodat		35
 
 #endif
 #define SYS_readv		0
@@ -73,3 +74,4 @@
 #define SYS_uname		32
 #define SYS_sethostname	33
 #define SYS_chrootat		34
+#define SYS_mknodat		35
