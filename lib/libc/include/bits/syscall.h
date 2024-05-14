@@ -33,6 +33,8 @@
 #define __NR_setgroups		29
 #define __NR_mount		30
 #define __NR_faccessat		31
+#define __NR_uname		32
+#define __NR_sethostname	33
 
 #endif
 #define SYS_readv		0
@@ -67,3 +69,5 @@
 #define SYS_setgroups		29
 #define SYS_mount		30
 #define SYS_faccessat		31
+#define SYS_uname		32
+#define SYS_sethostname	33
