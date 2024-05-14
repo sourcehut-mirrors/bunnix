@@ -138,7 +138,9 @@ fn sys_getcreds(out: *creds) (u64 | error) = {
 	if (len(groups) > len(out.groups)) {
 		groups = groups[..len(out.groups)];
 	};
-	out.groups[..] = groups[..];
+	if (len(groups) != 0) {
+		out.groups[..] = groups[..];
+	};
 
 	return 0u64;
 };
