@@ -36,4 +36,5 @@ export type sys = enum u64 {
 	UNAME,
 	SETHOSTNAME,
 	CHROOTAT,
+	MKNODAT,
 };
