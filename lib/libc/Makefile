@@ -56,6 +56,7 @@ src/%.o: src/%.S
 	@$(CC) $(CFLAGS) -c -o $@ $<
 
 DIRS=\
+     conf \
      crypt \
      ctype \
      dirent \
