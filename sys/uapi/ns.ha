@@ -1,8 +1,9 @@
 use dev::block;
 use errors::{errno, error};
-use io;
 use fs;
+use io;
 use proc;
+use strings;
 
 fn sys_mount(opts: *mount_options) (u64 | error) = {
 	validate_user_addr(opts, size(mount_options))?;
@@ -43,6 +44,31 @@ fn sys_mount(opts: *mount_options) (u64 | error) = {
 
 	const fs = fs::fs_open(&fsopts)?;
 	fs::mount_fs(cur.root, fs, opts.mountpoint)?;
+
+	return 0u64;
+};
+
+fn sys_chrootat(dirfd: i64, path: *str, flags: int) (u64 | error) = {
+	validate_user_addr(path, size(str))?;
+	validate_user_string(*path)?;
+
+	const (targ, _) = atwalk(dirfd: int, *path)?;
+	if (!io::isdir(targ.mode)) {
+		io::inode_unref(targ);
+		return errno::NOTDIR: error;
+	};
+
+	// Note: Bunnix sets the cwd to / when doing chroot, which differs from
+	// most Unicies but is less dumb
+	let cur = proc::current();
+	io::inode_unref(cur.root);
+	io::inode_unref(cur.cwd);
+	io::inode_ref(targ); // ref both root and cwd
+
+	cur.root = targ;
+	cur.cwd = targ;
+	free(cur.cwd_str);
+	cur.cwd_str = strings::dup("/");
 
 	return 0u64;
 };
