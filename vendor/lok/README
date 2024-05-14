@@ -1,0 +1,18 @@
+ _       _    
+| | ___ | | __
+| |/ _ \| |/ /
+| | (_) |   < 
+|_|\___/|_|\_\
+              
+Overview
+========
+
+lok is a Linux (https://www.kernel.org/) port of OpenBSD's
+(http://www.openbsd.org/) awk.
+
+Legal Information
+=================
+
+lok is licensed under the same license as the upstream code it is based on.
+
+The ASCII art logo at the top was made using FIGlet (http://www.figlet.org/).
