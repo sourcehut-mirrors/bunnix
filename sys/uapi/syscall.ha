@@ -61,6 +61,8 @@ export type sys = enum u64 {
 	SETGROUPS,
 	MOUNT,
 	FACCESSAT,
+	UNAME,
+	SETHOSTNAME,
 };
 
 export type syscall_handler = fn(u64, u64, u64, u64, u64) (u64 | error);
@@ -98,6 +100,8 @@ let systab: [_]*opaque = [
 	&sys_setgroups,
 	&sys_mount,
 	&sys_faccessat,
+	&sys_uname,
+	&sys_sethostname,
 ];
 
 const sysname = [
@@ -133,4 +137,6 @@ const sysname = [
 	"setgroups",
 	"mount",
 	"faccessat",
+	"uname",
+	"sethostname,"
 ];

@@ -1,3 +1,5 @@
+use types::c;
+
 export type vector = struct {
 	base: *opaque,
 	count: size,
@@ -177,4 +179,12 @@ export type faccessat_options = struct {
 	dirfd: int,
 	path: str,
 	flags: int,
+};
+
+export type utsname = struct {
+	sysname: [65]c::char,
+	nodename: [65]c::char,
+	release: [65]c::char,
+	version: [65]c::char,
+	machine: [65]c::char,
 };
