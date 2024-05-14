@@ -73,6 +73,7 @@ DIRS=\
      mman \
      multibyte \
      passwd \
+     prng \
      process \
      regex \
      setjmp \

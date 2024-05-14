@@ -143,7 +143,7 @@ SBASE_PROGS=\
 install-bin: $(SBASE_PROGS)
 
 define sbase_prog
-$1: $(SBASE_SOURCES)
+$1: $(SBASE_SOURCES) $(SYSROOT)/usr/lib/libc.a
 	make -C $(SBASE) $(shell basename $1) CC=$(CC)
 
 all: $1
