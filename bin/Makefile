@@ -144,13 +144,21 @@ SBASE_PROGS=\
 
 install-bin: $(SBASE_PROGS)
 
+SBASE_MAKEVARS=CC=$(CC) AR=$(AR) RANTOOL=$(RANTOOL)
+
+$(SBASE)/libutf.a: $(SBASE_SOURCES)
+	make -C $(SBASE) libutf.a $(SBASE_MAKEVARS)
+
+$(SBASE)/libutil.a: $(SBASE_SOURCES)
+	make -C $(SBASE) libutil.a $(SBASE_MAKEVARS)
+
+SBASE_LIBS=$(SBASE)/libutf.a $(SBASE)/libutil.a
+
 define sbase_prog
-$1: $(SBASE_SOURCES) $(SYSROOT)/usr/lib/libc.a
-	make -C $(SBASE) $(shell basename $1) CC=$(CC)
+$1: $(SBASE_SOURCES) $(SBASE_LIBS) $(SYSROOT)/usr/lib/libc.a
+	make -C $(SBASE) $(shell basename $1) $(SBASE_MAKEVARS)
 
 all: $1
-
-.PHONY: $1
 endef
 
 $(foreach prog,$(SBASE_PROGS),$(eval $(call sbase_prog,$(prog))))
