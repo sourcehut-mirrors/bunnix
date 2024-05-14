@@ -64,6 +64,7 @@ export type sys = enum u64 {
 	UNAME,
 	SETHOSTNAME,
 	CHROOTAT,
+	MKNODAT,
 };
 
 export type syscall_handler = fn(u64, u64, u64, u64, u64) (u64 | error);
@@ -104,6 +105,7 @@ let systab: [_]*opaque = [
 	&sys_uname,
 	&sys_sethostname,
 	&sys_chrootat,
+	&sys_mknodat,
 ];
 
 const sysname = [
@@ -142,4 +144,5 @@ const sysname = [
 	"uname",
 	"sethostname,"
 	"chrootat",
+	"mknodat",
 ];

@@ -358,7 +358,20 @@ fn sys_dup2(oldfd: i64, newfd: i64, flags: i64) (u64 | error) = {
 };
 
 fn sys_faccessat(opts: *faccessat_options) (u64 | error) = {
+	validate_user_addr(opts, size(faccessat_options))?;
+	validate_user_string(opts.path)?;
+
 	let (inode, _) = atwalk(opts.dirfd, opts.path)?;
 	io::inode_unref(inode);
+	return 0u64;
+};
+
+fn sys_mknodat(opts: *mknodat_options) (u64 | error) = {
+	validate_user_addr(opts, size(mknodat_options))?;
+	validate_user_string(opts.path)?;
+
+	let (parent, name) = atwalk(opts.dirfd, opts.path, fs::walkflag::PARENT)?;
+	io::inode_mknod(parent, name, opts.mode: io::mode, opts.dev)?;
+
 	return 0u64;
 };

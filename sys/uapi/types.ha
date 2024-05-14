@@ -188,3 +188,10 @@ export type utsname = struct {
 	version: [65]c::char,
 	machine: [65]c::char,
 };
+
+export type mknodat_options = struct {
+	dirfd: int,
+	path: str,
+	mode: uint,
+	dev: u64,
+};
