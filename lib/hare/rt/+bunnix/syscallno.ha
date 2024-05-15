@@ -38,4 +38,5 @@ export type sys = enum u64 {
 	CHROOTAT,
 	MKNODAT,
 	BRK,
+	UTIMENSAT,
 };
