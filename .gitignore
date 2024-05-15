@@ -13,14 +13,9 @@ config.mk
 
 # Binaries in /bin
 # TODO: Can I be made more general please
-/bin/cat/cat
-/bin/echo/echo
-/bin/env/env
-/bin/init/init
-/bin/mount/mount
-/bin/getty/getty
-/bin/scancodes/scancodes
-/bin/test-c/test-c
+/sbin/init/init
+/sbin/mount/mount
+/sbin/getty/getty
 /vendor/dash/src/sh
 /vendor/lok/awk
 /bin/awk

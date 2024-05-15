@@ -1,5 +1,5 @@
 #!/bin/sh
-export PATH=/bin:/usr/bin:/sbin:/usr/sbin
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 info() {
         echo $*
 }

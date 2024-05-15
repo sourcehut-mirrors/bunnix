@@ -51,7 +51,7 @@ export fn main(ctx: *boot::context) void = {
 		fstype = "ext4",
 		...
 	};
-	let init = "/bin/init";
+	let init = "/sbin/init";
 	for (let i = 0z; i < len(args); i += 1) {
 		const (key, val) = strings::cut(args[i], "=");
 		switch (key) {
@@ -97,7 +97,7 @@ export fn main(ctx: *boot::context) void = {
 	// Populate /dev
 	mountdev(root);
 
-	// Start /bin/init
+	// Start /sbin/init
 	log::kprintfln(KERN, "entering userspace: exec {}", init);
 	const proc = proc::new_proc(root, root, "/", null)!;
 	const (inode, _) = fs::walk(root, init)!;
