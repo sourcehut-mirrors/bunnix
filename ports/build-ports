@@ -1,0 +1,28 @@
+#!/bin/sh
+mode=$1
+sysroot=$2
+
+build_gzip() (
+	mkdir build-gzip
+	cd build-gzip
+	../gzip/configure --host=x86_64-bunnix --prefix=/usr
+	make
+)
+
+install_gzip() {
+	cd build-gzip
+	make install DESTDIR="$sysroot"
+}
+
+case $mode in
+	build)
+		build_gzip
+		;;
+	install)
+		install_gzip
+		;;
+	*)
+		echo "Usage: build-ports <build|install>"
+		exit 1
+		;;
+esac

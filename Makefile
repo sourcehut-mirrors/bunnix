@@ -54,7 +54,18 @@ $(SYSROOT)/etc: $(ETC_FILES)
 	cp $(ETC_FILES) $(SYSROOT)/etc
 	chmod 600 $(SYSROOT)/etc/shadow
 
-$(SYSROOT): $(SYSROOT)/bin $(SYSROOT)/sbin $(SYSROOT)/etc
+ifeq ($(BUILD_PORTS), 1)
+
+include ports/ports.mk
+
+else
+
+$(SYSROOT)/usr/bin:
+	@true
+
+endif
+
+$(SYSROOT): $(SYSROOT)/bin $(SYSROOT)/sbin $(SYSROOT)/etc $(SYSROOT)/usr/bin
 	mkdir -p $(SYSROOT)
 	for d in \
 		boot \
