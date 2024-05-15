@@ -5,9 +5,13 @@ use io;
 def STATIC_CONSOLES: size = 64;
 let static_consoles: [STATIC_CONSOLES]*io::file = [null: *io::file...];
 
+def STATIC_LOG: size = 8192;
+let static_log: [STATIC_LOG]u8 = [0...];
+
 export type console = struct {
 	chardev,
 	out: []*io::file,
+	log: []u8,
 };
 
 const console_impl = chardev_iface {
@@ -19,6 +23,7 @@ let cons = console {
 	major = dev::TTY_ALT_MAJOR,
 	minor = dev::CONS_MINOR,
 	out = [],
+	log = [],
 };
 
 @init fn init() void = {
@@ -29,6 +34,9 @@ let cons = console {
 export fn cons_register(out: *io::file) void = {
 	if (&(cons.out: *[*]*io::file)[0] != &static_consoles[0]) {
 		cons.out = static_consoles[..0];
+	};
+	if (len(cons.log) == 0) {
+		cons.log = static_log[..0];
 	};
 
 	if (len(cons.out) >= STATIC_CONSOLES) {
@@ -53,6 +61,18 @@ export fn cons_write(buf: const []u8) void = {
 	for (let out .. cons.out) {
 		io::writeall(out, buf)!;
 	};
+
+	// TODO: This could/should be a proper ring buffer but I can't be arsed
+	if (len(cons.log) + len(buf) >= STATIC_LOG) {
+		const diff = STATIC_LOG - (len(cons.log) + len(buf));
+		static delete(cons.log[..diff]);
+	};
+	static append(cons.log, buf...);
+};
+
+// Returns the contents of the kernel log buffer.
+export fn console_log() []u8 = {
+	return cons.log;
 };
 
 fn cons_open(cdev: *chardev) (*io::file | error) = {
