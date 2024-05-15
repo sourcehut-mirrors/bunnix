@@ -3,6 +3,7 @@ use fs;
 use io;
 use proc;
 use strings;
+use time;
 
 fn validate_fd(fd: i64) (*proc::filedesc | error) = {
 	return proc::getfd(proc::current(), fd: int)?;
@@ -259,9 +260,18 @@ fn populate_stat(statbuf: *st, ino: *io::inode) void = {
 		sz = ino.bytes,
 		blksz = 512,			// TODO
 		blocks = ino.blocks,
-		atime = timespec { ... },	// TODO
-		mtime = timespec { ... },	// TODO
-		ctime = timespec { ... },	// TODO
+		atime = time::timespec {
+			tv_sec = ino.atime.tv_sec,
+			tv_nsec = ino.atime.tv_nsec,
+		},
+		mtime = time::timespec {
+			tv_sec = ino.mtime.tv_sec,
+			tv_nsec = ino.mtime.tv_nsec,
+		},
+		ctime = time::timespec {
+			tv_sec = ino.ctime.tv_sec,
+			tv_nsec = ino.ctime.tv_nsec,
+		},
 	};
 };
 

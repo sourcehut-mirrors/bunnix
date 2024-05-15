@@ -46,6 +46,7 @@ fn file_write(fd: *io::file, buf: const []u8) (size | error) = {
 		append(inode.data, buf[bufend..]...);
 		fd.pos += len(buf[bufend..]);
 	};
+	fs::put_time(&inode.mtime);
 	return len(buf);
 };
 

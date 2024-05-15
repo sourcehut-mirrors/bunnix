@@ -51,3 +51,8 @@ export type instant = struct {
 
 // Represents a unique interval of time between two [[instant]]s.
 export type interval = (instant, instant);
+
+export type timespec = struct {
+	tv_sec: i64,
+	tv_nsec: i64,
+};

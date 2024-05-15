@@ -66,6 +66,10 @@ fn mkinode(
 		ino.nlink = 2;
 	};
 
+	fs::put_time(&ino.ctime);
+	fs::put_time(&ino.mtime);
+	fs::put_time(&ino.atime);
+
 	return ino;
 };
 
@@ -97,6 +101,8 @@ fn inode_trunc(ino: *io::inode, length: size) (void | error) = {
 	} else {
 		append(ino.data, [0...], length - len(ino.data));
 	};
+	fs::put_time(&ino.ctime);
+	fs::put_time(&ino.mtime);
 };
 
 fn inode_mkchild(ino: *io::inode, name: str, mode: io::mode) (*io::inode | error) = {
@@ -116,6 +122,9 @@ fn inode_mkchild(ino: *io::inode, name: str, mode: io::mode) (*io::inode | error
 	const i = sort::lbisect(parent.entries, size(dirent), &dent, &dent_cmp);
 	insert(parent.entries[i], dent);
 	child.nlink += 1;
+
+	fs::put_time(&parent.ctime);
+	fs::put_time(&parent.mtime);
 
 	return child;
 };
@@ -177,6 +186,9 @@ fn inode_link(
 	insert(parent.entries[i], dent);
 
 	child.nlink += 1;
+
+	fs::put_time(&parent.ctime);
+	fs::put_time(&parent.mtime);
 };
 
 fn inode_unlink(
@@ -197,4 +209,7 @@ fn inode_unlink(
 	case void =>
 		return errno::NOENT;
 	};
+
+	fs::put_time(&parent.ctime);
+	fs::put_time(&parent.mtime);
 };

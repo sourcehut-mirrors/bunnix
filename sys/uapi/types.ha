@@ -1,4 +1,5 @@
 use types::c;
+use time;
 
 export type vector = struct {
 	base: *opaque,
@@ -121,9 +122,9 @@ export type st = struct {
 	sz: u64,
 	blksz: u64,
 	blocks: u64,
-	atime: timespec,
-	mtime: timespec,
-	ctime: timespec,
+	atime: time::timespec,
+	mtime: time::timespec,
+	ctime: time::timespec,
 };
 
 export type fstatat_options = struct {
@@ -131,11 +132,6 @@ export type fstatat_options = struct {
 	path: str,
 	stat: *st,
 	flags: int,
-};
-
-export type timespec = struct {
-	tv_sec: i64,
-	tv_nsec: i64,
 };
 
 export type creds = struct {

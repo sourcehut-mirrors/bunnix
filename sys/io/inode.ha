@@ -1,5 +1,10 @@
 use errors::{error, errno};
 
+export type timespec = struct {
+	tv_sec: i64,
+	tv_nsec: i64,
+};
+
 // Generic inode data structure, generally embedded in a filesystem-specific
 // structure.
 export type inode = struct {
@@ -20,7 +25,10 @@ export type inode = struct {
 	gid: uint,
 	blocks: size,
 	bytes: size,
-	// TODO: Add times
+
+	atime: timespec,
+	mtime: timespec,
+	ctime: timespec,
 };
 
 // Opens an inode file.

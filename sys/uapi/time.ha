@@ -3,8 +3,8 @@ use errors::{error, errno};
 use sched;
 use time;
 
-fn sys_gettime(clock: u64, tp: *timespec) (u64 | error) = {
-	validate_user_addr(tp, size(timespec))?;
+fn sys_gettime(clock: u64, tp: *time::timespec) (u64 | error) = {
+	validate_user_addr(tp, size(time::timespec))?;
 
 	let clock = clock: time::clock;
 	if (clock > time::clock::MAX) {
@@ -18,8 +18,8 @@ fn sys_gettime(clock: u64, tp: *timespec) (u64 | error) = {
 	return 0u64;
 };
 
-fn sys_nanosleep(req: *timespec) (u64 | error) = {
-	validate_user_addr(req, size(timespec))?;
+fn sys_nanosleep(req: *time::timespec) (u64 | error) = {
+	validate_user_addr(req, size(time::timespec))?;
 
 	const rate = arch::getrate();
 	const now = arch::gettime();
