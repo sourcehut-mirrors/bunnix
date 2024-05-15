@@ -32,3 +32,8 @@ fn sys_mprotect(addr: *opaque, length: size, prot: int) (u64 | error) = {
 	mman::mprotect(vmm, addr: uintptr, length, prot: mman::prot)?;
 	return 0u64;
 };
+
+fn sys_brk(addr: uintptr) (u64 | error) = {
+	const cur = proc::current();
+	return mman::brk(&cur.vmm, addr)?: u64;
+};

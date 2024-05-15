@@ -54,6 +54,15 @@ export fn mmap_phys(vmm: *vmm, vaddr: uintptr) uintptr = {
 	return *pte: uintptr & PADDR_MASK;
 };
 
+// Change the address of program break.
+export fn brk(vmm: *vmm, brk: uintptr) (uintptr | error) = {
+	if (brk == 0) {
+		return vmm.brk;
+	};
+	// TODO: Change brk location
+	return errno::NOMEM;
+};
+
 // Maps physical pages into a virtual address space.
 export fn mmap(
 	vmm: *vmm,

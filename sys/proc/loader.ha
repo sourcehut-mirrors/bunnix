@@ -25,6 +25,7 @@ export fn load(vmm: *mman::vmm, image: *io::file) (uintptr | error) = {
 		return errno::NOEXEC;
 	};
 
+	let brk = 0: uintptr;
 	for (let i = 0u16; i < hdr.e_phnum; i += 1) {
 		const offs = hdr.e_phoff + i * hdr.e_phentsize;
 		io::seek(image, offs: i64, io::whence::SET)?;
@@ -36,8 +37,14 @@ export fn load(vmm: *mman::vmm, image: *io::file) (uintptr | error) = {
 			continue;
 		};
 
-		phdr_load(vmm, image, phdr)?;
+		phdr_load(vmm, image, phdr, &brk)?;
 	};
+
+	if (brk % arch::PAGESIZE != 0) {
+		brk += arch::PAGESIZE - brk % arch::PAGESIZE;
+	};
+
+	vmm.brk = brk;
 
 	return hdr.e_entry: uintptr;
 };
@@ -46,6 +53,7 @@ fn phdr_load(
 	vmm: *mman::vmm,
 	image: *io::file,
 	phdr: *elf::phdr64,
+	brk: *uintptr,
 ) (void | error) = {
 	// TODO: some more validation
 	// - Is vaddr in the lower half?
@@ -79,5 +87,10 @@ fn phdr_load(
 	if (phdr.p_flags & elf::pf::W == 0) {
 		prot &= ~mman::prot::WRITE;
 		mman::mprotect(vmm, p_vaddr: uintptr, p_memsz, prot)!;
+	};
+
+	const max = (p_vaddr + p_memsz): uintptr;
+	if (max > *brk) {
+		*brk = max;
 	};
 };
