@@ -38,6 +38,23 @@ export fn cons_register(out: *io::file) void = {
 	static append(cons.out, out);
 };
 
+// Removes a console file from the list of kernel consoles.
+export fn cons_unregister(out: *io::file) void = {
+	for (let i = 0z; i < len(cons.out); i += 1) {
+		if (cons.out[i] == out) {
+			static delete(cons.out[i]);
+			break;
+		};
+	};
+};
+
+// Writes data to the kernel console.
+export fn cons_write(buf: const []u8) void = {
+	for (let out .. cons.out) {
+		io::writeall(out, buf)!;
+	};
+};
+
 fn cons_open(cdev: *chardev) (*io::file | error) = {
 	return alloc(io::file {
 		vtable = &console_file_impl,
@@ -45,20 +62,23 @@ fn cons_open(cdev: *chardev) (*io::file | error) = {
 	});
 };
 
-let console_file_impl = io::vtable {
-	write = &cons_write,
-	finish = &cons_finish,
+// A "file" for writing to the kernel console.
+export const console_file = io::file {
+	vtable = &console_file_impl,
 	...
 };
 
-fn cons_write(file: *io::file, buf: const []u8) (size | error) = {
-	const file = file: *console;
-	for (let out .. cons.out) {
-		io::writeall(out, buf)!;
-	};
+const console_file_impl = io::vtable {
+	write = &cons_file_write,
+	finish = &cons_file_finish,
+	...
+};
+
+fn cons_file_write(file: *io::file, buf: const []u8) (size | error) = {
+	cons_write(buf);
 	return len(buf);
 };
 
-fn cons_finish(file: *io::file) void = {
+fn cons_file_finish(file: *io::file) void = {
 	free(file);
 };

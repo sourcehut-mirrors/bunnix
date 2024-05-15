@@ -1,16 +1,16 @@
-let writer: nullable *fn(buf: []u8) size = null;
+let writer: nullable *fn(buf: const []u8) void = null;
 
 // Sets the console for printing abort details.
-export fn abortcons(obj: *fn(buf: []u8) size) void = {
+export fn abortcons(obj: *fn(buf: const []u8) void) void = {
 	writer = obj;
 };
 
-fn abort_writestr(s: str) size = {
+fn abort_writestr(s: str) void = {
 	let buf = *(&s: *[]u8);
 	const writer = match (writer) {
 	case null =>
 		halt();
-	case let func: *fn(buf: []u8) size =>
+	case let func: *fn(buf: const []u8) void =>
 		yield func;
 	};
 	return writer(buf);
@@ -24,7 +24,7 @@ fn target_abort(
 ) never = {
 	const writer = match (writer) {
 	case null => halt();
-	case let wr: *fn(buf: []u8) size =>
+	case let wr: *fn(buf: const []u8) void =>
 		yield wr;
 	};
 

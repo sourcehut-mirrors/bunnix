@@ -1,6 +1,7 @@
 use arch;
 use boot;
 use dev;
+use dev::chr;
 use io;
 use log;
 use rt;
@@ -41,16 +42,7 @@ export fn earlyinit(ctx: *boot::context) void = {
 		static append(consoles, &vgacons);
 	};
 
-	static let cons = io::teefile {
-		vtable = null: *io::vtable,
-		primary = null: *io::file,
-		secondary = null: *io::file,
-		...
-	};
-	cons = io::tee(consoles[0], consoles[1]);
-
-	log::setcons(&cons);
-	rt::abortcons(&log::write);
+	rt::abortcons(&chr::cons_write);
 };
 
 // Initialize architecture-specific devices.
