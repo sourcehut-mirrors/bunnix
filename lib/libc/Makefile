@@ -68,6 +68,7 @@ DIRS=\
      legacy \
      locale \
      malloc \
+     malloc/mallocng \
      math \
      misc \
      mman \
