@@ -1,6 +1,6 @@
 use arch;
 use arch::x86_64;
-use log;
+use time;
 
 let boot_tsc: u64 = 0;
 
@@ -61,8 +61,7 @@ fn cmos_init() void = {
 		time.min,
 		time.sec,
 	);
-	log::println(x86_64, "CMOS: current Unix time is", unix);
-	// TODO: Hand that over to time:: or whatever
+	time::set_basis(unix, boot_tsc);
 };
 
 fn cmos_read(reg: u8) u8 = {

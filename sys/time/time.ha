@@ -1,14 +1,6 @@
-// License: MPL-2.0
-// (c) 2021 Drew DeVault <sir@cmpwn.com>
-// (c) 2021 Ember Sawady <ecs@d2evs.net>
-// (c) 2021 Mykyta Holubakha <hilobakho@gmail.com>
 use arch;
 
-// Reads the current TSC value.
-export fn rdtsc() u64;
-
 // An enumeration of clocks available on this system.
-// TODO: Implement more clocks
 export type clock = enum {
 	// The current wall-clock time. This may jump forwards or backwards in
 	// time to account for leap seconds, NTP adjustments, etc.
@@ -18,24 +10,46 @@ export type clock = enum {
 	// changes to the system time: it always increases by one second per
 	// second.
 	MONOTONIC = 1,
+
+	MAX = MONOTONIC,
+};
+
+let bootunix: u64 = 0;
+let bootticks: u64 = 0;
+
+// Sets the Unix time at boot.
+export fn set_basis(unix: u64, ticks: u64) void = {
+	bootunix = unix;
+	bootticks = ticks;
 };
 
 // Returns the current time for a given clock.
 export fn now(clock: clock) instant = {
-	assert(clock == clock::MONOTONIC);
+	let now = arch::gettime();
+	const rate = arch::getrate();
 
-	const now = rdtsc();
-	const sec = now / arch::tsc_rate;
-	const remain = now % arch::tsc_rate;
-	const nsec = 10e11 / arch::tsc_rate * remain / 10e2;
+	let sec = 0u64;
+	let remain = 0u64;
+	switch (clock) {
+	case clock::REALTIME =>
+		now -= bootticks;
+		sec = now / rate;
+		remain = now % rate;
+		sec += bootunix;
+	case clock::MONOTONIC =>
+		sec = now / rate;
+		remain = now % rate;
+	};
+
+	const nsec = 10e11 / rate * remain / 10e2;
 	return instant {
 		sec = sec: i64,
 		nsec = nsec: i64,
 	};
 };
 
-// Returns after the requested duration.
-// TODO: This is obsolete, see sched::sleep
+// Blocks and returns after the given duration. For the preemptable version, see
+// sched::sleep.
 export fn sleep(d: duration) void = {
 	const deadline = add(now(clock::MONOTONIC), d);
 	for (true) {
@@ -43,5 +57,6 @@ export fn sleep(d: duration) void = {
 		if (compare(now, deadline) == 1) {
 			break;
 		};
+		arch::pause();
 	};
 };

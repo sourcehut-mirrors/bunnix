@@ -1,10 +1,21 @@
 use arch;
 use errors::{error, errno};
 use sched;
+use time;
 
 fn sys_gettime(clock: u64, tp: *timespec) (u64 | error) = {
 	validate_user_addr(tp, size(timespec))?;
-	return 0u64; // TODO
+
+	let clock = clock: time::clock;
+	if (clock > time::clock::MAX) {
+		return errno::INVAL: error;
+	};
+
+	const now = time::now(clock);
+	tp.tv_sec = now.sec;
+	tp.tv_nsec = now.nsec;
+
+	return 0u64;
 };
 
 fn sys_nanosleep(req: *timespec) (u64 | error) = {
