@@ -105,14 +105,29 @@ fn ext4_inode_create(
 
 fn ext4_inode_trunc(ino: *io::inode, length: size) (void | error) = {
 	const ino = ino: *inode;
+	const sb = ino.sb: *superblock;
+	let fs = &sb.mp.fs;
 	if (length > ino.bytes) {
-		abort(); // TODO: shim this, lwext4 does not support it
+		lwext4::inode_set_size(ino.ref.inode as *lwext4::inode, length);
+
+		// Commit change to disk
+		ino.ref.dirty = false;
+		let r = lwext4::fs_put_inode_ref(&ino.ref);
+		if (r != errno::NONE) {
+			return r;
+		};
+
+		// Refresh inode reference
+		lwext4::fs_get_inode_ref(fs, ino.ino, &ino.ref);
+		ino.bytes = length;
+		return;
 	};
 
 	let r = lwext4::fs_truncate_inode(&ino.ref, length);
 	if (r != errno::NONE) {
 		return r;
 	};
+	ino.bytes = length;
 };
 
 fn ext4_inode_link(
