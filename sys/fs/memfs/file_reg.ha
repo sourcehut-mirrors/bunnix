@@ -17,7 +17,7 @@ const file_impl_reg = io::vtable {
 fn file_read(fd: *io::file, buf: []u8) (size | io::EOF | error) = {
 	let fd = fd: *file;
 	let inode = fd.inode: *inode;
-	if (len(inode.data) == fd.pos) {
+	if (fd.pos >= len(inode.data)) {
 		return io::EOF;
 	};
 	const n = if (len(inode.data) - fd.pos < len(buf)) {
@@ -34,6 +34,10 @@ fn file_read(fd: *io::file, buf: []u8) (size | io::EOF | error) = {
 fn file_write(fd: *io::file, buf: const []u8) (size | error) = {
 	let fd = fd: *file;
 	let inode = fd.inode: *inode;
+	if (fd.pos >= len(inode.data)) {
+		inode_trunc(inode, fd.pos)?;
+	};
+
 	let spare = len(inode.data) - fd.pos;
 	let bufend = if (spare < len(buf)) spare else len(buf);
 	inode.data[fd.pos..fd.pos+bufend] = buf[..bufend];
@@ -53,15 +57,13 @@ fn file_seek(fd: *io::file, offs: i64, w: io::whence) (i64 | error) = {
 	case io::whence::CUR => yield fd.pos;
 	case io::whence::END => yield len(inode.data);
 	};
+
 	if (offs < 0) {
 		if (start < (-offs): size) {
 			return errno::INVAL: error;
 		};
-	} else {
-		if (len(inode.data) - start < offs: size) {
-			return errno::INVAL: error;
-		};
 	};
+
 	fd.pos = start + offs: size;
 	return fd.pos: i64;
 };
