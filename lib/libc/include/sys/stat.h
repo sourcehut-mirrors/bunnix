@@ -131,6 +131,14 @@ int mknod(const char *, mode_t, dev_t);
 int mknodat(int, const char *, mode_t, dev_t);
 #endif
 
+struct __utimensat_options {
+	int dirfd;
+	__string_t path;
+	int flags;
+	const struct timespec *atime;
+	const struct timespec *mtime;
+};
+
 int futimens(int, const struct timespec [2]);
 int utimensat(int, const char *, const struct timespec [2], int);
 
