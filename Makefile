@@ -55,17 +55,10 @@ $(SYSROOT)/etc: $(ETC_FILES)
 	chmod 600 $(SYSROOT)/etc/shadow
 
 ifeq ($(BUILD_PORTS), 1)
-
 include ports/ports.mk
-
-else
-
-$(SYSROOT)/usr/bin:
-	@true
-
 endif
 
-$(SYSROOT): $(SYSROOT)/bin $(SYSROOT)/sbin $(SYSROOT)/etc $(SYSROOT)/usr/bin
+$(SYSROOT): $(SYSROOT)/bin $(SYSROOT)/sbin $(SYSROOT)/etc
 	mkdir -p $(SYSROOT)
 	for d in \
 		boot \

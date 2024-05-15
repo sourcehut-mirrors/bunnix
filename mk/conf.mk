@@ -1,7 +1,10 @@
 include $(ROOT)config.mk
 include $(ROOT)mk/$(ARCH).conf.mk
 
+AROOT=$(shell readlink -f $(ROOT))/
+
 SYSROOT=$(ROOT)target/root/
+ASYSROOT=$(AROOT)target/root/
 
 # Kernel build configuration
 KHAREPATH=$(ROOT)sys/

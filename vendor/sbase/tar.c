@@ -262,8 +262,8 @@ unarchive(char *fname, ssize_t l, char b[BLKSIZ])
 
 	if (!mflag && ((mtime = strtol(h->mtime, &p, 8)) < 0 || *p != '\0'))
 		eprintf("strtol %s: invalid number\n", h->mtime);
-	if (remove(fname) < 0 && errno != ENOENT)
-		weprintf("remove %s:", fname);
+	//if (remove(fname) < 0 && errno != ENOENT)
+	//	weprintf("remove %s:", fname);
 
 	tmp = estrdup(fname);
 	mkdirp(dirname(tmp), 0777, 0777);
