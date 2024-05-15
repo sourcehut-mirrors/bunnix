@@ -64,3 +64,27 @@ clean-make:
 	rm -rf ports/build-make
 .PHONY: clean-make
 clean-ports: clean-make
+
+#### tcc
+
+ports/build-tcc/tcc: $(SYSROOT)/usr/lib/libc.a
+	mkdir -p ports/build-tcc/
+	cd ports/build-tcc/ && ../tcc/configure \
+		--prefix=/usr \
+		--targetos=Bunnix \
+		--enable-static \
+		--cross-prefix=x86_64-bunnix-
+	cd ports/build-tcc && make
+
+$(DISTROOT)/devel/usr/bin/cc: ports/build-tcc/tcc
+	cd ports/build-tcc/ && make install DESTDIR="$(DISTROOT)/devel"
+	mv $(DISTROOT)/devel/usr/bin/tcc $(DISTROOT)/devel/usr/bin/cc
+
+$(SYSROOT)/dist/devel.tar.gz: $(DISTROOT)/devel/usr/bin/cc
+
+$(DIST_DEVEL): $(DISTROOT)/devel/usr/bin/cc
+
+clean-tcc:
+	rm -rf ports/build-tcc
+.PHONY: clean-tcc
+clean-ports: clean-tcc
