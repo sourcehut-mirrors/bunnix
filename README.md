@@ -90,6 +90,8 @@ Bunnix includes (often patched versions of) the following third-party software:
 * [sbase](https://git.sr.ht/~sircmpwn/sbase): core utilities*
 * [lok](https://github.com/dimkr/lok): /bin/awk
 * [musl libc](http://musl.libc.org/): the libc is derived from musl
+* [gzip](https://www.gnu.org/software/gzip/): for installing ports
+* [tcc](https://bellard.org/tcc/): C compiler
 
 \* sbase is good software written by questionable people. I do not endorse
    suckless.
