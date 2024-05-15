@@ -50,5 +50,11 @@ export type clock = enum {
 
 // Returns the current time for a given clock.
 export fn now(clock: clock) instant = {
-	abort(); // TODO Bunnix
+	let tp = rt::timespec { ... };
+	match (rt::gettime(clock, &tp)) {
+	case void =>
+		return timespec_to_instant(tp);
+	case let err: rt::errno =>
+		abort("Unexpected error from clock_gettime");
+	};
 };
