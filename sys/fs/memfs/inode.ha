@@ -46,22 +46,22 @@ fn mkinode(
 	ino: uint,
 	mode: io::mode,
 	parent: nullable *inode,
-) inode = {
-	const ino = inode {
+) *inode = {
+	const ino = alloc(inode {
 		impl = &inode_dir_impl,
 		sb = sb,
 		ino = ino,
 		mode = mode,
 		...
-	};
+	});
 
 	if (io::isdir(mode)) {
-		inode_link(&ino, &ino, ".")!;
+		inode_link(ino, ino, ".")!;
 		match (parent) {
 		case let p: *inode =>
-			inode_link(&ino, p, "..")!;
+			inode_link(ino, p, "..")!;
 		case null =>
-			inode_link(&ino, &ino, "..")!;
+			inode_link(ino, ino, "..")!;
 		};
 		ino.nlink = 2;
 	};
@@ -115,7 +115,7 @@ fn inode_mkchild(ino: *io::inode, name: str, mode: io::mode) (*io::inode | error
 
 	const sb = parent.sb;
 	const ino = sb_get_ino(sb);
-	const child = alloc(mkinode(sb, ino, mode, parent));
+	const child = mkinode(sb, ino, mode, parent);
 	const dent = dirent {
 		name = strings::dup(name),
 		inode = child,

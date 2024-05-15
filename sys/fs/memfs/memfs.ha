@@ -6,7 +6,7 @@ def ROOT_INODE: uint = 1;
 export type superblock = struct {
 	fs::superblock,
 	next_ino: uint,
-	root: inode,
+	root: *inode,
 };
 
 // Creates a new in-memory filesystem.
@@ -31,7 +31,7 @@ const super_impl = fs::superblock_iface {
 
 fn sb_get_root(sb: *fs::superblock) *io::inode = {
 	const sb = sb: *superblock;
-	return &sb.root;
+	return sb.root;
 };
 
 fn sb_get_ino(sb: *superblock) uint = {
