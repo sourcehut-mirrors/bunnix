@@ -178,13 +178,13 @@ target/disk.mbr.img: target/fs.fat.img target/fs.ext4.img
 	sfdisk $@ < tools/mkdisk-mbr
 	dd if=$(MBR) conv=notrunc of=$@
 	dd if=target/fs.fat.img conv=notrunc of=$@ seek=2048
-	dd if=target/fs.ext4.img conv=notrunc of=$@ seek=133120
+	dd if=target/fs.ext4.img conv=notrunc of=$@ seek=51200
 
 target/disk.gpt.img: target/fs.fat.img target/fs.ext4.img
 	qemu-img create -f raw $@ $(DISK_SZ)
 	sfdisk $@ < tools/mkdisk-gpt
 	dd if=target/fs.fat.img conv=notrunc of=$@ seek=2048
-	dd if=target/fs.ext4.img conv=notrunc of=$@ seek=133120
+	dd if=target/fs.ext4.img conv=notrunc of=$@ seek=51200
 
 # Emulator targets
 #
