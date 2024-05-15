@@ -385,3 +385,36 @@ fn sys_mknodat(opts: *mknodat_options) (u64 | error) = {
 
 	return 0u64;
 };
+
+fn sys_utimensat(opts: *utimensat_options) (u64 | error) = {
+	validate_user_addr(opts, size(utimensat_options))?;
+	if (opts.atime != null) {
+		validate_user_addr(opts.atime, size(io::timespec))?;
+	};
+	if (opts.mtime != null) {
+		validate_user_addr(opts.mtime, size(io::timespec))?;
+	};
+
+	let ino: nullable *io::inode = null;
+	if (opts.flags & AT_EMPTY_PATH != 0) {
+		const fd = validate_file(opts.dirfd)?;
+		match (fd.inode) {
+		case let i: *io::inode =>
+			ino = i;
+		case null =>
+			// TODO: We should never have a [[file]] without an
+			// inode, so we should drop nullable in the future
+			return errno::BADF: error;
+		};
+	} else {
+		let (targ, _) = atwalk(opts.dirfd, opts.path)?;
+		ino = targ;
+	};
+
+	const ino = ino as *io::inode;
+	defer io::inode_unref(ino);
+
+	io::inode_utimens(ino, opts.atime, opts.mtime)?;
+
+	return 0u64;
+};

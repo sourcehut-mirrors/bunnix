@@ -1,5 +1,5 @@
 use types::c;
-use time;
+use io;
 
 export type vector = struct {
 	base: *opaque,
@@ -122,9 +122,9 @@ export type st = struct {
 	sz: u64,
 	blksz: u64,
 	blocks: u64,
-	atime: time::timespec,
-	mtime: time::timespec,
-	ctime: time::timespec,
+	atime: io::timespec,
+	mtime: io::timespec,
+	ctime: io::timespec,
 };
 
 export type fstatat_options = struct {
@@ -190,4 +190,12 @@ export type mknodat_options = struct {
 	path: str,
 	mode: uint,
 	dev: u64,
+};
+
+export type utimensat_options = struct {
+	dirfd: int,
+	path: str,
+	flags: int,
+	atime: nullable *io::timespec,
+	mtime: nullable *io::timespec,
 };

@@ -82,6 +82,7 @@ const inode_dir_impl = io::inode_iface {
 	mknod = &inode_mknod,
 	link = &inode_link,
 	unlink = &inode_unlink,
+	utimens = &inode_utimens,
 	...
 };
 
@@ -212,4 +213,15 @@ fn inode_unlink(
 
 	fs::put_time(&parent.ctime);
 	fs::put_time(&parent.mtime);
+};
+
+fn inode_utimens(
+	ino: *io::inode,
+	atime: nullable *io::timespec,
+	mtime: nullable *io::timespec,
+) (void | error) = {
+	const ino = ino: *inode;
+	fs::put_time(&ino.atime, atime);
+	fs::put_time(&ino.mtime, atime);
+	fs::put_time(&ino.ctime);
 };

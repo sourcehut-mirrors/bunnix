@@ -63,6 +63,13 @@ export type fn_inode_mknod = fn(
 	dev: u64,
 ) (*inode | error);
 
+// Removes a directory from this inode.
+export type fn_inode_utimens = fn(
+	ino: *inode,
+	atime: nullable *timespec,
+	mtime: nullable *timespec,
+) (void | error);
+
 // Called when the last reference to this inode is dropped, freeing resources
 // associated with it.
 export type fn_inode_finish = fn(ino: *inode) void;
@@ -78,6 +85,7 @@ export type inode_iface = struct {
 	mkdir: nullable *fn_inode_mkdir,
 	rmdir: nullable *fn_inode_rmdir,
 	mknod: nullable *fn_inode_mknod,
+	utimens: nullable *fn_inode_utimens,
 	finish: nullable *fn_inode_finish,
 };
 
@@ -165,6 +173,20 @@ export fn inode_mknod(
 	match (ino.impl.mknod) {
 	case let func: *fn_inode_mknod =>
 		return func(ino, name, mode, rdev);
+	case null =>
+		return errno::NOTSUP;
+	};
+};
+
+// Updates the time specs associated with this inode.
+export fn inode_utimens(
+	ino: *inode,
+	atime: nullable *timespec,
+	mtime: nullable *timespec,
+) (void | error) = {
+	match (ino.impl.utimens) {
+	case let func: *fn_inode_utimens =>
+		return func(ino, atime, mtime);
 	case null =>
 		return errno::NOTSUP;
 	};
