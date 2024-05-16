@@ -8,6 +8,13 @@ export type pixbuf = struct {
 	data: nullable *[*]u32,
 };
 
+export type rect = struct {
+	x: uint,
+	y: uint,
+	w: uint,
+	h: uint,
+};
+
 // Initializes an identity-mapped pixel buffer for the given fb.
 fn pixbuf_init_ident(buf: *pixbuf, fb: *chr::fb) void = {
 	const addr = chr::fb_getphys(fb);
@@ -39,6 +46,22 @@ fn pixbuf_copy(dest: *pixbuf, src: const *pixbuf) void = {
 	const dest_data = dest.data as *[*]u32;
 	const length = (fb.stride * fb.height) / size(u32);
 	dest_data[..length] = src_data[..length];
+};
+
+fn pixbuf_copyrect(
+	dest: *pixbuf,
+	src: const *pixbuf,
+	rect: const *rect,
+) void = {
+	const fb = dest.fb as *chr::fb;
+	let dest = dest.data as *[*]u32;
+	let src = src.data as *[*]u32;
+	for (let y = rect.y; y < rect.y + rect.h; y += 1) {
+		const row_ix = y * (fb.stride / 4);
+		const start = row_ix + rect.x;
+		const end = row_ix + rect.x + rect.w;
+		dest[start..end] = src[start..end];
+	};
 };
 
 fn pixbuf_clear(buf: *pixbuf) void = {
@@ -87,6 +110,8 @@ fn blitchar(
 			const mask = 1 << (FONT_WIDTH - FONT_HPAD - gx);
 			if (glyph[gy] & mask != 0) {
 				blitop(pixel, color, op);
+			} else {
+				blitop(pixel, 0, op);
 			};
 		};
 	};

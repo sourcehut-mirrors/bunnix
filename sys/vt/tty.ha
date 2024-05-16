@@ -3,10 +3,12 @@ use dev::chr;
 use dev::chr::{key_state};
 use errors::{error, errno};
 use io;
+use types;
 
 export type vt = struct {
 	chr::tty,
 
+	// Console state
 	cons: vtcons,
 	row: uint,
 	col: uint,
@@ -20,6 +22,13 @@ export type vt = struct {
 	// Pixel buffers
 	front: pixbuf,
 	back: pixbuf,
+
+	damage: struct {
+		row: uint,
+		col: uint,
+		rows: uint,
+		cols: uint,
+	},
 };
 
 // vt console device
@@ -120,6 +129,12 @@ fn vt_keyev(code: u32, state: key_state, user: nullable *opaque) void = {
 	chr::tty_putc(term, sym: u8);
 };
 
+fn vt_blitchar(vt: *vt, row: uint, col: uint, char: rune) void = {
+	const x = col * FONT_WIDTH;
+	const y = row * FONT_HEIGHT;
+	blitchar(&vt.back, x, y, char);
+};
+
 fn vt_putc(vt: *vt, char: rune) void = {
 	switch (char) {
 	case '\n' =>
@@ -134,14 +149,11 @@ fn vt_putc(vt: *vt, char: rune) void = {
 			return;
 		};
 		vt.col -= 1;
-		const x = vt.col * FONT_WIDTH;
-		const y = vt.row * FONT_HEIGHT;
-		blitrect(&vt.back, x, y, FONT_WIDTH, FONT_HEIGHT);
+		vt_blitchar(vt, vt.row, vt.col, ' ');
+		vt_damage(vt, vt.row, vt.col);
 	case =>
-		const x = vt.col * FONT_WIDTH;
-		const y = vt.row * FONT_HEIGHT;
-		blitrect(&vt.back, x, y, FONT_WIDTH, FONT_HEIGHT);
-		blitchar(&vt.back, x, y, char);
+		vt_blitchar(vt, vt.row, vt.col, char);
+		vt_damage(vt, vt.row, vt.col);
 		vt.col += 1;
 	};
 	if (vt.col >= vt.cols) {
@@ -151,9 +163,53 @@ fn vt_putc(vt: *vt, char: rune) void = {
 	if (vt.row >= vt.rows) {
 		vt.row = vt.rows - 1;
 		scroll(&vt.back, FONT_HEIGHT);
+		vt_damage(vt, 0, 0, vt.rows, vt.cols);
 	};
 };
 
+fn vt_damage(
+	vt: *vt,
+	row: uint,
+	col: uint,
+	rows: uint = 1,
+	cols: uint = 1,
+) void = {
+	let d = &vt.damage;
+	if (d.row == types::UINT_MAX || d.col == types::UINT_MAX) {
+		d.row = row;
+		d.col = col;
+		d.rows = rows;
+		d.cols = cols;
+		return;
+	};
+
+	const r1 = if (d.row < row) d.row else row;
+	const r2 = if (d.row + d.rows < row + rows) row + rows else d.row + d.rows;
+	const c1 = if (d.col < col) d.col else col;
+	const c2 = if (d.col + d.cols < col + cols) col + cols else d.col + d.cols;
+
+	d.row = r1;
+	d.col = c1;
+	d.rows = r2 - r1;
+	d.cols = c2 - c1;
+};
+
 fn vt_present(vt: *vt) void = {
-	pixbuf_copy(&vt.front, &vt.back);
+	let damage = &vt.damage;
+
+	if (damage.rows == 0 || damage.cols == 0) {
+		return;
+	};
+
+	pixbuf_copyrect(&vt.front, &vt.back, &rect {
+		x = damage.col * FONT_WIDTH,
+		y = damage.row * FONT_HEIGHT,
+		w = damage.cols * FONT_WIDTH,
+		h = damage.rows * FONT_HEIGHT,
+	});
+
+	damage.row = types::UINT_MAX;
+	damage.col = types::UINT_MAX;
+	damage.rows = 0;
+	damage.cols = 0;
 };
