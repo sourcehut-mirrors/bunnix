@@ -4,6 +4,7 @@ use dev::chr;
 use errors::{error, errno};
 use io;
 use sched;
+use log;
 
 export type pcserial = struct {
 	chr::serialdev,
@@ -74,7 +75,13 @@ fn serial_write(dev: *chr::serialdev, buf: const []u8) (size | error) = {
 fn serial_read(dev: *pcserial) void = {
 	for (serial_inb(dev, LSR) & RBF == RBF) {
 		const ch = serial_inb(dev, RBR);
-		chr::serial_putc(dev, ch);
+		switch (ch) {
+		case '\x7f' =>	// Backspace
+			serial_write(dev, ['\b', ' '])!;
+			chr::serial_putc(dev, '\b');
+		case =>
+			chr::serial_putc(dev, ch);
+		};
 	};
 };
 
