@@ -4,12 +4,12 @@ use dev::chr;
 use errors::{error, errno};
 use io;
 use sched;
-use log;
 
 export type pcserial = struct {
 	chr::serialdev,
 	irq: [2]arch::irq_handler,
 	port: u16,
+	wq: sched::wq_head,
 };
 
 def IRQ3 = 3;
@@ -31,7 +31,7 @@ export fn serial_init(dev: *pcserial, port: u16) void = {
 	serial_outb(dev, LCR,    0x03);   // Disable divisor mode, set parity
 	serial_outb(dev, FCR,    0xC7);   // Enable FIFO and clear
 	serial_outb(dev, MCR,    0x0B);   // Enable OUT1 & OUT2
-	serial_outb(dev, IER,    0x01);   // Enable read interrupt
+	serial_outb(dev, IER,    ERBFI);  // Enable read interrupt
 
 	arch::irq_ack(IRQ3);
 	arch::irq_ack(IRQ4);
@@ -55,9 +55,17 @@ fn serial_ready(dev: *pcserial) bool = {
 };
 
 fn serial_putc(dev: *pcserial, val: u8) void = {
-	for (!serial_ready(dev)) {
-		sched::schedule();
+	if (!serial_ready(dev)) {
+		serial_outb(dev, IER, ERBFI | ETBEI);
+
+		let wq = sched::wq_link { ... };
+		for (!serial_ready(dev)) {
+			sched::wait(&dev.wq, &wq);
+		};
+
+		serial_outb(dev, IER, ERBFI);
 	};
+
 	serial_outb(dev, THR, val);
 };
 
@@ -94,6 +102,6 @@ fn serial_irq(irq: u8, user: nullable *opaque) void = {
 		serial_read(dev);
 	};
 	if (iir & (1 << 1) != 0) {
-		void; // TODO: read interrupts
+		sched::wake(&dev.wq);
 	};
 };
