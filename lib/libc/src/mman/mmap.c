@@ -24,7 +24,11 @@ void *__mmap(void *start, size_t len, int prot, int flags, int fd, off_t off)
 
 	ret = __syscall(SYS_mmap, &opts);
 
-	return (void *)__syscall_ret(ret);
+	void *out = (void *)__syscall_ret(ret);
+	if (ret < 0) {
+		return MAP_FAILED;
+	}
+	return out;
 }
 
 weak_alias(__mmap, mmap);

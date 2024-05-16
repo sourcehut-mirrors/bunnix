@@ -109,6 +109,8 @@ extern "C" {
 #define SIOCGSTAMP      0x8906
 #define SIOCGSTAMPNS    0x8907
 
+#define FBIOGET_VSCREENINFO 0x4600
+
 int ioctl (int, int, ...);
 
 #ifdef __cplusplus
