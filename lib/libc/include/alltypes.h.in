@@ -64,6 +64,8 @@ TYPEDEF unsigned long sigset_t;
 
 STRUCT iovec { void *iov_base; size_t iov_len; };
 
+STRUCT winsize { unsigned short ws_row, ws_col; };
+
 /* Bunnix syscall ABI */
 TYPEDEF struct __string { const char *data; unsigned long length; unsigned long cap; } __string_t;
 

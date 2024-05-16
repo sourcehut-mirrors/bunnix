@@ -308,6 +308,12 @@ struct iovec { void *iov_base; size_t iov_len; };
 #endif
 
 
+#if defined(__NEED_struct_winsize) && !defined(__DEFINED_struct_winsize)
+struct winsize { unsigned short ws_row, ws_col; };
+#define __DEFINED_struct_winsize
+#endif
+
+
 /* Bunnix syscall ABI */
 #if defined(__NEED___string_t) && !defined(__DEFINED___string_t)
 typedef struct __string { const char *data; unsigned long length; unsigned long cap; } __string_t;

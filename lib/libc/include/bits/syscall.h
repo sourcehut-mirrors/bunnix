@@ -39,6 +39,7 @@
 #define __NR_mknodat		35
 #define __NR_brk		36
 #define __NR_utimensat		37
+#define __NR_ioctl		38
 
 #endif
 #define SYS_readv		0
@@ -79,3 +80,4 @@
 #define SYS_mknodat		35
 #define SYS_brk		36
 #define SYS_utimensat		37
+#define SYS_ioctl		38

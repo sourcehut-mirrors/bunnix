@@ -84,6 +84,7 @@ DIRS=\
      stdlib \
      string \
      temp \
+     termios \
      time \
      unistd
 
