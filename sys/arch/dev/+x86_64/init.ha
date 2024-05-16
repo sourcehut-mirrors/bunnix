@@ -9,8 +9,6 @@ use vt;
 
 let fbcons = vt::fb_console {
 	vtable = null: *io::vtable,
-	fb = null: *chr::fb,
-	buffer = null: *[*]u32,
 	...
 };
 
