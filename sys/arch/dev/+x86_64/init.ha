@@ -10,6 +10,7 @@ use vt;
 let fbcons = vt::fb_console {
 	vtable = null: *io::vtable,
 	fb = null: *chr::fb,
+	buffer = null: *[*]u32,
 	...
 };
 
@@ -59,10 +60,10 @@ export fn init() void = {
 	// TODO: Grab ACPI and look for PCIe
 	dev::bus_register(&legacy_pci_bus);
 
-	if (fbcons.vtable != null) {
-		vt::fbcons_lateinit(&fbcons);
-		vt::tty_init(&fbcons);
-	};
+	//if (fbcons.vtable != null) {
+	//	vt::fbcons_lateinit(&fbcons);
+	//	vt::tty_init(&fbcons);
+	//};
 
 	chr::serial_tty_init(&serialdev);
 };

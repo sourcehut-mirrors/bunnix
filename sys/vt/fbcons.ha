@@ -1,31 +1,18 @@
 use arch;
-use boot;
 use dev::chr;
 use errors::{error, errno};
 use io;
-use mman;
 use rt;
-use sched;
-use types;
 
+// Basic framebuffer console suitable for pre-MMU use.
 export type fb_console = struct {
 	io::file,
 	fb: *chr::fb,
-	front: uintptr,
-	back: uintptr,
+	buffer: *[*]u32,
 	row: uint,
 	col: uint,
 	rows: uint,
 	cols: uint,
-	damage: struct {
-		x: uint,
-		y: uint,
-		w: uint,
-		h: uint,
-	},
-	cursor: (int, int),
-	cursor_shown: bool,
-	next_tick: u64,
 };
 
 // Pre-MMU initialization
@@ -35,75 +22,17 @@ export fn fbcons_init(cons: *fb_console, fb: *chr::fb) void = {
 	*cons = fb_console {
 		vtable = &fb_vtable,
 		fb = fb,
-		front = arch::phys_tokernel(addr): uintptr,
-		back = arch::phys_tokernel(addr): uintptr,
-		row = 0,
-		col = 0,
+		buffer = arch::phys_tokernel(addr): *[*]u32,
 		cols = fb.width / (WIDTH + 1),
 		rows = fb.height / HEIGHT,
-		cursor = (-1, -1),
 		...
 	};
 
 	// Clear to black
-	rt::memset(cons.back: *opaque, 0, fb.height * fb.stride);
+	const length = fb.stride * fb.height;
+	cons.buffer[..length] = [0...];
 
 	chr::cons_register(cons);
-
-	static let link = sched::tick_link { ... };
-	sched::ontick(&link, &fbcons_tick, cons);
-};
-
-fn fbcons_tick(tick: u64, user: nullable *opaque) void = {
-	let cons = user: *fb_console;
-	const rate = arch::getrate();
-
-	if (tick < cons.next_tick) {
-		return;
-	};
-
-	cons.cursor_shown = !cons.cursor_shown;
-	fbcons_blitcursor(cons, blit_op::XOR);
-	fbcons_present(cons);
-	cons.next_tick = tick + rate;
-};
-
-// Post-MMU initialization
-export fn fbcons_lateinit(cons: *fb_console) void = {
-	assert(cons.front == cons.back);
-
-	const fb = cons.fb;
-	const length = fb.stride * fb.height;
-	const front = chr::fb_map(fb, &mman::kernel, 0,
-		mman::prot::READ | mman::prot::WRITE)!;
-	const back = mman::mmap(&mman::kernel, 0, 0, length,
-		mman::prot::READ | mman::prot::WRITE,
-		mman::flag::ANON)!;
-
-	// Copy the current screen contents into the back buffer
-	const front_data = front: *[*]u8;
-	const back_data = back: *[*]u8;
-	back_data[..length] = front_data[..length];
-
-	cons.front = front;
-	cons.back = back;
-};
-
-// Moves the cursor on screen.
-export fn fbcons_movecursor(cons: *fb_console, row: int, col: int) void = {
-	fbcons_blitcursor(cons, blit_op::XOR);
-	cons.cursor = (row, col);
-	fbcons_blitcursor(cons, blit_op::XOR);
-};
-
-fn fbcons_blitcursor(cons: *fb_console, op: blit_op) void = {
-	if (cons.cursor.0 != -1 && cons.cursor.1 != -1) {
-		const (row, col) = cons.cursor;
-		const x = col: uint * (WIDTH + 1);
-		const y = row: uint * HEIGHT;
-		fbcons_blitchar(cons, x, y, '_', op);
-		fbcons_damage(cons, x, y, WIDTH + 1, HEIGHT);
-	};
 };
 
 const fb_vtable = io::vtable {
@@ -113,25 +42,11 @@ const fb_vtable = io::vtable {
 
 fn fbcons_write(file: *io::file, buf: const []u8) (size | error) = {
 	let cons = file: *fb_console;
-	if (cons.cursor_shown) {
-		fbcons_blitcursor(cons, blit_op::XOR);
-	};
 
 	for (let i = 0z; i < len(buf); i += 1) {
 		fbcons_putc(cons, buf[i]: rune);
 	};
 
-	cons.cursor = (cons.row: int, cons.col: int);
-
-	if (cons.cursor_shown) {
-		fbcons_blitcursor(cons, blit_op::XOR);
-	} else {
-		cons.cursor_shown = true;
-		fbcons_blitcursor(cons, blit_op::XOR);
-	};
-	cons.next_tick = arch::gettime() + arch::getrate();
-
-	fbcons_present(cons);
 	return len(buf);
 };
 
@@ -157,7 +72,6 @@ fn fbcons_putc(cons: *fb_console, char: rune) void = {
 		const y = cons.row * HEIGHT;
 		fbcons_clearcell(cons, x, y);
 		fbcons_blitchar(cons, x, y, char);
-		fbcons_damage(cons, x, y, WIDTH, HEIGHT);
 		cons.col += 1;
 	};
 	if (cons.col >= cons.cols) {
@@ -171,9 +85,9 @@ fn fbcons_putc(cons: *fb_console, char: rune) void = {
 };
 
 fn fbcons_scroll(cons: *fb_console) void = {
-	let buffer = cons.back: *[*]u32;
 	const fb = cons.fb;
 	const wstride = fb.stride / size(u32);
+	let buffer = cons.buffer;
 
 	// Scroll buffer
 	const ncopy = HEIGHT * (cons.rows - 1) * wstride;
@@ -184,14 +98,11 @@ fn fbcons_scroll(cons: *fb_console) void = {
 	const ncopy = HEIGHT * wstride;
 	const start = HEIGHT * (cons.rows - 1) * wstride;
 	rt::memset(&buffer[start], 0, ncopy * size(u32));
-
-	const fb = cons.fb;
-	fbcons_damage(cons, 0, 0, fb.width, fb.height);
 };
 
 fn fbcons_clearcell(cons: *fb_console, x: uint, y: uint) void = {
 	const fb = cons.fb;
-	let buffer = cons.back: *[*]u32;
+	let buffer = cons.buffer;
 	for (let gy = 0u; gy < HEIGHT; gy += 1) {
 		for (let gx = 0u; gx < WIDTH + 1; gx += 1) {
 			let pixel = &buffer[(y + gy) * (fb.stride / 4) + (x + gx)];
@@ -215,9 +126,9 @@ fn fbcons_blitchar(
 	op: blit_op = blit_op::OVER,
 ) void = {
 	const fb = cons.fb;
-	let buffer = cons.back: *[*]u32;
-	const glyph = getchar(char);
+	let buffer = cons.buffer;
 
+	const glyph = getchar(char);
 	for (let gy = 0u; gy < HEIGHT; gy += 1) {
 		for (let gx = 0u; gx < WIDTH + 1; gx += 1) {
 			let pixel = &buffer[(y + gy) * (fb.stride / 4) + (x + gx)];
@@ -244,51 +155,4 @@ fn fbcons_blitchar(
 			};
 		};
 	};
-};
-
-fn fbcons_damage(cons: *fb_console, x: uint, y: uint, w: uint, h: uint) void = {
-	let d = &cons.damage;
-	if (d.x == types::UINT_MAX || d.y == types::UINT_MAX) {
-		d.x = x;
-		d.y = y;
-		d.w = w;
-		d.h = h;
-		return;
-	};
-
-	const x1 = if (d.x < x) d.x else x;
-	const x2 = if (d.x + d.w < x + w) x + w else d.x + d.w;
-	const y1 = if (d.y < y) d.y else y;
-	const y2 = if (d.y + d.h < y + h) y + h else d.y + d.h;
-
-	d.x = x1;
-	d.y = y1;
-	d.w = x2 - x1;
-	d.h = y2 - y1;
-};
-
-fn fbcons_present(cons: *fb_console) void = {
-	if (cons.front == cons.back) {
-		return;
-	};
-
-	let dmg = &cons.damage;
-	if (dmg.w == 0 || dmg.h == 0) {
-		return;
-	};
-
-	const fb = cons.fb;
-	let back = cons.back: *[*]u32;
-	let front = cons.front: *[*]u32;
-	for (let y = dmg.y; y < dmg.y + dmg.h; y += 1) {
-		const row_ix = y * (fb.stride / 4);
-		const start = row_ix + dmg.x;
-		const end = row_ix + dmg.x + dmg.w;
-		front[start..end] = back[start..end];
-	};
-
-	dmg.x = types::UINT_MAX;
-	dmg.y = types::UINT_MAX;
-	dmg.w = 0;
-	dmg.h = 0;
 };
