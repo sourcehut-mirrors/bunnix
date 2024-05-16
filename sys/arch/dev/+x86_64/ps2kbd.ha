@@ -14,7 +14,9 @@ export fn ps2_init() void = {
 	chr::kbd_init(&ps2_kbd);
 };
 
-fn ps2_irq(user: nullable *opaque) void = {
+fn ps2_irq(irq: u8, user: nullable *opaque) void = {
+	defer arch::irq_ack(irq);
+
 	let scancode = x86_64::inb(PS2_DATA);
 
 	const mask = 1u8 << 7;

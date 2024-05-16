@@ -27,7 +27,7 @@ let serialdev = pcserial {
 
 // Performs pre-MMU architecture-specific device initialization.
 export fn earlyinit(ctx: *boot::context) void = {
-	serial_init(&serialdev, SERIAL_PORT_A);
+	serial_init(&serialdev, COM1);
 
 	if (ctx.fb.fb_base != 0) {
 		vt::fbcons_init(&fbcons, &ctx.fb);
@@ -40,18 +40,16 @@ export fn earlyinit(ctx: *boot::context) void = {
 
 // Initialize architecture-specific devices.
 export fn init() void = {
-	if (fbcons.vtable != null) {
-		vt::fbcons_lateinit(&fbcons);
-	};
+	cmos_init();
+	ps2_init();
 
 	// TODO: Grab ACPI and look for PCIe
 	dev::bus_register(&legacy_pci_bus);
 
-	ps2_init();
-
 	if (fbcons.vtable != null) {
+		vt::fbcons_lateinit(&fbcons);
 		vt::tty_init(&fbcons);
 	};
 
-	cmos_init();
+	chr::serial_tty_init(&serialdev);
 };

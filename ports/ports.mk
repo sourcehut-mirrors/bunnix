@@ -20,6 +20,7 @@ $(SYSROOT)/dist: $(DIST_DEVEL)
 ####                                 PORTS                                  ####
 
 $(SYSROOT)/usr/bin/distinstall: ports/distinstall
+	mkdir -p $(SYSROOT)/usr/bin
 	cp $^ $@
 
 $(SYSROOT)/usr/bin: $(SYSROOT)/usr/bin/distinstall

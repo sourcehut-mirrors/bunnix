@@ -53,7 +53,9 @@ fn ahci_probe(info: *pci::probe_info) nullable *pci::pcidev = {
 	return cont;
 };
 
-fn ahci_irq(user: nullable *opaque) void = {
+fn ahci_irq(irq: u8, user: nullable *opaque) void = {
+	defer arch::irq_ack(irq);
+
 	let cont = user: *ahci_controller;
 	let hba = cont.hba;
 	const _is = hba._is;

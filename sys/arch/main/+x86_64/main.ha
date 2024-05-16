@@ -10,6 +10,10 @@ use vt;
 @symbol("main") fn kmain(ctx: *boot::context) never;
 
 export fn main(ctx: *boot::context) never = {
+	// Initialize the PIC first so that we can install interrupts for early
+	// console devices
+	arch::init_pic();
+
 	// Set up early console(s)
 	dev::earlyinit(ctx);
 
@@ -30,7 +34,9 @@ export fn main(ctx: *boot::context) never = {
 	kmain(ctx);
 };
 
-fn handle_pit_irq(user: nullable *opaque) void = {
+fn handle_pit_irq(irq: u8, user: nullable *opaque) void = {
+	arch::irq_ack(irq);
+
 	sched::timer_process();
 	sched::schedule();
 };

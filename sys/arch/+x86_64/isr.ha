@@ -15,6 +15,7 @@ let irq_handlers: [256]nullable *irq_handler = [null...];
 // An IRQ handler can be registered with [[install_irq]] to be called upon
 // receiving a matching IRQ.
 export type irq_handler_func = fn(
+	irq: u8,
 	user: nullable *opaque,
 ) void;
 
@@ -39,6 +40,11 @@ export fn install_irq(
 	handler.user = user;
 };
 
+// Acknowledge an interrupt.
+export fn irq_ack(irq: u8) void = {
+	pic_eoi(irq);
+};
+
 fn irq_handler_dispatch(ctx: *context, irq: u8) void = {
 	if (irq == 7 || irq == 15) {
 		// Spurious IRQ
@@ -57,8 +63,7 @@ fn irq_handler_dispatch(ctx: *context, irq: u8) void = {
 	for (cur != null; cur = (cur: *irq_handler).next) {
 		const cur = cur: *irq_handler;
 		const func = cur.func as *irq_handler_func;
-		pic_eoi(irq);
-		func(cur.user);
+		func(irq, cur.user);
 	};
 };
 

@@ -53,7 +53,6 @@ export fn earlyinit() void = {
 	init_tsc();
 	log::kprintfln(X86_64, "TSC measured at {} MHz", tsc_rate / 1000000);
 
-	init_pic();
 	init_idt();
 	init_cpu(0);
 
