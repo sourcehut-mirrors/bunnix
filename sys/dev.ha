@@ -31,6 +31,9 @@ fn mountdev(root: *io::inode) void = {
 	// TTY devices
 	chr::mounttty(devroot);
 
+	// Framebuffer devices
+	chr::mountfb(devroot);
+
 	// Block devices
 	block::mknodes(devroot)!;
 };

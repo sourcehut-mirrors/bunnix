@@ -25,11 +25,24 @@ let serialdev = pcserial {
 	...
 };
 
+let fbdev = chr::fb { ... };
+
 // Performs pre-MMU architecture-specific device initialization.
 export fn earlyinit(ctx: *boot::context) void = {
 	serial_init(&serialdev, COM1);
 
 	if (ctx.fb.fb_base != 0) {
+		const bootfb = &ctx.fb;
+		fbdev = chr::fb {
+			phys = bootfb.fb_base,
+			width = bootfb.width,
+			height = bootfb.height,
+			stride = bootfb.stride,
+			format = bootfb.fmt: chr::pixel_format,
+			...
+		};
+		chr::fb_init(&fbdev);
+
 		vt::fbcons_init(&fbcons, &ctx.fb);
 	} else {
 		vga_init(&vgacons);
