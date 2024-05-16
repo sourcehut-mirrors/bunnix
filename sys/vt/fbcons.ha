@@ -14,7 +14,7 @@ export type fb_console = struct {
 	cols: uint,
 };
 
-// Pre-MMU initialization
+// Initialize a basic early framebuffer console.
 export fn fbcons_init(cons: *fb_console, fb: *chr::fb) void = {
 	const addr = chr::fb_getphys(fb);
 
@@ -28,6 +28,11 @@ export fn fbcons_init(cons: *fb_console, fb: *chr::fb) void = {
 	pixbuf_clear(&cons.pixbuf);
 
 	chr::cons_register(cons);
+};
+
+// Tear down the early framebuffer console.
+export fn fbcons_finish(cons: *fb_console) void = {
+	chr::cons_unregister(cons);
 };
 
 const fb_vtable = io::vtable {

@@ -58,10 +58,13 @@ export fn init() void = {
 	// TODO: Grab ACPI and look for PCIe
 	dev::bus_register(&legacy_pci_bus);
 
-	//if (fbcons.vtable != null) {
-	//	vt::fbcons_lateinit(&fbcons);
-	//	vt::tty_init(&fbcons);
-	//};
-
 	chr::serial_tty_init(&serialdev);
+
+	if (fbcons.vtable != null) {
+		vt::fbcons_finish(&fbcons);
+
+		let vt = vt::vt_init(&fbdev);
+		vt.row = fbcons.row;
+		vt.col = fbcons.col;
+	};
 };

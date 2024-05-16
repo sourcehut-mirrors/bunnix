@@ -3,52 +3,78 @@ use dev::chr;
 use dev::chr::{key_state};
 use errors::{error, errno};
 
-export type fb_tty = struct {
+export type vt = struct {
 	chr::tty,
-	fb: *fb_console,
+
+	row: uint,
+	col: uint,
+	rows: uint,
+	cols: uint,
+
+	// Keyboard state
 	kbd: *chr::kbd,
 	shift: bool,
 	ctrl: bool,
+
+	// Pixel buffers
+	front: pixbuf,
+	back: pixbuf,
 };
 
-// Allocates a virtual terminal with the given [[fb_console]]. Will open
-// /dev/kbd if available.
-export fn tty_init(fb: *fb_console) void = {
+// Allocates a virtual terminal with the given [[chr::fb]]. Will open /dev/kbd
+// if available.
+export fn vt_init(fb: *chr::fb) *vt = {
 	const kbd = chr::lookup(dev::INPUT_MAJOR, dev::KBD_MINOR)!: *chr::kbd;
 
-	const tty = alloc(fb_tty {
+	// TODO:
+	// - s/WIDTH/FONT_WIDTH/g
+	// - Add vt to /dev/cons
+	const term = alloc(vt {
 		tty_iface = &tty_impl,
-		fb = fb,
 		kbd = kbd,
+		cols = fb.width / (WIDTH + 1),
+		rows = fb.height / HEIGHT,
 		...
 	});
-	chr::kbd_onproc(kbd, &tty_keyev, tty);
-	chr::tty_init(tty, false);
+	pixbuf_init_mapped(&term.front, fb);
+	pixbuf_init_back(&term.back, fb);
+	pixbuf_copy(&term.back, &term.front);
+
+	chr::kbd_onproc(kbd, &vt_keyev, term);
+	chr::tty_init(term, false);
+
+	return term;
 };
 
 const tty_impl = chr::tty_iface {
-	write = &tty_write,
-	getwinsz = &tty_getwinsz,
+	write = &vt_write,
+	getwinsz = &vt_getwinsz,
 };
 
-fn tty_write(tty: *chr::tty, buf: const []u8) (size | error) = {
-	const tty = tty: *fb_tty;
-	return fbcons_write(tty.fb, buf);
+fn vt_write(tty: *chr::tty, buf: const []u8) (size | error) = {
+	let vt = tty: *vt;
+
+	for (let i = 0z; i < len(buf); i += 1) {
+		vt_putc(vt, buf[i]: rune);
+	};
+
+	vt_present(vt);
+	return len(buf);
 };
 
-fn tty_getwinsz(tty: *chr::tty) (uint, uint) = {
-	const tty = tty: *fb_tty;
-	return (tty.fb.rows, tty.fb.cols);
+fn vt_getwinsz(tty: *chr::tty) (uint, uint) = {
+	const term = tty: *vt;
+	return (term.rows, term.cols);
 };
 
-fn tty_keyev(code: u32, state: key_state, user: nullable *opaque) void = {
-	let tty = user: *fb_tty;
+fn vt_keyev(code: u32, state: key_state, user: nullable *opaque) void = {
+	let term = user: *vt;
 
 	switch (code) {
 	case K_LFSH, K_RTSH =>
-		tty.shift = state == key_state::PRESSED;
+		term.shift = state == key_state::PRESSED;
 	case K_LCTL =>
-		tty.ctrl = state == key_state::PRESSED;
+		term.ctrl = state == key_state::PRESSED;
 	case => yield;
 	};
 
@@ -57,15 +83,53 @@ fn tty_keyev(code: u32, state: key_state, user: nullable *opaque) void = {
 		return;
 	};
 
-	const layer = if (tty.shift) 1 else 0;
+	const layer = if (term.shift) 1 else 0;
 	const sym = keysyms[keycode][layer];
 	if (sym == '\0') {
 		return;
 	};
-	if (sym == 'd' && tty.ctrl && !tty.shift) {
-		chr::tty_putc(tty, '\x04'); // EOF
+	if (sym == 'd' && term.ctrl && !term.shift) {
+		chr::tty_putc(term, '\x04'); // EOF
 		return;
 	};
 
-	chr::tty_putc(tty, sym: u8);
+	chr::tty_putc(term, sym: u8);
+};
+
+fn vt_putc(vt: *vt, char: rune) void = {
+	switch (char) {
+	case '\n' =>
+		vt.row += 1;
+		vt.col = 0;
+	case '\r' =>
+		vt.col = 0;
+	case '\t' =>
+		vt.col += 8 - vt.col % 8;
+	case '\b' =>
+		if (vt.col == 0) {
+			return;
+		};
+		vt.col -= 1;
+		const x = vt.col * (WIDTH + 1);
+		const y = vt.row * HEIGHT;
+		blitrect(&vt.back, x, y, WIDTH + 1, HEIGHT);
+	case =>
+		const x = vt.col * (WIDTH + 1);
+		const y = vt.row * HEIGHT;
+		blitrect(&vt.back, x, y, WIDTH + 1, HEIGHT);
+		blitchar(&vt.back, x, y, char);
+		vt.col += 1;
+	};
+	if (vt.col >= vt.cols) {
+		vt.col = 0;
+		vt.row += 1;
+	};
+	if (vt.row >= vt.rows) {
+		vt.row = vt.rows - 1;
+		scroll(&vt.back, HEIGHT);
+	};
+};
+
+fn vt_present(vt: *vt) void = {
+	pixbuf_copy(&vt.front, &vt.back);
 };

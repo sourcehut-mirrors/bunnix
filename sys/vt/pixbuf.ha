@@ -1,6 +1,9 @@
 use arch;
 use dev::chr;
+use mman;
 use rt;
+// XXX TEMP
+use log;
 
 export type pixbuf = struct {
 	fb: nullable *chr::fb,
@@ -12,6 +15,34 @@ fn pixbuf_init_ident(buf: *pixbuf, fb: *chr::fb) void = {
 	const addr = chr::fb_getphys(fb);
 	buf.data = arch::phys_tokernel(addr): *[*]u32;
 	buf.fb = fb;
+};
+
+// Initializes a pixel buffer by memory-mapping a framebuffer into the kernel.
+fn pixbuf_init_mapped(buf: *pixbuf, fb: *chr::fb) void = {
+	const data = chr::fb_map(fb, &mman::kernel, 0,
+		mman::prot::READ | mman::prot::WRITE)!: *[*]u32;
+	log::printfln("pixbuf init mapped {}", data);
+	buf.data = data;
+	buf.fb = fb;
+};
+
+// Initializes a memory-backed backbuffer for a framebuffer.
+fn pixbuf_init_back(buf: *pixbuf, fb: *chr::fb) void = {
+	const length = fb.stride * fb.height;
+	const data = mman::mmap(&mman::kernel, 0, 0, length,
+		mman::prot::READ | mman::prot::WRITE,
+		mman::flag::ANON)!: *[*]u32;
+	log::printfln("pixbuf init back {}", data);
+	buf.data = data;
+	buf.fb = fb;
+};
+
+fn pixbuf_copy(dest: *pixbuf, src: const *pixbuf) void = {
+	const fb = dest.fb as *chr::fb;
+	const src_data = src.data as *[*]u32;
+	const dest_data = dest.data as *[*]u32;
+	const length = (fb.stride * fb.height) / size(u32);
+	dest_data[..length] = src_data[..length];
 };
 
 fn pixbuf_clear(buf: *pixbuf) void = {
