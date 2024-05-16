@@ -33,7 +33,6 @@ const kbd_impl = chr::kbd_iface {
 };
 
 const ps2_kbd = chr::kbd {
-	iface = null: *chr::chardev_iface,
 	kbd_iface = &kbd_impl,
 	...
 };

@@ -9,7 +9,7 @@ def BUFSIZ: size = 1024;
 // TTY device.
 export type tty = struct {
 	chardev,
-	tty_iface: const *tty_iface,
+	tty_iface: const nullable *tty_iface,
 	buffer: []u8,
 	avail: []u8,
 	refs: int,
@@ -26,6 +26,7 @@ let ttys: []*tty = [];
 
 // Initializes a TTY.
 export fn tty_init(tty: *tty, serial: bool) void = {
+	assert(tty.tty_iface != null);
 	tty.iface = &tty_chardev_impl;
 	tty.major = dev::TTY_MAJOR;
 	tty.buffer = alloc([0...], BUFSIZ);
@@ -77,7 +78,8 @@ export fn tty_putc(tty: *tty, c: u8) void = {
 	// - RAW mode
 	// - NOECHO mode
 
-	tty.tty_iface.write(tty, [c])!;
+	const iface = tty.tty_iface as *tty_iface;
+	iface.write(tty, [c])!;
 
 	if (c == '\n' || len(tty.avail) == len(tty.buffer)) {
 		sched::wake(&tty.wq);
@@ -149,7 +151,8 @@ fn tty_read(tty: *io::file, buf: []u8) (size | io::EOF | error) = {
 fn tty_write(tty: *io::file, buf: const []u8) (size | error) = {
 	const file = tty: *tty_file;
 	const tty = file.tty;
-	return tty.tty_iface.write(tty, buf);
+	const iface = tty.tty_iface as *tty_iface;
+	return iface.write(tty, buf);
 };
 
 fn tty_finish(tty: *io::file) void = {

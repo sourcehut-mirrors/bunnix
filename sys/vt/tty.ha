@@ -16,8 +16,6 @@ export fn tty_init(fb: *fb_console) void = {
 	const kbd = chr::lookup(dev::INPUT_MAJOR, dev::KBD_MINOR)!: *chr::kbd;
 
 	const tty = alloc(fb_tty {
-		// Filled in by chr::tty_init
-		iface = null: *chr::chardev_iface,
 		tty_iface = &tty_impl,
 		fb = fb,
 		kbd = kbd,

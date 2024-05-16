@@ -17,29 +17,22 @@ let vgacons = vga_console {
 	...
 };
 
-let serialcons = serial_console {
-	vtable = null: *io::vtable,
+let serialdev = pcserial {
+	cons = chr::serialcons {
+		vtable = null: *io::vtable,
+		...
+	},
 	...
 };
 
-def MAX_EARLYCONS: uint = 2;
-let consolebuf: [MAX_EARLYCONS]*io::file = [null: *io::file...];
-let consoles: []*io::file = [];
-
 // Performs pre-MMU architecture-specific device initialization.
 export fn earlyinit(ctx: *boot::context) void = {
-	// TODO: This should be refactored a bit
-	consoles = consolebuf[..0];
-
-	serial_init(&serialcons, SERIAL_PORT_A);
-	static append(consoles, &serialcons);
+	serial_init(&serialdev, SERIAL_PORT_A);
 
 	if (ctx.fb.fb_base != 0) {
 		vt::fbcons_init(&fbcons, &ctx.fb);
-		static append(consoles, &fbcons);
 	} else {
 		vga_init(&vgacons);
-		static append(consoles, &vgacons);
 	};
 
 	rt::abortcons(&chr::cons_write);
