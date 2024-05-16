@@ -9,6 +9,7 @@ use vt;
 
 let fbcons = vt::fb_console {
 	vtable = null: *io::vtable,
+	fb = null: *chr::fb,
 	...
 };
 
@@ -34,7 +35,7 @@ export fn earlyinit(ctx: *boot::context) void = {
 	if (ctx.fb.fb_base != 0) {
 		const bootfb = &ctx.fb;
 		fbdev = chr::fb {
-			phys = bootfb.fb_base,
+			addr = bootfb.fb_base,
 			width = bootfb.width,
 			height = bootfb.height,
 			stride = bootfb.stride,
@@ -42,8 +43,7 @@ export fn earlyinit(ctx: *boot::context) void = {
 			...
 		};
 		chr::fb_init(&fbdev);
-
-		vt::fbcons_init(&fbcons, &ctx.fb);
+		vt::fbcons_init(&fbcons, &fbdev);
 	} else {
 		vga_init(&vgacons);
 	};

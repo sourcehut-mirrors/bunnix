@@ -10,11 +10,9 @@ use types;
 
 export type fb_console = struct {
 	io::file,
+	fb: *chr::fb,
 	front: uintptr,
 	back: uintptr,
-	width: uint,
-	height: uint,
-	stride: uint,
 	row: uint,
 	col: uint,
 	rows: uint,
@@ -31,24 +29,24 @@ export type fb_console = struct {
 };
 
 // Pre-MMU initialization
-export fn fbcons_init(cons: *fb_console, fb: *boot::bootfb) void = {
+export fn fbcons_init(cons: *fb_console, fb: *chr::fb) void = {
+	const addr = chr::fb_getphys(fb);
+
 	*cons = fb_console {
 		vtable = &fb_vtable,
-		front = arch::phys_tokernel(fb.fb_base): uintptr,
-		back = arch::phys_tokernel(fb.fb_base): uintptr,
-		width = fb.width,
-		height = fb.height,
-		stride = fb.stride,
+		fb = fb,
+		front = arch::phys_tokernel(addr): uintptr,
+		back = arch::phys_tokernel(addr): uintptr,
 		row = 0,
 		col = 0,
-		cols = fb.width / (WIDTH + 1): u32,
-		rows = fb.height / HEIGHT: u32,
+		cols = fb.width / (WIDTH + 1),
+		rows = fb.height / HEIGHT,
 		cursor = (-1, -1),
 		...
 	};
 
 	// Clear to black
-	rt::memset(cons.back: *opaque, 0, fb.fb_size);
+	rt::memset(cons.back: *opaque, 0, fb.height * fb.stride);
 
 	chr::cons_register(cons);
 
@@ -74,12 +72,10 @@ fn fbcons_tick(tick: u64, user: nullable *opaque) void = {
 export fn fbcons_lateinit(cons: *fb_console) void = {
 	assert(cons.front == cons.back);
 
-	const length = cons.stride * cons.height;
-	const front_phys = arch::kernel_tophys(cons.front: *opaque);
-	const front = mman::mmap(&mman::kernel,
-		front_phys, 0, length,
-		mman::prot::READ | mman::prot::WRITE,
-		mman::flag::WT | mman::flag::CD)!;
+	const fb = cons.fb;
+	const length = fb.stride * fb.height;
+	const front = chr::fb_map(fb, &mman::kernel, 0,
+		mman::prot::READ | mman::prot::WRITE)!;
 	const back = mman::mmap(&mman::kernel, 0, 0, length,
 		mman::prot::READ | mman::prot::WRITE,
 		mman::flag::ANON)!;
@@ -176,7 +172,8 @@ fn fbcons_putc(cons: *fb_console, char: rune) void = {
 
 fn fbcons_scroll(cons: *fb_console) void = {
 	let buffer = cons.back: *[*]u32;
-	const wstride = cons.stride / size(u32);
+	const fb = cons.fb;
+	const wstride = fb.stride / size(u32);
 
 	// Scroll buffer
 	const ncopy = HEIGHT * (cons.rows - 1) * wstride;
@@ -188,14 +185,16 @@ fn fbcons_scroll(cons: *fb_console) void = {
 	const start = HEIGHT * (cons.rows - 1) * wstride;
 	rt::memset(&buffer[start], 0, ncopy * size(u32));
 
-	fbcons_damage(cons, 0, 0, cons.width, cons.height);
+	const fb = cons.fb;
+	fbcons_damage(cons, 0, 0, fb.width, fb.height);
 };
 
 fn fbcons_clearcell(cons: *fb_console, x: uint, y: uint) void = {
+	const fb = cons.fb;
 	let buffer = cons.back: *[*]u32;
 	for (let gy = 0u; gy < HEIGHT; gy += 1) {
 		for (let gx = 0u; gx < WIDTH + 1; gx += 1) {
-			let pixel = &buffer[(y + gy) * (cons.stride / 4) + (x + gx)];
+			let pixel = &buffer[(y + gy) * (fb.stride / 4) + (x + gx)];
 			*pixel = 0;
 		};
 	};
@@ -215,12 +214,13 @@ fn fbcons_blitchar(
 	char: rune,
 	op: blit_op = blit_op::OVER,
 ) void = {
+	const fb = cons.fb;
 	let buffer = cons.back: *[*]u32;
 	const glyph = getchar(char);
 
 	for (let gy = 0u; gy < HEIGHT; gy += 1) {
 		for (let gx = 0u; gx < WIDTH + 1; gx += 1) {
-			let pixel = &buffer[(y + gy) * (cons.stride / 4) + (x + gx)];
+			let pixel = &buffer[(y + gy) * (fb.stride / 4) + (x + gx)];
 			const mask = 1 << (WIDTH - gx);
 			switch (op) {
 			case blit_op::OVER =>
@@ -277,10 +277,11 @@ fn fbcons_present(cons: *fb_console) void = {
 		return;
 	};
 
+	const fb = cons.fb;
 	let back = cons.back: *[*]u32;
 	let front = cons.front: *[*]u32;
 	for (let y = dmg.y; y < dmg.y + dmg.h; y += 1) {
-		const row_ix = y * (cons.stride / 4);
+		const row_ix = y * (fb.stride / 4);
 		const start = row_ix + dmg.x;
 		const end = row_ix + dmg.x + dmg.w;
 		front[start..end] = back[start..end];
