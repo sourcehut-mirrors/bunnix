@@ -1,8 +1,10 @@
+use arch;
 use dev;
 use dev::chr;
 use dev::chr::{key_state};
 use errors::{error, errno};
 use io;
+use sched;
 use types;
 
 export type vt = struct {
@@ -29,6 +31,11 @@ export type vt = struct {
 		rows: uint,
 		cols: uint,
 	},
+
+	// Cursor
+	cursor: (int, int),
+	cursor_shown: bool,
+	next_tick: u64,
 };
 
 // vt console device
@@ -48,6 +55,7 @@ export fn vt_init(fb: *chr::fb) *vt = {
 			vtable = &cons_impl,
 			...
 		},
+		cursor = (-1, -1),
 		...
 	});
 	pixbuf_init_mapped(&term.front, fb);
@@ -66,6 +74,9 @@ export fn vt_init(fb: *chr::fb) *vt = {
 	term.cons.dev = term;
 	chr::cons_register(&term.cons);
 
+	static let link = sched::tick_link { ... };
+	sched::ontick(&link, &vt_tick, term);
+
 	return term;
 };
 
@@ -76,10 +87,22 @@ const tty_impl = chr::tty_iface {
 
 fn vt_write(tty: *chr::tty, buf: const []u8) (size | error) = {
 	let vt = tty: *vt;
+	if (vt.cursor_shown) {
+		vt_blitcursor(vt);
+	};
 
 	for (let i = 0z; i < len(buf); i += 1) {
 		vt_putc(vt, buf[i]: rune);
 	};
+
+	vt.cursor = (vt.row: int, vt.col: int);
+	if (vt.cursor_shown) {
+		vt_blitcursor(vt);
+	} else {
+		vt.cursor_shown = true;
+		vt_blitcursor(vt);
+	};
+	vt.next_tick = arch::gettime() + arch::getrate();
 
 	vt_present(vt);
 	return len(buf);
@@ -129,10 +152,49 @@ fn vt_keyev(code: u32, state: key_state, user: nullable *opaque) void = {
 	chr::tty_putc(term, sym: u8);
 };
 
-fn vt_blitchar(vt: *vt, row: uint, col: uint, char: rune) void = {
+fn vt_tick(tick: u64, user: nullable *opaque) void = {
+	let vt = user: *vt;
+	const rate = arch::getrate();
+
+	if (tick < vt.next_tick) {
+		return;
+	};
+
+	vt.cursor_shown = !vt.cursor_shown;
+	vt_blitcursor(vt);
+	vt_present(vt);
+	vt.next_tick = tick + rate;
+};
+
+fn vt_movecursor(vt: *vt, row: int, col: int) void = {
+	vt_blitcursor(vt);
+	vt.cursor = (row, col);
+	vt_blitcursor(vt);
+};
+
+fn vt_blitchar(
+	vt: *vt,
+	row: uint,
+	col: uint,
+	char: rune,
+	color: u32 = 0xFFFFFFFF,
+	op: blit_op = blit_op::OVER,
+) void = {
 	const x = col * FONT_WIDTH;
 	const y = row * FONT_HEIGHT;
-	blitchar(&vt.back, x, y, char);
+	blitchar(&vt.back, x, y, char, color, op);
+};
+
+fn vt_blitcursor(vt: *vt) void = {
+	def COLOR: u32 = 0xFFFFFFFF;
+
+	const (row, col) = vt.cursor;
+	if (row != -1 && row != -1) {
+		const row = row: uint;
+		const col = col: uint;
+		vt_blitchar(vt, row, col, '_', COLOR, blit_op::XOR);
+		vt_damage(vt, row, col);
+	};
 };
 
 fn vt_putc(vt: *vt, char: rune) void = {
