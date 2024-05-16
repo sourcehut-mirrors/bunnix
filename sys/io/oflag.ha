@@ -1,14 +1,12 @@
 // Flags to use for opening a file. Not all operating systems support all flags;
 // at a minimum, RDONLY, WRONLY, RDWR, CREATE, and TRUNC will be supported.
-// Note that NOCTTY and CLOEXEC are on by default, and the CTTY/NOCLOEXEC flags
-// respectively disable them.
 export type flag = enum int {
 	RDONLY		= 0,
 	WRONLY		= 1,
 	RDWR		= 2,
 	CREATE		= 0o100,
 	EXCL		= 0o200,
-	CTTY		= 0o400,
+	NOCTTY		= 0o400,
 	TRUNC		= 0o1000,
 	APPEND		= 0o2000,
 	NONBLOCK	= 0o4000,

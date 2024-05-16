@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 // (c) Hare authors <https://harelang.org>
 
-fn mman::kisreadable(addr: uintptr, length: size) bool;
+fn mman::kisreadable(addr: *opaque, length: size) bool;
 
 // Details for a stack frame. Contents are architecture-specific.
 export type stackframe = struct {
@@ -15,7 +15,7 @@ export fn next(frame: stackframe) (stackframe | done) = {
 	case null =>
 		return done;
 	case let next: *stackframe =>
-		if (!mman::kisreadable(next: uintptr, size(stackframe))) {
+		if (!mman::kisreadable(next, size(stackframe))) {
 			return done;
 		};
 		if (next.fp == null) {

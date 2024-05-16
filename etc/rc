@@ -34,5 +34,8 @@ info "Starting user sessions"
 echo
 for tty in /dev/tty*
 do
+	# skip /dev/tty psuedo-device
+	[ "$tty" = "/dev/tty" ] && continue
+
 	getty $tty &
 done

@@ -67,6 +67,7 @@ export type sys = enum u64 {
 	MKNODAT,
 	BRK,
 	UTIMENSAT,
+	IOCTL,
 };
 
 export type syscall_handler = fn(u64, u64, u64, u64, u64) (u64 | error);
@@ -110,6 +111,7 @@ let systab: [_]*opaque = [
 	&sys_mknodat,
 	&sys_brk,
 	&sys_utimensat,
+	&sys_ioctl,
 ];
 
 const sysname = [
@@ -151,4 +153,5 @@ const sysname = [
 	"mknodat",
 	"brk",
 	"utimensat",
+	"ioctl",
 ];

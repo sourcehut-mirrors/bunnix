@@ -1,3 +1,4 @@
+use dev;
 use errors::{error, errno};
 use fs;
 use io;
@@ -172,7 +173,14 @@ fn sys_openat(opts: *openat_options) (u64 | error) = {
 		};
 	};
 
-	return proc::installfd(proc::current(), file, oflag, inode): u64;
+	let current = proc::current();
+	const is_tty = io::ischdev(inode.mode) &&
+		inode.rdev >> 32 == dev::TTY_MAJOR;
+	if (is_tty && current.ctty == 0 && oflag & io::flag::NOCTTY == 0) {
+		current.ctty = inode.rdev;
+	};
+
+	return proc::installfd(current, file, oflag, inode): u64;
 };
 
 fn sys_mkdirat(opts: *mkdirat_options) (u64 | error) = {
@@ -417,4 +425,9 @@ fn sys_utimensat(opts: *utimensat_options) (u64 | error) = {
 	io::inode_utimens(ino, opts.atime, opts.mtime)?;
 
 	return 0u64;
+};
+
+fn sys_ioctl(fd: i64, req: u64, arg: u64) (u64 | error) = {
+	const fd = validate_fd(fd)?;
+	return io::ioctl(fd.file as *io::file, req: uint, arg);
 };

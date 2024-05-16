@@ -11,8 +11,7 @@ fn validate_user_addr(
 	write: bool = false,
 	error: errno = errno::FAULT,
 ) (void | error) = {
-	const vmm = &proc::current().vmm;
-	if (!mman::isvalid(vmm, addr: uintptr, bytes, write)) {
+	if (!mman::isvalid(addr, bytes, write)) {
 		return error;
 	};
 };

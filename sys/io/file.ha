@@ -31,6 +31,7 @@ export type vtable = struct {
 	write: nullable *fn_file_write,
 	seek: nullable *fn_file_seek,
 	readdir: nullable *fn_file_readdir,
+	ioctl: nullable *fn_file_ioctl,
 	finish: nullable *fn_file_finish,
 };
 
@@ -42,14 +43,17 @@ export type fn_file_read = fn(s: *file, buf: []u8) (size | EOF | error);
 // validity within the current address space by the implementation.
 export type fn_file_write = fn(s: *file, buf: const []u8) (size | error);
 
-// Frees all resources associated with a file.
-export type fn_file_finish = fn(s: *file) void;
-
 // Seeks a file to the requested offset, returning the new offset.
 export type fn_file_seek = fn(s: *file, off: i64, w: whence) (i64 | error);
 
 // Reads the next directory from a file descriptor.
 export type fn_file_readdir = fn(fd: *file, dent: *dirent) (void | EOF | error);
+
+// Executes an ioctl operation on a file.
+export type fn_file_ioctl = fn(fd: *file, req: uint, arg: u64) (u64 | error);
+
+// Frees all resources associated with a file.
+export type fn_file_finish = fn(s: *file) void;
 
 // Performs a read on a [[file]]. The provided buffer is not checked for
 // validity within the current address space by the implementation.
@@ -95,6 +99,16 @@ export fn readdir(file: *file, dent: *dirent) (void | EOF | error) = {
 		return func(file, dent);
 	case null =>
 		return errno::NOTSUP;
+	};
+};
+
+// Executes an ioctl on this file descriptor.
+export fn ioctl(file: *file, req: uint, arg: u64) (u64 | error) = {
+	match (file.vtable.ioctl) {
+	case let func: *fn_file_ioctl =>
+		return func(file, req, arg);
+	case null =>
+		return errno::INVAL: error;
 	};
 };
 

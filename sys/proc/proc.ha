@@ -16,6 +16,7 @@ export type proc = struct {
 	fds: []filedesc,
 	creds: creds,
 	sig: sigproc,
+	ctty: u64,
 	args: []str,
 
 	// XXX HACK
@@ -69,6 +70,7 @@ export fn new_proc(
 		new_proc.creds = proc.creds;
 		new_proc.creds.pid = nextpid;
 		new_proc.creds.ppid = proc.creds.pid;
+		new_proc.ctty = proc.ctty;
 		append(proc.children, new_proc);
 	case null => void;
 	};
@@ -81,6 +83,11 @@ export fn new_proc(
 export fn current() *proc = {
 	const current = sched::current() as *sched::task;
 	return current.user: *proc;
+};
+
+// Returns the controlling TTY device number for the current process.
+export fn ctty() u64 = {
+	return current().ctty;
 };
 
 // Returns a process by its pid.

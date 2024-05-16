@@ -75,12 +75,12 @@ export fn resume_signal(task: *sched::task) bool = {
 	// Deliver signal
 	sched::prepare_task(task);
 
-	if (!mman::isvalid(&proc.vmm, sp, size(signal_stack), true)) {
+	let frame = sp: *signal_stack;
+	if (!mman::isvalid(frame, size(signal_stack), true, &proc.vmm)) {
 		// TODO: Exit with segfault
 		exit(1);
 	};
 
-	let frame = sp: *signal_stack;
 	frame.sigreturn = arch::SIGRETURN_MAGIC;
 	frame.ctx = task.ctx;
 	frame.restore = task.restore;
@@ -98,12 +98,14 @@ export fn return_signal(ctx: *arch::context) void = {
 	const proc = task.user: *proc;
 
 	let sp = arch::context_get_sp(ctx);
-	if (!mman::isvalid(&proc.vmm, sp, size(signal_stack), true)) {
-		abort(); // TODO: Do something here
-	};
 
 	sp -= size(uintptr): uintptr;
 	let frame = sp: *signal_stack;
+
+	if (!mman::isvalid(frame, size(signal_stack), true, &proc.vmm)) {
+		abort(); // TODO: Do something here
+	};
+
 	assert(frame.sigreturn == arch::SIGRETURN_MAGIC);
 	*ctx = frame.ctx;
 

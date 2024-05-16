@@ -20,6 +20,7 @@ export def URANDOM_MINOR: u32 = 3;
 // TTY_ALT_MAJOR
 
 export def CONS_MINOR: u32 = 0;
+export def DEVTTY_MINOR: u32 = 1;
 
 // TTY_MAJOR
 

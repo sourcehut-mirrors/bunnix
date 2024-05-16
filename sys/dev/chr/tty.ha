@@ -2,7 +2,11 @@ use dev;
 use errors::{error, errno};
 use fmt;
 use io;
+use mman;
 use sched;
+
+// Forward declaration
+fn proc::ctty() u64;
 
 def BUFSIZ: size = 1024;
 
@@ -15,6 +19,7 @@ export type tty = struct {
 	eof: bool,
 	refs: int,
 	wq: sched::wq_head,
+	tios: termios,
 };
 
 // TTY device implementation.
@@ -46,6 +51,44 @@ export fn tty_init(tty: *tty, serial: bool) void = {
 	append(ttys, tty);
 
 	register(tty);
+};
+
+// chardev for /dev/tty psuedo-device, opens the user's controlling terminal
+const devtty = chardev {
+	iface = &devtty_impl,
+	major = dev::TTY_ALT_MAJOR,
+	minor = dev::DEVTTY_MINOR,
+};
+
+const devtty_impl = chardev_iface {
+	open = &devtty_open,
+};
+
+fn devtty_open(cdev: *chardev) (*io::file | error) = {
+	const ctty = proc::ctty();
+	const major = (ctty >> 32): u32;
+	const minor = ctty: u32;
+	return open(major, minor);
+};
+
+// Populates /dev with TTY devices
+export fn mounttty(root: *io::inode) void = {
+	let namebuf: [32]u8 = [0...];
+	for (let tty .. ttys) {
+		const name = if (tty.minor >= dev::TTYS_MINOR) {
+			yield fmt::bsprintf(namebuf, "ttyS{}",
+				tty.minor - dev::TTYS_MINOR);
+		} else {
+			yield fmt::bsprintf(namebuf, "tty{}", tty.minor);
+		};
+
+		io::inode_mknod(root, name, 0o660 | io::mode::CHR,
+			dev::mkdev(tty.major, tty.minor))!;
+	};
+
+	register(&devtty);
+	io::inode_mknod(root, "tty", 0o660 | io::mode::CHR,
+		dev::mkdev(devtty.major, devtty.minor))!;
 };
 
 // Puts a character to this tty.
@@ -93,22 +136,6 @@ export fn tty_putc(tty: *tty, c: u8) void = {
 	};
 };
 
-// Populates /dev with TTY devices
-export fn mounttty(root: *io::inode) void = {
-	let namebuf: [32]u8 = [0...];
-	for (let tty .. ttys) {
-		const name = if (tty.minor >= dev::TTYS_MINOR) {
-			yield fmt::bsprintf(namebuf, "ttyS{}",
-				tty.minor - dev::TTYS_MINOR);
-		} else {
-			yield fmt::bsprintf(namebuf, "tty{}", tty.minor);
-		};
-
-		io::inode_mknod(root, name, 0o660 | io::mode::CHR,
-			dev::mkdev(tty.major, tty.minor))!;
-	};
-};
-
 const tty_chardev_impl = chardev_iface {
 	open = &tty_open,
 };
@@ -131,6 +158,7 @@ type tty_file = struct {
 const tty_file_impl = io::vtable {
 	read = &tty_read,
 	write = &tty_write,
+	ioctl = &tty_ioctl,
 	finish = &tty_finish,
 	...
 };
@@ -164,6 +192,40 @@ fn tty_write(tty: *io::file, buf: const []u8) (size | error) = {
 	const tty = file.tty;
 	const iface = tty.tty_iface as *tty_iface;
 	return iface.write(tty, buf);
+};
+
+fn tty_ioctl(tty: *io::file, req: uint, arg: u64) (u64 | error) = {
+	let file = tty: *tty_file;
+	let tty = file.tty;
+	const iface = tty.tty_iface as *tty_iface;
+
+	switch (req) {
+	case io::TIOCGWINSZ =>
+		let wsize = arg: uintptr: *winsize;
+		if (!mman::isvalid(wsize, size(winsize), true)) {
+			return errno::FAULT: error;
+		};
+		const (rows, cols) = iface.getwinsz(tty);
+		wsize.ws_row = rows: u16;
+		wsize.ws_col = cols: u16;
+		return 0u64;
+	case io::TCGETS =>
+		let tios = arg: uintptr: *termios;
+		if (!mman::isvalid(tios, size(termios), true)) {
+			return errno::FAULT: error;
+		};
+		*tios = tty.tios;
+		return 0u64;
+	case io::TCSETS, io::TCSETSW, io::TCSETSF =>
+		let tios = arg: uintptr: *termios;
+		if (!mman::isvalid(tios, size(termios))) {
+			return errno::FAULT: error;
+		};
+		tty.tios = *tios;
+		return 0u64;
+	case =>
+		return errno::INVAL: error;
+	};
 };
 
 fn tty_finish(tty: *io::file) void = {
