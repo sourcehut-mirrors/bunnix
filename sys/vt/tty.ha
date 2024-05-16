@@ -2,17 +2,18 @@ use dev;
 use dev::chr;
 use dev::chr::{key_state};
 use errors::{error, errno};
+use io;
 
 export type vt = struct {
 	chr::tty,
 
+	cons: vtcons,
 	row: uint,
 	col: uint,
 	rows: uint,
 	cols: uint,
 
 	// Keyboard state
-	kbd: *chr::kbd,
 	shift: bool,
 	ctrl: bool,
 
@@ -21,27 +22,42 @@ export type vt = struct {
 	back: pixbuf,
 };
 
+// vt console device
+export type vtcons = struct {
+	io::file,
+	dev: nullable *vt,
+};
+
 // Allocates a virtual terminal with the given [[chr::fb]]. Will open /dev/kbd
 // if available.
 export fn vt_init(fb: *chr::fb) *vt = {
-	const kbd = chr::lookup(dev::INPUT_MAJOR, dev::KBD_MINOR)!: *chr::kbd;
-
 	// TODO:
 	// - s/WIDTH/FONT_WIDTH/g
-	// - Add vt to /dev/cons
 	const term = alloc(vt {
 		tty_iface = &tty_impl,
-		kbd = kbd,
 		cols = fb.width / (WIDTH + 1),
 		rows = fb.height / HEIGHT,
+		cons = vtcons {
+			vtable = &cons_impl,
+			...
+		},
 		...
 	});
 	pixbuf_init_mapped(&term.front, fb);
 	pixbuf_init_back(&term.back, fb);
 	pixbuf_copy(&term.back, &term.front);
 
-	chr::kbd_onproc(kbd, &vt_keyev, term);
+	match (chr::lookup(dev::INPUT_MAJOR, dev::KBD_MINOR)) {
+	case let dev: *chr::chardev =>
+		const kbd = dev: *chr::kbd;
+		chr::kbd_onproc(kbd, &vt_keyev, term);
+	case => void;
+	};
+
 	chr::tty_init(term, false);
+
+	term.cons.dev = term;
+	chr::cons_register(&term.cons);
 
 	return term;
 };
@@ -65,6 +81,16 @@ fn vt_write(tty: *chr::tty, buf: const []u8) (size | error) = {
 fn vt_getwinsz(tty: *chr::tty) (uint, uint) = {
 	const term = tty: *vt;
 	return (term.rows, term.cols);
+};
+
+const cons_impl = io::vtable {
+	write = &vt_cons_write,
+	...
+};
+
+fn vt_cons_write(cons: *io::file, buf: const []u8) (size | error) = {
+	const cons = cons: *vtcons;
+	return vt_write(cons.dev as *vt, buf);
 };
 
 fn vt_keyev(code: u32, state: key_state, user: nullable *opaque) void = {
