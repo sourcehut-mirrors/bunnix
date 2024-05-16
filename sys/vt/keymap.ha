@@ -1,3 +1,5 @@
+// TODO: User-configurable keymaps
+
 // Loosely based on xkbcommon, only applies to US keyboard layouts
 def K_ESC: u32 = 9;
 def K_AE01: u32 = 10;

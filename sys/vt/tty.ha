@@ -8,6 +8,7 @@ export type fb_tty = struct {
 	fb: *fb_console,
 	kbd: *chr::kbd,
 	shift: bool,
+	ctrl: bool,
 };
 
 // Allocates a virtual terminal with the given [[fb_console]]. Will open
@@ -47,8 +48,7 @@ fn tty_keyev(code: u32, state: key_state, user: nullable *opaque) void = {
 	case K_LFSH, K_RTSH =>
 		tty.shift = state == key_state::PRESSED;
 	case K_LCTL =>
-		// TODO: ^D should send EOF
-		void;
+		tty.ctrl = state == key_state::PRESSED;
 	case => yield;
 	};
 
@@ -62,5 +62,10 @@ fn tty_keyev(code: u32, state: key_state, user: nullable *opaque) void = {
 	if (sym == '\0') {
 		return;
 	};
+	if (sym == 'd' && tty.ctrl && !tty.shift) {
+		chr::tty_putc(tty, '\x04'); // EOF
+		return;
+	};
+
 	chr::tty_putc(tty, sym: u8);
 };

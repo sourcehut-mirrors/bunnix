@@ -12,6 +12,7 @@ export type tty = struct {
 	tty_iface: const nullable *tty_iface,
 	buffer: []u8,
 	avail: []u8,
+	eof: bool,
 	refs: int,
 	wq: sched::wq_head,
 };
@@ -66,6 +67,12 @@ export fn tty_putc(tty: *tty, c: u8) void = {
 		};
 		static delete(tty.avail[len(tty.avail)-1]);
 		add = false;
+	case '\x04' =>
+		if (len(tty.avail) == 0) {
+			tty.eof = true;
+			sched::wake(&tty.wq);
+		};
+		return;
 	case => void;
 	};
 
@@ -133,8 +140,12 @@ fn tty_read(tty: *io::file, buf: []u8) (size | io::EOF | error) = {
 	const tty = file.tty;
 
 	let wq = sched::wq_link { ... };
-	for (len(tty.avail) == 0) {
+	for (len(tty.avail) == 0 && !tty.eof) {
 		sched::wait(&tty.wq, &wq);
+	};
+	if (tty.eof) {
+		tty.eof = false;
+		return io::EOF;
 	};
 
 	let ncopy = len(tty.avail);
