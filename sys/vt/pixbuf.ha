@@ -2,8 +2,6 @@ use arch;
 use dev::chr;
 use mman;
 use rt;
-// XXX TEMP
-use log;
 
 export type pixbuf = struct {
 	fb: nullable *chr::fb,
@@ -21,7 +19,6 @@ fn pixbuf_init_ident(buf: *pixbuf, fb: *chr::fb) void = {
 fn pixbuf_init_mapped(buf: *pixbuf, fb: *chr::fb) void = {
 	const data = chr::fb_map(fb, &mman::kernel, 0,
 		mman::prot::READ | mman::prot::WRITE)!: *[*]u32;
-	log::printfln("pixbuf init mapped {}", data);
 	buf.data = data;
 	buf.fb = fb;
 };
@@ -32,7 +29,6 @@ fn pixbuf_init_back(buf: *pixbuf, fb: *chr::fb) void = {
 	const data = mman::mmap(&mman::kernel, 0, 0, length,
 		mman::prot::READ | mman::prot::WRITE,
 		mman::flag::ANON)!: *[*]u32;
-	log::printfln("pixbuf init back {}", data);
 	buf.data = data;
 	buf.fb = fb;
 };
@@ -85,10 +81,10 @@ fn blitchar(
 	let data = buf.data as *[*]u32;
 
 	const glyph = getchar(char);
-	for (let gy = 0u; gy < HEIGHT; gy += 1) {
-		for (let gx = 0u; gx < WIDTH + 1; gx += 1) {
+	for (let gy = 0u; gy < FONT_HEIGHT; gy += 1) {
+		for (let gx = 0u; gx < FONT_WIDTH; gx += 1) {
 			let pixel = &data[(y + gy) * (fb.stride / 4) + (x + gx)];
-			const mask = 1 << (WIDTH - gx);
+			const mask = 1 << (FONT_WIDTH - FONT_HPAD - gx);
 			if (glyph[gy] & mask != 0) {
 				blitop(pixel, color, op);
 			};

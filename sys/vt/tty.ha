@@ -31,12 +31,10 @@ export type vtcons = struct {
 // Allocates a virtual terminal with the given [[chr::fb]]. Will open /dev/kbd
 // if available.
 export fn vt_init(fb: *chr::fb) *vt = {
-	// TODO:
-	// - s/WIDTH/FONT_WIDTH/g
 	const term = alloc(vt {
 		tty_iface = &tty_impl,
-		cols = fb.width / (WIDTH + 1),
-		rows = fb.height / HEIGHT,
+		cols = fb.width / FONT_WIDTH,
+		rows = fb.height / FONT_HEIGHT,
 		cons = vtcons {
 			vtable = &cons_impl,
 			...
@@ -136,13 +134,13 @@ fn vt_putc(vt: *vt, char: rune) void = {
 			return;
 		};
 		vt.col -= 1;
-		const x = vt.col * (WIDTH + 1);
-		const y = vt.row * HEIGHT;
-		blitrect(&vt.back, x, y, WIDTH + 1, HEIGHT);
+		const x = vt.col * FONT_WIDTH;
+		const y = vt.row * FONT_HEIGHT;
+		blitrect(&vt.back, x, y, FONT_WIDTH, FONT_HEIGHT);
 	case =>
-		const x = vt.col * (WIDTH + 1);
-		const y = vt.row * HEIGHT;
-		blitrect(&vt.back, x, y, WIDTH + 1, HEIGHT);
+		const x = vt.col * FONT_WIDTH;
+		const y = vt.row * FONT_HEIGHT;
+		blitrect(&vt.back, x, y, FONT_WIDTH, FONT_HEIGHT);
 		blitchar(&vt.back, x, y, char);
 		vt.col += 1;
 	};
@@ -152,7 +150,7 @@ fn vt_putc(vt: *vt, char: rune) void = {
 	};
 	if (vt.row >= vt.rows) {
 		vt.row = vt.rows - 1;
-		scroll(&vt.back, HEIGHT);
+		scroll(&vt.back, FONT_HEIGHT);
 	};
 };
 

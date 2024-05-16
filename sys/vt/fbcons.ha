@@ -20,8 +20,8 @@ export fn fbcons_init(cons: *fb_console, fb: *chr::fb) void = {
 
 	*cons = fb_console {
 		vtable = &fb_vtable,
-		cols = fb.width / (WIDTH + 1),
-		rows = fb.height / HEIGHT,
+		cols = fb.width / FONT_WIDTH,
+		rows = fb.height / FONT_HEIGHT,
 		...
 	};
 	pixbuf_init_ident(&cons.pixbuf, fb);
@@ -64,13 +64,13 @@ fn fbcons_putc(cons: *fb_console, char: rune) void = {
 			return;
 		};
 		cons.col -= 1;
-		const x = cons.col * (WIDTH + 1);
-		const y = cons.row * HEIGHT;
-		blitrect(&cons.pixbuf, x, y, WIDTH + 1, HEIGHT);
+		const x = cons.col * FONT_WIDTH;
+		const y = cons.row * FONT_HEIGHT;
+		blitrect(&cons.pixbuf, x, y, FONT_WIDTH, FONT_HEIGHT);
 	case =>
-		const x = cons.col * (WIDTH + 1);
-		const y = cons.row * HEIGHT;
-		blitrect(&cons.pixbuf, x, y, WIDTH + 1, HEIGHT);
+		const x = cons.col * FONT_WIDTH;
+		const y = cons.row * FONT_HEIGHT;
+		blitrect(&cons.pixbuf, x, y, FONT_WIDTH, FONT_HEIGHT);
 		blitchar(&cons.pixbuf, x, y, char);
 		cons.col += 1;
 	};
@@ -80,6 +80,6 @@ fn fbcons_putc(cons: *fb_console, char: rune) void = {
 	};
 	if (cons.row >= cons.rows) {
 		cons.row = cons.rows - 1;
-		scroll(&cons.pixbuf, HEIGHT);
+		scroll(&cons.pixbuf, FONT_HEIGHT);
 	};
 };

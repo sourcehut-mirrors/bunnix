@@ -1,7 +1,8 @@
 let @symbol("_binary_vt_alt_8x16_start") font_data: [*]u8;
 
-export def WIDTH: uint = 8;
-export def HEIGHT: uint = 16;
+export def FONT_WIDTH: uint = 9;
+export def FONT_HPAD: uint = 1;
+export def FONT_HEIGHT: uint = 16;
 
 // TODO: Map some non-ascii characters
 def FALLBACK: u8 = 254; // ■
