@@ -32,6 +32,7 @@ export type vtable = struct {
 	seek: nullable *fn_file_seek,
 	readdir: nullable *fn_file_readdir,
 	ioctl: nullable *fn_file_ioctl,
+	mmap: nullable *fn_file_mmap,
 	finish: nullable *fn_file_finish,
 };
 
@@ -51,6 +52,17 @@ export type fn_file_readdir = fn(fd: *file, dent: *dirent) (void | EOF | error);
 
 // Executes an ioctl operation on a file.
 export type fn_file_ioctl = fn(fd: *file, req: uint, arg: u64) (u64 | error);
+
+// Executes an mmap operation on a file.
+export type fn_file_mmap = fn(
+	fd: *file,
+	vmm: *opaque,
+	addr: uintptr,
+	length: size,
+	prot: int,
+	flags: int,
+	offs: i64,
+) (uintptr | error);
 
 // Frees all resources associated with a file.
 export type fn_file_finish = fn(s: *file) void;
@@ -109,6 +121,23 @@ export fn ioctl(file: *file, req: uint, arg: u64) (u64 | error) = {
 		return func(file, req, arg);
 	case null =>
 		return errno::INVAL: error;
+	};
+};
+
+export fn mmap(
+	file: *file,
+	vmm: *opaque,
+	addr: uintptr,
+	length: size,
+	prot: int,
+	flags: int,
+	offs: i64,
+) (uintptr | error) = {
+	match (file.vtable.mmap) {
+	case let func: *fn_file_mmap =>
+		return func(file, vmm, addr, length, prot, flags, offs);
+	case null =>
+		return errno::ACCES;
 	};
 };
 

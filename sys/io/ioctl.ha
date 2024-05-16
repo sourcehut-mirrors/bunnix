@@ -96,3 +96,5 @@ export def SIOCGPGRP: uint = 0x8904;
 export def SIOCATMARK: uint = 0x8905;
 export def SIOCGSTAMP: uint = 0x8906;
 export def SIOCGSTAMPNS: uint = 0x8907;
+
+export def FBIOGET_VSCREENINFO: uint = 0x4600;

@@ -1,4 +1,5 @@
 use errors::{error, errno};
+use io;
 use mman;
 use proc;
 
@@ -6,18 +7,28 @@ fn sys_mmap(opts: *mmap_options) (u64 | error) = {
 	validate_user_addr(opts, size(mmap_options), false)?;
 
 	const flag = opts.flags: mman::flag & mman::flag::USER_MASK;
-	assert(flag & mman::flag::ANON != 0); // TODO
-
 	const vmm = &proc::current().vmm;
-	const uptr = mman::mmap(
-		vmm,
-		0,
+
+	if (flag & mman::flag::ANON != 0) {
+		const uptr = mman::mmap(
+			vmm,
+			0,
+			opts.addr: uintptr,
+			opts.length,
+			opts.prot: mman::prot,
+			flag | mman::flag::USER,
+		)?;
+		return uptr: u64;
+	};
+
+	const file = validate_file(opts.fd,
+		opts.prot: mman::prot & mman::prot::WRITE != 0)?;
+	return io::mmap(file, vmm,
 		opts.addr: uintptr,
 		opts.length,
-		opts.prot: mman::prot,
-		flag | mman::flag::USER,
-	)?;
-	return uptr: u64;
+		opts.prot,
+		flag: int,
+		opts.offs)?: uintptr;
 };
 
 fn sys_munmap(addr: *opaque, length: size) (u64 | error) = {

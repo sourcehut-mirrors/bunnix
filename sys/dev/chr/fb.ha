@@ -89,9 +89,63 @@ type fb_file = struct {
 };
 
 const fb_file_impl = io::vtable {
-	// TODO: mmap goes here
+	ioctl = &fb_ioctl,
+	mmap = &fb_mmap,
 	finish = &fb_finish,
 	...
+};
+
+type screeninfo = struct {
+	width: uint,
+	height: uint,
+	stride: uint,
+	format: pixel_format,
+};
+
+fn fb_ioctl(file: *io::file, req: uint, arg: u64) (u64 | error) = {
+	let file = file: *fb_file;
+	let fb = file.dev;
+
+	switch (req) {
+	case io::FBIOGET_VSCREENINFO =>
+		let info = arg: uintptr: *screeninfo;
+		if (!mman::isvalid(info, size(screeninfo), true)) {
+			return errno::FAULT: error;
+		};
+		*info = screeninfo {
+			width = fb.width,
+			height = fb.height,
+			stride = fb.stride,
+			format = fb.format,
+		};
+		return 0u64;
+	case =>
+		return errno::INVAL: error;
+	};
+};
+
+fn fb_mmap(
+	file: *io::file,
+	vmm: *opaque,
+	addr: uintptr,
+	length: size,
+	prot: int,
+	flags: int,
+	offs: i64,
+) (uintptr | error) = {
+	const file = file: *fb_file;
+	const fb = file.dev;
+	if (length > fb.height * fb.stride) {
+		return errno::INVAL;
+	};
+
+	const flag = flags: mman::flag
+		| mman::flag::WT
+		| mman::flag::CD
+		| mman::flag::USER;
+	return mman::mmap(vmm: *mman::vmm,
+		fb.addr, addr, length,
+		prot: mman::prot, flag);
 };
 
 fn fb_finish(file: *io::file) void = {

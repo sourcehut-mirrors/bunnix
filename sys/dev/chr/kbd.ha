@@ -1,7 +1,6 @@
 use dev;
 use errors::{error, errno};
 use io;
-use log;
 use sched;
 
 def KBD_KEYBUF_SZ: size = 32;
@@ -67,13 +66,15 @@ export fn kbd_onproc(
 
 // Process input from a keyboard device.
 export fn kbd_keyproc(kbd: *kbd, scancode: u32, state: key_state) void = {
-	match (kbd.onproc) {
-	case let func: *kbd_onproc_cb =>
-		func(scancode, state, kbd.onproc_user);
-	case null => void;
-	};
-
 	if (kbd.refs == 0) {
+		// Only pass through to kernel users if there is no userspace
+		// user at the moment
+		match (kbd.onproc) {
+		case let func: *kbd_onproc_cb =>
+			func(scancode, state, kbd.onproc_user);
+		case null => void;
+		};
+
 		// Don't buffer keyboard events if there's no one to read them
 		return;
 	};
@@ -126,10 +127,15 @@ fn kbd_read(file: *io::file, buf: []u8) (size | io::EOF | error) = {
 		return errno::INVAL: error;
 	};
 
-	let wait = sched::wq_link { ... };
-	for (len(kbd.buf) == 0) {
-		sched::wait(&kbd.wq, &wait);
+	// TODO: Proper O_NONBLOCK support
+	if (len(kbd.buf) == 0) {
+		return errno::AGAIN: error;
 	};
+
+	//let wait = sched::wq_link { ... };
+	//for (len(kbd.buf) == 0) {
+	//	sched::wait(&kbd.wq, &wait);
+	//};
 
 	let n = 0z;
 	let events = (buf: *[*]kbd_evdata)[..len(buf) / size(kbd_evdata)];
