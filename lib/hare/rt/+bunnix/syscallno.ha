@@ -39,4 +39,5 @@ export type sys = enum u64 {
 	MKNODAT,
 	BRK,
 	UTIMENSAT,
+	IOCTL,
 };
