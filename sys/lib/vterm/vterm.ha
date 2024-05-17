@@ -192,12 +192,10 @@ export @symbol("vterm_state_reset") fn vterm_state_reset(*VTermState, int) void;
 export @symbol("vterm_screen_enable_altscreen") fn vterm_screen_enable_altscreen(*VTermScreen, int) void;
 
 export type VTermDamageSize = enum size {
-	VTERM_DAMAGE_CELL,
-	VTERM_DAMAGE_ROW,
-	VTERM_DAMAGE_SCREEN,
-	VTERM_DAMAGE_SCROLL,
-
-	VTERM_N_DAMAGES
+	CELL,
+	ROW,
+	SCREEN,
+	SCROLL,
 };
 
 export @symbol("vterm_screen_set_damage_merge") fn vterm_screen_set_damage_merge(*VTermScreen, VTermDamageSize) void;

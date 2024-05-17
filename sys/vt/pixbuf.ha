@@ -51,16 +51,37 @@ fn pixbuf_copy(dest: *pixbuf, src: const *pixbuf) void = {
 fn pixbuf_copyrect(
 	dest: *pixbuf,
 	src: const *pixbuf,
-	rect: const *rect,
+	dest_rect: const *rect,
+	src_rect: const nullable *rect = null,
 ) void = {
-	const fb = dest.fb as *chr::fb;
+	const src_rect = match (src_rect) {
+	case let r: const *rect =>
+		yield r;
+	case null =>
+		yield dest_rect;
+	};
+
+	assert(src_rect.w == dest_rect.w
+		&& src_rect.h == dest_rect.h);
+
+	const src_fb = dest.fb as *chr::fb;
+	const dest_fb = dest.fb as *chr::fb;
+	const src = src.data as *[*]u32;
 	let dest = dest.data as *[*]u32;
-	let src = src.data as *[*]u32;
-	for (let y = rect.y; y < rect.y + rect.h; y += 1) {
-		const row_ix = y * (fb.stride / 4);
-		const start = row_ix + rect.x;
-		const end = row_ix + rect.x + rect.w;
-		dest[start..end] = src[start..end];
+	const sstride = src_fb.stride / 4;
+	const dstride = dest_fb.stride / 4;
+	for (let y = 0u; y < src_rect.h; y += 1) {
+		const src_y = y + src_rect.y;
+		const src_ix = src_y * sstride;
+		const src_start = src_ix + src_rect.x;
+		const src_end = src_ix + src_rect.x + src_rect.w;
+
+		const dest_y = y + dest_rect.y;
+		const dest_ix = dest_y * dstride;
+		const dest_start = dest_ix + dest_rect.x;
+		const dest_end = dest_ix + dest_rect.x + dest_rect.w;
+
+		dest[dest_start..dest_end] = src[src_start..src_end];
 	};
 };
 
@@ -100,19 +121,19 @@ fn blitchar(
 	color: u32 = 0xFFFFFFFF,
 	op: blit_op = blit_op::OVER,
 ) void = {
+	def FONT_PXWIDTH = FONT_WIDTH - FONT_HPAD;
+
 	const fb = buf.fb as *chr::fb;
 	let data = buf.data as *[*]u32;
+	const wstride = fb.stride / 4;
 
 	const glyph = getchar(char);
-	for (let gy = 0u; gy < FONT_HEIGHT; gy += 1) {
-		for (let gx = 0u; gx < FONT_WIDTH; gx += 1) {
-			let pixel = &data[(y + gy) * (fb.stride / 4) + (x + gx)];
-			const mask = 1 << (FONT_WIDTH - FONT_HPAD - gx);
-			if (glyph[gy] & mask != 0) {
-				blitop(pixel, color, op);
-			} else {
-				blitop(pixel, 0, op);
-			};
+	for (let gy = 0u; gy < FONT_HEIGHT; gy += 1)
+	for (let gx = 0u; gx < FONT_PXWIDTH; gx += 1) {
+		let pixel = &data[(y + gy) * wstride + (x + gx)];
+		const mask = 1 << (FONT_PXWIDTH - gx);
+		if (glyph[gy] & mask != 0) {
+			blitop(pixel, color, op);
 		};
 	};
 };

@@ -47,6 +47,7 @@ export type vt = struct {
 	cursor: (int, int),
 	cursor_shown: bool,
 	next_tick: u64,
+	last_present: u64,
 };
 
 // vt console device
@@ -73,6 +74,7 @@ export fn vt_init(fb: *chr::fb) *vt = {
 	const vscreen = vterm::vterm_obtain_screen(vterm);
 	vterm::vterm_screen_reset(vscreen, 1);
 	vterm::vterm_screen_enable_altscreen(vscreen, 1);
+	vterm::vterm_screen_set_damage_merge(vscreen, vterm::VTermDamageSize::SCROLL);
 
 	const term = alloc(vt {
 		tty_iface = &tty_impl,
@@ -89,7 +91,10 @@ export fn vt_init(fb: *chr::fb) *vt = {
 	});
 	pixbuf_init_mapped(&term.front, fb);
 	pixbuf_init_back(&term.back, fb);
-	pixbuf_copy(&term.back, &term.front);
+
+	// Erase the front buffer
+	// TODO: Preserve and/or replay early console
+	pixbuf_copy(&term.front, &term.front);
 
 	term.vscreen = vscreen;
 	term.vterm = vterm;
@@ -151,7 +156,23 @@ fn vterm_moverect(
 	src: vterm::VTermRect,
 	user: nullable *opaque,
 ) int = {
-	abort(); // TODO
+	const vt = user: *vt;
+	const src_rect = &rect {
+		x = src.start_col: uint * FONT_WIDTH,
+		y = src.start_row: uint * FONT_HEIGHT,
+		w = (src.end_col - src.start_col): uint * FONT_WIDTH,
+		h = (src.end_row - src.start_row): uint * FONT_HEIGHT,
+	};
+	const dest_rect = &rect {
+		x = dest.start_col: uint * FONT_WIDTH,
+		y = dest.start_row: uint * FONT_HEIGHT,
+		w = (dest.end_col - dest.start_col): uint * FONT_WIDTH,
+		h = (dest.end_row - dest.start_row): uint * FONT_HEIGHT,
+	};
+	pixbuf_copyrect(&vt.back, &vt.back, src_rect, dest_rect);
+	vterm_damage(src, vt);
+	vterm_damage(dest, vt);
+	return 1;
 };
 
 fn vterm_movecursor(
@@ -181,7 +202,10 @@ fn vt_write(tty: *chr::tty, buf: const []u8) (size | error) = {
 		};
 	};
 
-	vt_present(vt);
+	if (vt.last_present == 0) {
+		vt_present(vt);
+	};
+
 	return len(buf);
 };
 
@@ -233,14 +257,12 @@ fn vt_tick(tick: u64, user: nullable *opaque) void = {
 	let vt = user: *vt;
 	const rate = arch::getrate();
 
-	if (tick < vt.next_tick) {
-		return;
+	// Present no faster than 24 Hz
+	const ellapsed = tick - vt.last_present;
+	const deadline = rate / 24;
+	if (ellapsed > deadline) {
+		vt_present(vt);
 	};
-
-	//vt.cursor_shown = !vt.cursor_shown;
-	//vt_blitcursor(vt);
-	//vt_present(vt);
-	vt.next_tick = tick + rate;
 };
 
 fn vt_blitchar(
@@ -296,6 +318,8 @@ fn vt_damage(
 };
 
 fn vt_present(vt: *vt) void = {
+	vt.last_present = arch::gettime();
+
 	const vscreen = vt.vscreen;
 	vterm::vterm_screen_flush_damage(vscreen);
 

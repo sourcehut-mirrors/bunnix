@@ -27,6 +27,7 @@ export type sig = enum int {
 	SIGPROF,
 	SIGSYS,
 	SIGTRAP,
+	SIGWINCH,
 	SIGURG,
 	SIGVTALRM,
 	SIGXCPU,

@@ -5,6 +5,7 @@ use arch::x86_64::{PAGESIZE, UPAGESIZE, PADDR_MASK};
 use bytes;
 use errors::{error, errno};
 
+def HIGH_MASK: uintptr = ((1 << 48) - 1): uintptr;
 def UBRK_INIT: uintptr = 0x400000000000u64: uintptr;
 def GUARD: uintptr = UPAGESIZE * 2;
 
@@ -101,6 +102,8 @@ export fn mmap(
 	const mflag = pte::P;
 	if (flags & flag::USER != 0) {
 		mflag |= pte::U;
+	} else if (vaddr & ~HIGH_MASK != 0) {
+		mflag |= pte::G;
 	};
 	if (flags & flag::CD != 0) {
 		mflag |= pte::PCD;
@@ -206,7 +209,6 @@ export fn mprotect(
 
 fn map_tables(vmm: *vmm, vaddr: uintptr) (*pte | error) = {
 	// Mask out higher half addresses
-	def HIGH_MASK: uintptr = ((1 << 48) - 1): uintptr;
 	vaddr = vaddr & HIGH_MASK;
 
 	const pml4i = vaddr >> 39;
