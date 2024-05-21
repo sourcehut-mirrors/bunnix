@@ -21,3 +21,4 @@ config.mk
 /vendor/lolcat/lolcat
 /vendor/lolcat/censor
 /bin/awk
+/bin/lolcat
