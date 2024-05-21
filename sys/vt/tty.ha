@@ -29,6 +29,7 @@ export type vt = struct {
 	ctrl: bool,
 
 	// Pixel buffers
+	fb: *chr::fb,
 	front: pixbuf,
 	back: pixbuf,
 
@@ -78,6 +79,7 @@ export fn vt_init(fb: *chr::fb) *vt = {
 
 	const term = alloc(vt {
 		tty_iface = &tty_impl,
+		fb = fb,
 		rows = rows,
 		cols = cols,
 		cons = vtcons {
@@ -369,6 +371,11 @@ fn vt_damage(
 
 fn vt_present(vt: *vt) void = {
 	vt.last_present = arch::gettime();
+
+	// If userspace holds a fb reference, do not present
+	if (vt.fb.refs != 0) {
+		return;
+	};
 
 	const vscreen = vt.vscreen;
 	vterm::vterm_screen_flush_damage(vscreen);

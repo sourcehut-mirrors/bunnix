@@ -12,6 +12,7 @@ export type fb = struct {
 	height: uint,
 	stride: uint,
 	format: pixel_format,
+	refs: uint,
 };
 
 // Framebuffer pixel format.
@@ -76,6 +77,7 @@ const fb_chardev_impl = chardev_iface {
 
 fn fb_open(cdev: *chardev) (*io::file | error) = {
 	let dev = cdev: *fb;
+	dev.refs += 1;
 	return alloc(fb_file {
 		vtable = &fb_file_impl,
 		dev = dev,
@@ -150,5 +152,6 @@ fn fb_mmap(
 
 fn fb_finish(file: *io::file) void = {
 	let fb = file: *fb_file;
+	fb.dev.refs -= 1;
 	free(fb);
 };

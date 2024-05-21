@@ -32,7 +32,7 @@ export type inode = struct {
 };
 
 // Opens an inode file.
-export type fn_inode_open = fn(ino: *inode) (*file | error);
+export type fn_inode_open = fn(ino: *inode, flag: flag) (*file | error);
 
 // Looks up a child of this inode.
 export type fn_inode_lookup = fn(ino: *inode, name: str) (*inode | error);
@@ -90,10 +90,10 @@ export type inode_iface = struct {
 };
 
 // Opens an inode as a file.
-export fn inode_open(ino: *inode) (*file | error) = {
+export fn inode_open(ino: *inode, flag: flag) (*file | error) = {
 	match (ino.impl.open) {
 	case let func: *fn_inode_open =>
-		return func(ino);
+		return func(ino, flag & FILE_FLAG_MASK);
 	case null =>
 		return errno::NOTSUP;
 	};

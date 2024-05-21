@@ -6,18 +6,21 @@ use io;
 // Opens a character device file.
 export fn openchr(
 	rdev: u64,
+	flag: io::flag,
 	inode: nullable *io::inode = null,
 ) (*io::file | error) = {
 	const major = (rdev >> 32): u32;
 	const minor = rdev: u32;
 	let file = chr::open(major, minor)?;
 	file.inode = inode;
+	file.flag = flag;
 	return file;
 };
 
 // Opens a block device file.
 export fn openblk(
 	rdev: u64,
+	flag: io::flag,
 	inode: nullable *io::inode = null,
 ) (*io::file | error) = {
 	const major = (rdev >> 32): u32;
@@ -25,5 +28,6 @@ export fn openblk(
 	const bdev = block::opendev(major, minor)?;
 	let file = block::openfile(bdev);
 	file.inode = inode;
+	file.flag = flag;
 	return file;
 };

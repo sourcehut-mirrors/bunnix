@@ -13,7 +13,16 @@ export type file = struct {
 	// Note: refs is zero when there is one reference held, it will be
 	// finished when unrefed
 	refs: uint,
+	// Open flags, subject to FILE_FLAG_MASK
+	flag: flag,
 };
+
+// Open flags stored on [[file]] which are relevant to filesystem drivers; other
+// flags are handled in uapi.
+export def FILE_FLAG_MASK: flag =
+	flag::NONBLOCK |
+	flag::SYNC |
+	flag::DSYNC;
 
 // Indicates an end-of-file condition.
 export type EOF = done;

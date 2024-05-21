@@ -86,8 +86,8 @@ const inode_dir_impl = io::inode_iface {
 	...
 };
 
-fn inode_open(ino: *io::inode) (*io::file | error) = {
-	return mkfile(ino: *inode);
+fn inode_open(ino: *io::inode, flag: io::flag) (*io::file | error) = {
+	return mkfile(ino: *inode, flag);
 };
 
 fn inode_trunc(ino: *io::inode, length: size) (void | error) = {

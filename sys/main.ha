@@ -103,12 +103,12 @@ export fn main(ctx: *boot::context) void = {
 	const (inode, _) = fs::walk(root, init)!;
 
 	const consdev = dev::mkdev(dev::TTY_ALT_MAJOR, dev::CONS_MINOR);
-	const cons = fs::openchr(consdev)!;
+	const cons = fs::openchr(consdev, 0)!;
 	proc::installfd(proc, cons);	// stdin
 	proc::installfd(proc, cons);	// stdout
 	proc::installfd(proc, cons);	// stderr
 
-	const file = io::inode_open(inode)!;
+	const file = io::inode_open(inode, 0)!;
 
 	args[0] = init;
 	match (proc::exec(proc, file, args, [])) {

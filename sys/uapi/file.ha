@@ -153,7 +153,7 @@ fn sys_openat(opts: *openat_options) (u64 | error) = {
 		return errno::ISDIR: error;
 	};
 
-	const file = io::inode_open(inode)?;
+	const file = io::inode_open(inode, oflag)?;
 
 	if (oflag & io::flag::TRUNC != 0) {
 		match (io::inode_trunc(inode, 0)) {

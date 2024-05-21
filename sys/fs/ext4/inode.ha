@@ -63,8 +63,8 @@ const inode_impl = io::inode_iface {
 	...
 };
 
-fn ext4_inode_open(ino: *io::inode) (*io::file | error) = {
-	return mkfile(ino: *inode);
+fn ext4_inode_open(ino: *io::inode, flag: io::flag) (*io::file | error) = {
+	return mkfile(ino: *inode, flag);
 };
 
 fn ext4_inode_create(

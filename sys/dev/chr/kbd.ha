@@ -2,6 +2,8 @@ use dev;
 use errors::{error, errno};
 use io;
 use sched;
+// XXX TEMP
+use log;
 
 def KBD_KEYBUF_SZ: size = 32;
 
@@ -127,15 +129,14 @@ fn kbd_read(file: *io::file, buf: []u8) (size | io::EOF | error) = {
 		return errno::INVAL: error;
 	};
 
-	// TODO: Proper O_NONBLOCK support
-	if (len(kbd.buf) == 0) {
+	if (file.flag & io::flag::NONBLOCK != 0 && len(kbd.buf) == 0) {
 		return errno::AGAIN: error;
 	};
 
-	//let wait = sched::wq_link { ... };
-	//for (len(kbd.buf) == 0) {
-	//	sched::wait(&kbd.wq, &wait);
-	//};
+	let wait = sched::wq_link { ... };
+	for (len(kbd.buf) == 0) {
+		sched::wait(&kbd.wq, &wait);
+	};
 
 	let n = 0z;
 	let events = (buf: *[*]kbd_evdata)[..len(buf) / size(kbd_evdata)];

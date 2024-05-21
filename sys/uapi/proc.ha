@@ -101,7 +101,7 @@ fn sys_execve(opts: *exec_options) (u64 | error) = {
 		validate_user_string(opts.path)?;
 		// TODO: Should we have an fexecveat?
 		const (inode, _) = atwalk(AT_FDCWD, opts.path)?;
-		yield io::inode_open(inode)!;
+		yield io::inode_open(inode, 0)!;
 	};
 
 	// TODO:
