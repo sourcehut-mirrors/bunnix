@@ -74,10 +74,9 @@ fn mmap_init(mb: *mb::multiboot) void = {
 		boot::mtype::LOADER_DATA_RUNTIME,
 	);
 
-	// Skip the first module (i.e. the kernel)
 	const mods = mb.mods_addr: uintptr: *[*]mb::module;
 	const mods = mods[..mb.mods_count];
-	for (let i = 1z; i < len(mods); i += 1) {
+	for (let i = 0z; i < len(mods); i += 1) {
 		const mod = &mods[i];
 		mmap_reclassify(
 			mod.start: uintptr,
@@ -101,31 +100,51 @@ fn mmap_reclassify(start: uintptr, end: uintptr, kind: boot::mtype) void = {
 	const npage = ((end - start) / x86_64::UPAGESIZE): size;
 	for (let i = 0z; i < len(mmap); i += 1) {
 		const entry = mmap[i];
-		const estart = entry.phys;
-		const eend = entry.phys + entry.pages: uintptr * x86_64::UPAGESIZE;
-		if (estart <= start && end <= eend) {
-			mmap[i] = boot::marea {
-				phys = start,
-				pages = npage,
-				mtype = kind,
-			};
-			if (end != eend) {
-				static insert(mmap[i+1], boot::marea {
-					phys = end,
-					pages = ((eend - end) / x86_64::UPAGESIZE): size,
-					mtype = entry.mtype,
-				});
-			};
-			if (start != estart) {
-				static insert(mmap[i], boot::marea {
-					phys = estart,
-					pages = ((end - estart) / x86_64::UPAGESIZE): size,
-					mtype = entry.mtype,
-				});
-			};
-			return;
+		let rstart = entry.phys;
+		let rend = entry.phys + (entry.pages * x86_64::PAGESIZE): uintptr;
+		const rst_orig = rstart, rend_orig = rend;
+		if (start >= rend || end <= rstart) {
+			// Memory regions do not overlap
+			continue;
+		};
+		if (rstart >= start && rend <= end) {
+			// Memory region is entirely located within reclassified
+			// memory area
+			static delete(mmap[i]);
+			continue;
+		};
+
+		// Apply changes to rstart and rend as computed by remainder of
+		// this algorithm
+		defer mmap[i] = boot::marea {
+			phys = rstart,
+			pages = ((rend - rstart) / x86_64::UPAGESIZE): size,
+			mtype = entry.mtype,
+		};
+
+		if (rstart >= start) {
+			rstart = end;
+		};
+		if (rend <= end) {
+			rend = start;
+		};
+
+		if (rst_orig < start && end < rend_orig) {
+			// Reclassified region is entirely contained within the
+			// original region, which has now been shrunk to the
+			// left, and we have to insert a new memory area of the
+			// original classification to the right.
+			static insert(mmap[i+1], boot::marea {
+				phys = end,
+				pages = ((rend - end) / x86_64::UPAGESIZE): size,
+				mtype = entry.mtype,
+			});
 		};
 	};
 
-	abort("weird memory layout, bailing out");
+	static append(mmap, boot::marea {
+		phys = start,
+		pages = npage,
+		mtype = kind,
+	});
 };

@@ -1,5 +1,9 @@
 OUTPUT_FORMAT(binary)
 ENTRY(_start)
+PHDRS {
+	text PT_LOAD;
+	data PT_LOAD;
+}
  
 SECTIONS
 {
@@ -11,23 +15,23 @@ SECTIONS
 	.text : {
 		*(.multiboot)
 		*(.text.*)
-	}
+	} :text
 
 	.rodata : {
 		*(.rodata.*)
-	}
+	} :data
 
 	.init_array : {
 		PROVIDE_HIDDEN (__init_array_start = .);
 		KEEP (*(.init_array))
 		PROVIDE_HIDDEN (__init_array_end = .);
-	}
+	} :data
 
 	.fini_array : {
 		PROVIDE_HIDDEN (__fini_array_start = .);
 		KEEP (*(.fini_array))
 		PROVIDE_HIDDEN (__fini_array_end = .);
-	}
+	} :data
 
 	_loader_code_end = .;
 
@@ -37,13 +41,13 @@ SECTIONS
  
 	.data : {
 		*(.data.*)
-	}
+	} :data
 
 	.bss : {
 		PROVIDE(bss_start = .);
 		*(COMMON)
 		*(.bss.*)
-	}
+	} :data
 
 	_loader_data_end = .;
 

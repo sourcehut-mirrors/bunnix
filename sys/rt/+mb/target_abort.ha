@@ -12,5 +12,6 @@ fn target_abort(
 	write(u64tos(col));
 	writestr(": ");
 	writestr(msg);
+	writestr("\n");
 	halt();
 };

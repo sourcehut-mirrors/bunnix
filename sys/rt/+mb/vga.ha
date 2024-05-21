@@ -54,11 +54,11 @@ type vga_color = enum u8 {
 	cons.row = last: uint;
 };
 
-fn mkcell(rn: u8, bg: vga_color, fg: vga_color) u16 = {
+fn vga_mkcell(rn: u8, bg: vga_color, fg: vga_color) u16 = {
 	return rn: u16 | (fg | bg << 4): u16 << 8;
 };
 
-fn writern(rn: u8) void = {
+fn vga_putc(rn: u8) void = {
 	switch (rn) {
 	case '\n' =>
 		cons.row += 1;
@@ -66,7 +66,7 @@ fn writern(rn: u8) void = {
 	case '\r' =>
 		cons.col = 0;
 	case =>
-		const val = mkcell(rn, vga_color::BLACK, vga_color::LIGHT_GREY);
+		const val = vga_mkcell(rn, vga_color::BLACK, vga_color::LIGHT_GREY);
 		VGA_CONS[cons.row * VGA_COLS + cons.col] = val;
 		cons.col += 1;
 		if (cons.col >= VGA_COLS) {
@@ -76,10 +76,8 @@ fn writern(rn: u8) void = {
 	};
 };
 
-fn write(buf: []u8) void = {
+fn vga_write(buf: []u8) void = {
 	for (let i = 0z; i < len(buf); i += 1) {
-		writern(buf[i]);
+		vga_putc(buf[i]);
 	};
 };
-
-export fn writestr(s: str) void = write(*(&s: *[]u8));

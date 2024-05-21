@@ -8,7 +8,7 @@ type kentry = fn(ctx: *boot::context) never;
 export fn bmain(mb: *mb::multiboot, mb_magic: u32, esp: *opaque) never = {
 	switch (mb_magic) {
 	case mb::MAGIC =>
-		bmain_mb2(mb);
+		bmain_mb1(mb);
 	case mb::MAGIC2 =>
 		abort("Multiboot 2 not yet supported");
 	case =>
@@ -16,8 +16,8 @@ export fn bmain(mb: *mb::multiboot, mb_magic: u32, esp: *opaque) never = {
 	};
 };
 
-fn bmain_mb2(mb: *mb::multiboot) never = {
-	rt::writestr("bunnixboot: booting via multiboot... ");
+fn bmain_mb1(mb: *mb::multiboot) never = {
+	rt::writestr("bunnixboot: booting via multiboot 0.X... ");
 	assert(mb.mods_count >= 1, "Nothing to boot? Did you provide a multiboot module?");
 
 	mmap_init(mb);

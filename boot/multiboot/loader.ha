@@ -87,6 +87,9 @@ fn init_brk(sz: size) uintptr = {
 		if (entry.pages < npage) {
 			continue;
 		};
+		if (entry.phys == 0) {
+			continue;
+		};
 
 		mmap[i] = boot::marea {
 			phys = entry.phys,
