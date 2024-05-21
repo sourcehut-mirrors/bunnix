@@ -65,6 +65,10 @@ fn pipe_file_read(f: *io::file, buf: []u8) (size | io::EOF | error) = {
 		};
 
 		if (len(pipe.avail) == 0) {
+			if (file.flag & io::flag::NONBLOCK != 0) {
+				return errno::AGAIN: error;
+			};
+
 			sched::wait(&file.wq, &link);
 		} else {
 			break;
@@ -99,6 +103,10 @@ fn pipe_file_write(f: *io::file, buf: const []u8) (size | error) = {
 		};
 
 		if (len(pipe.avail) == len(pipe.buffer)) {
+			if (file.flag & io::flag::NONBLOCK != 0) {
+				return errno::AGAIN: error;
+			};
+
 			sched::wait(&file.wq, &link);
 		} else {
 			break;
