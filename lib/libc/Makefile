@@ -77,6 +77,7 @@ DIRS=\
      prng \
      process \
      regex \
+     search \
      setjmp \
      signal \
      stat \
