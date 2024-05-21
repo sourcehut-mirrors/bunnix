@@ -1,0 +1,6 @@
+NAME="Bunnix"
+ID=bunnix
+VERSION_ID="0.0.0"
+PRETTY_NAME="Bunnix edge"
+HOME_URL="https://sr.ht/~sircmpwn/bunnix"
+BUG_REPORT_URL="https://todo.sr.ht/~sircmpwn/bunnix"
