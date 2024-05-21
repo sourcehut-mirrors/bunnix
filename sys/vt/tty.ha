@@ -100,6 +100,7 @@ export fn vt_init(fb: *chr::fb) *vt = {
 	term.vterm = vterm;
 
 	vterm::vterm_screen_set_callbacks(vscreen, &vterm_screen_cb, term);
+	vterm::vterm_output_set_callback(vterm, &vterm_output_cb, term);
 
 	match (chr::lookup(dev::INPUT_MAJOR, dev::KBD_MINOR)) {
 	case let dev: *chr::chardev =>
@@ -130,6 +131,14 @@ fn vterm_malloc(n: size, user: nullable *opaque) nullable *opaque = {
 
 fn vterm_free(p: *opaque, user: nullable *opaque) void = {
 	return rt::free_(p);
+};
+
+fn vterm_output_cb(buf: *const c::char, ln: size, user: nullable *opaque) void = {
+	let vt = user: *vt;
+	let buf = (buf: *[*]u8)[..ln];
+	for (let ch .. buf) {
+		chr::tty_putc(vt, ch);
+	};
 };
 
 const vterm_screen_cb = vterm::VTermScreenCallbacks {
@@ -211,9 +220,16 @@ fn vt_write(tty: *chr::tty, buf: const []u8) (size | error) = {
 	const vterm = vt.vterm;
 
 	for (let i = 0z; i < len(buf); i += 1) {
-		vterm::vterm_input_write(vterm, &buf[i]: *c::char, 1);
-		if (buf[i] == '\n') {
+		switch (buf[i]) {
+		case '\n' =>
+			vterm::vterm_input_write(vterm, &buf[i]: *c::char, 1);
 			vterm::vterm_input_write(vterm, &('\r': u8): *c::char, 1);
+		case '\b' =>
+			vterm::vterm_input_write(vterm, &buf[i]: *c::char, 1);
+			vterm::vterm_input_write(vterm, &(' ': u8): *c::char, 1);
+			vterm::vterm_input_write(vterm, &('\b': u8): *c::char, 1);
+		case =>
+			vterm::vterm_input_write(vterm, &buf[i]: *c::char, 1);
 		};
 	};
 
@@ -253,6 +269,18 @@ fn vt_keyev(code: u32, state: key_state, user: nullable *opaque) void = {
 	const keycode = code: size - 8;
 	if (state != key_state::PRESSED || keycode >= len(keysyms)) {
 		return;
+	};
+
+	let vtkey = vterm::VTERM_KEY_NONE;
+	switch (keycode) {
+	case K_BKSP =>
+		vtkey = vterm::VTERM_KEY_BACKSPACE;
+	case => void;
+	};
+
+	if (vtkey != vterm::VTERM_KEY_NONE) {
+		vterm::vterm_keyboard_key(term.vterm,
+			0, vtkey);
 	};
 
 	const layer = if (term.shift) 1 else 0;

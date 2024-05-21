@@ -191,6 +191,9 @@ export @symbol("vterm_obtain_state") fn vterm_obtain_state(*VTerm) *VTermState;
 export @symbol("vterm_state_reset") fn vterm_state_reset(*VTermState, int) void;
 export @symbol("vterm_screen_enable_altscreen") fn vterm_screen_enable_altscreen(*VTermScreen, int) void;
 
+export type VTermOutputCallback = fn(*const c::char, size, nullable *opaque) void;
+export @symbol("vterm_output_set_callback") fn vterm_output_set_callback(*VTerm, *VTermOutputCallback, nullable *opaque) void;
+
 export type VTermDamageSize = enum size {
 	CELL,
 	ROW,
@@ -200,4 +203,4 @@ export type VTermDamageSize = enum size {
 
 export @symbol("vterm_screen_set_damage_merge") fn vterm_screen_set_damage_merge(*VTermScreen, VTermDamageSize) void;
 export @symbol("vterm_screen_flush_damage") fn vterm_screen_flush_damage(*VTermScreen) void;
-
+export @symbol("vterm_keyboard_key") fn vterm_keyboard_key(*VTerm, int, int) void;
