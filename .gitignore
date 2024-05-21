@@ -18,4 +18,6 @@ config.mk
 /sbin/getty/getty
 /vendor/dash/src/sh
 /vendor/lok/awk
+/vendor/lolcat/lolcat
+/vendor/lolcat/censor
 /bin/awk

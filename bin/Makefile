@@ -4,8 +4,9 @@ ROOT=../
 include $(ROOT)mk/conf.mk
 
 include awk.mk
-include sh.mk
+include lolcat.mk
 include sbase.mk
+include sh.mk
 
 install-bin:
 	for f in $^; \

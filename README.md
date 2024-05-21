@@ -86,12 +86,14 @@ Use `make` to compile Bunnix. The following targets are available:
 Bunnix includes (often patched versions of) the following third-party software:
 
 * [lwext4](https://github.com/gkostka/lwext4): ext4 implementation (kernel)
+* [libvterm](https://www.leonerd.org.uk/code/libvterm/): terminal emulation for kernel console
 * [dash](https://git.sr.ht/~sircmpwn/dash): /bin/sh
 * [sbase](https://git.sr.ht/~sircmpwn/sbase): core utilities*
 * [lok](https://github.com/dimkr/lok): /bin/awk
 * [musl libc](http://musl.libc.org/): the libc is derived from musl
 * [gzip](https://www.gnu.org/software/gzip/): for installing ports
 * [tcc](https://bellard.org/tcc/): C compiler
+* [lolcat](https://github.com/jaseg/lolcat): just for fun
 
 \* sbase is good software written by questionable people. I do not endorse
    suckless.

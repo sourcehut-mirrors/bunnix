@@ -2,7 +2,7 @@ LOK=$(ROOT)/vendor/lok
 LOK_SOURCES=$(call rwildcard,$(LOK),*.c *.h)
 
 clean-lok:
-	make -C $(SBASE) clean
+	make -C $(LOK) clean
 	rm -f awk
 
 .PHONY: clean-lok
