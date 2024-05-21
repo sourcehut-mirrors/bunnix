@@ -1,5 +1,5 @@
 label: mbr
 # Partition 1, FAT32, 24 MiB
-start=2048, size=24MiB, type=0x7, bootable
+start=2048, size=64MiB, type=0x7, bootable
 # Partition 2, ext4, remainder
 size="+", type=L

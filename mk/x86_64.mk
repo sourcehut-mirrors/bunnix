@@ -10,9 +10,10 @@ ISO_TARGETS=\
 MKISOFSFLAGS=
 
 # Update tools/mkdisk-* if you edit these
-DISK_SZ=128M
-FAT_PARTSZ=24M
-EXT4_PARTSZ=100M
+DISK_SZ=256M
+FAT_PARTSZ=64M
+EXT4_PARTSZ=128M
+EXT4_PART_OFFS=113120
 
 # Legacy boot support
 ifeq ($(ENABLE_LEGACY),1)
@@ -178,13 +179,13 @@ target/disk.mbr.img: target/fs.fat.img target/fs.ext4.img
 	sfdisk $@ < tools/mkdisk-mbr
 	dd if=$(MBR) conv=notrunc of=$@
 	dd if=target/fs.fat.img conv=notrunc of=$@ seek=2048
-	dd if=target/fs.ext4.img conv=notrunc of=$@ seek=51200
+	dd if=target/fs.ext4.img conv=notrunc of=$@ seek=$(EXT4_PART_OFFS)
 
 target/disk.gpt.img: target/fs.fat.img target/fs.ext4.img
 	qemu-img create -f raw $@ $(DISK_SZ)
 	sfdisk $@ < tools/mkdisk-gpt
 	dd if=target/fs.fat.img conv=notrunc of=$@ seek=2048
-	dd if=target/fs.ext4.img conv=notrunc of=$@ seek=51200
+	dd if=target/fs.ext4.img conv=notrunc of=$@ seek=$(EXT4_PART_OFFS)
 
 # Emulator targets
 #
