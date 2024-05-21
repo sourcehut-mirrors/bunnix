@@ -182,7 +182,22 @@ fn vterm_movecursor(
 	user: nullable *opaque,
 ) int = {
 	const vt = user: *vt;
-	// TODO
+	if (vt.cursor_shown) {
+		// Erase cursor if visible
+		vt_blitcursor(vt);
+	};
+
+	if (visible == 1) {
+		vt.cursor = (pos.row, pos.col);
+	} else {
+		vt.cursor = (-1, -1);
+	};
+
+	vt.cursor_shown = visible == 1;
+	if (vt.cursor_shown) {
+		vt_blitcursor(vt);
+	};
+
 	return 1;
 };
 
@@ -257,6 +272,13 @@ fn vt_tick(tick: u64, user: nullable *opaque) void = {
 	let vt = user: *vt;
 	const rate = arch::getrate();
 
+	// Blink cursor
+	if (tick >= vt.next_tick) {
+		vt.cursor_shown = !vt.cursor_shown;
+		vt.next_tick = tick + rate;
+		vt_blitcursor(vt);
+	};
+
 	// Present no faster than 24 Hz
 	const ellapsed = tick - vt.last_present;
 	const deadline = rate / 24;
@@ -328,6 +350,11 @@ fn vt_present(vt: *vt) void = {
 		return;
 	};
 
+	// Erase cursor before redraw
+	if (vt.cursor_shown) {
+		vt_blitcursor(vt);
+	};
+
 	const fb = vt.front.fb: *chr::fb;
 	for (let row = damage.row; row < damage.row + damage.rows; row += 1)
 	for (let col = damage.col; col < damage.col + damage.cols; col += 1) {
@@ -353,6 +380,11 @@ fn vt_present(vt: *vt) void = {
 			cell.fg.rgb.blue: u32	<< 0;
 
 		vt_blitchar(vt, row, col, cell.chars[0]: rune, fg);
+	};
+
+	// Repaint cursor
+	if (vt.cursor_shown) {
+		vt_blitcursor(vt);
 	};
 
 	pixbuf_copyrect(&vt.front, &vt.back, &rect {
