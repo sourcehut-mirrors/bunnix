@@ -21,6 +21,10 @@ AR = $(TRIPLET)-ar
 RANLIB = $(TRIPLET)-ranlib
 
 #
+# Build and install optional ports
+BUILD_PORTS=0
+
+#
 # Bootloader configuration
 ENABLE_EFI=1
 ENABLE_LEGACY=1
