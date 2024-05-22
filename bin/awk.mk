@@ -13,6 +13,6 @@ awk: $(LOK)/awk
 	cp $(LOK)/awk awk
 
 $(LOK)/awk: $(LOK_SOURCES)
-	make -C $(LOK) CC=$(CC)
+	make -C $(LOK) CC=$(CC) HOSTCC=$(HOSTCC)
 
 install-bin: awk

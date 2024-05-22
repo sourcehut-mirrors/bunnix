@@ -4,6 +4,7 @@
 ARCH = x86_64
 
 # Sane defaults, feel free to configure:
+HOSTCC = gcc
 TRIPLET = x86_64-bunnix
 HARE = hare
 HAREC = harec
