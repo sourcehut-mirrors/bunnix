@@ -17,8 +17,13 @@ config.mk
 /sbin/mount/mount
 /sbin/getty/getty
 /vendor/dash/src/sh
-/vendor/lok/awk
 /vendor/lolcat/lolcat
 /vendor/lolcat/censor
 /bin/awk
 /bin/lolcat
+
+/vendor/lok/awk
+/vendor/lok/ytab.h
+/vendor/lok/ytab.c
+/vendor/lok/proctab.c
+/vendor/lok/maketab

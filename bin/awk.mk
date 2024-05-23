@@ -2,7 +2,7 @@ LOK=$(ROOT)/vendor/lok
 LOK_SOURCES=$(call rwildcard,$(LOK),*.c *.h)
 
 clean-lok:
-	make -C $(LOK) clean
+	cd $(LOK) && rm -f awk ytab.h ytab.c proctab.c maketab
 	rm -f awk
 
 .PHONY: clean-lok
