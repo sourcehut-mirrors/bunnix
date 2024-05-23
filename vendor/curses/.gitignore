@@ -12,7 +12,6 @@ tic/host_tic
 tic/hash.c
 tput/tput
 tset/tset
-config.mak
 terminfo/terminfo.cdb
 libterminfo/compiled_terms.c
 libterminfo/termcap_hash.c
