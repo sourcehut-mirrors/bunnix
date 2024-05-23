@@ -12,6 +12,13 @@ export type winsize = struct {
 	ws_col: u16,
 };
 
+export fn termios_init(tios: *termios) void = {
+	tios.c_iflag = BRKINT | ISTRIP | ICRNL | IMAXBEL | IXON | IXANY;
+	tios.c_oflag = OPOST | ONLCR;
+	tios.c_lflag = ECHO | ICANON | ISIG | IEXTEN;
+	tios.c_cflag = CREAD | CS7 | PARENB | HUPCL;
+};
+
 export def VINTR	= 0;
 export def VQUIT	= 1;
 export def VERASE	= 2;

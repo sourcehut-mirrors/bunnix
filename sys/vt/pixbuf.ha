@@ -145,6 +145,7 @@ fn blitrect(
 	w: uint,
 	h: uint,
 	color: u32 = 0,
+	op: blit_op = blit_op::OVER,
 ) void = {
 	const fb = buf.fb as *chr::fb;
 	let data = buf.data as *[*]u32;
@@ -153,7 +154,7 @@ fn blitrect(
 	for (let gy = 0u; gy < h; gy += 1)
 	for (let gx = 0u; gx < w + 1; gx += 1) {
 		let pixel = &data[(y + gy) * (fb.stride / 4) + (x + gx)];
-		blitop(pixel, color, blit_op::OVER);
+		blitop(pixel, color, op);
 	};
 };
 

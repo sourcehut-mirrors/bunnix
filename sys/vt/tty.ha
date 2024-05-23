@@ -47,6 +47,8 @@ export type vt = struct {
 	// Cursor
 	cursor: (int, int),
 	cursor_shown: bool,
+	cursor_blink: bool,
+	cursor_shape: int,
 	next_tick: u64,
 	last_present: u64,
 };
@@ -75,7 +77,7 @@ export fn vt_init(fb: *chr::fb) *vt = {
 	const vscreen = vterm::vterm_obtain_screen(vterm);
 	vterm::vterm_screen_reset(vscreen, 1);
 	vterm::vterm_screen_enable_altscreen(vscreen, 1);
-	vterm::vterm_screen_set_damage_merge(vscreen, vterm::VTermDamageSize::SCROLL);
+	vterm::vterm_screen_set_damage_merge(vscreen, vterm::VTermDamageSize::CELL);
 
 	const term = alloc(vt {
 		tty_iface = &tty_impl,
@@ -87,6 +89,8 @@ export fn vt_init(fb: *chr::fb) *vt = {
 			...
 		},
 		cursor = (-1, -1),
+		cursor_shape = vterm::VTERM_PROP_CURSORSHAPE_UNDERLINE,
+		cursor_blink = true,
 		vterm = vterm,
 		vscreen = vscreen,
 		...
@@ -147,6 +151,7 @@ const vterm_screen_cb = vterm::VTermScreenCallbacks {
 	damage = &vterm_damage,
 	moverect = &vterm_moverect,
 	movecursor = &vterm_movecursor,
+	settermprop = &vterm_settermprop,
 	...
 };
 
@@ -192,7 +197,7 @@ fn vterm_movecursor(
 	visible: int,
 	user: nullable *opaque,
 ) int = {
-	const vt = user: *vt;
+	let vt = user: *vt;
 	if (vt.cursor_shown) {
 		// Erase cursor if visible
 		vt_blitcursor(vt);
@@ -212,6 +217,36 @@ fn vterm_movecursor(
 	return 1;
 };
 
+fn vterm_settermprop(
+	prop: vterm::VTermProp,
+	val: *vterm::VTermValue,
+	user: nullable *opaque,
+) int = {
+	let vt = user: *vt;
+	switch (prop) {
+	case vterm::VTermProp::VTERM_PROP_CURSORBLINK =>
+		vt.cursor_blink = val.boolean == 1;
+
+		if (!vt.cursor_shown) {
+			vt.cursor_shown = true;
+			vt_blitcursor(vt);
+		};
+	case vterm::VTermProp::VTERM_PROP_CURSORSHAPE =>
+		if (vt.cursor_shown) {
+			vt_blitcursor(vt);
+		};
+
+		vt.cursor_shape = val.number;
+
+		if (vt.cursor_shown) {
+			vt_blitcursor(vt);
+		};
+	case => void;
+	};
+
+	return 1;
+};
+
 const tty_impl = chr::tty_iface {
 	write = &vt_write,
 	getwinsz = &vt_getwinsz,
@@ -226,10 +261,12 @@ fn vt_write(tty: *chr::tty, buf: const []u8) (size | error) = {
 		case '\n' =>
 			vterm::vterm_input_write(vterm, &buf[i]: *c::char, 1);
 			vterm::vterm_input_write(vterm, &('\r': u8): *c::char, 1);
-		case '\b' =>
-			vterm::vterm_input_write(vterm, &buf[i]: *c::char, 1);
-			vterm::vterm_input_write(vterm, &(' ': u8): *c::char, 1);
-			vterm::vterm_input_write(vterm, &('\b': u8): *c::char, 1);
+		case '\x7f' =>
+			if (tty.tios.c_lflag & chr::ECHO != 0) {
+				vterm::vterm_input_write(vterm, &('\b': u8): *c::char, 1);
+				vterm::vterm_input_write(vterm, &(' ': u8): *c::char, 1);
+			};
+			vterm::vterm_input_write(vterm, &('\x7f': u8): *c::char, 1);
 		case =>
 			vterm::vterm_input_write(vterm, &buf[i]: *c::char, 1);
 		};
@@ -274,15 +311,16 @@ fn vt_keyev(code: u32, state: key_state, user: nullable *opaque) void = {
 	};
 
 	let vtkey = vterm::VTERM_KEY_NONE;
-	switch (keycode) {
+	switch (code) {
 	case K_BKSP =>
 		vtkey = vterm::VTERM_KEY_BACKSPACE;
+	case K_ESC =>
+		vtkey = vterm::VTERM_KEY_ESCAPE;
 	case => void;
 	};
 
 	if (vtkey != vterm::VTERM_KEY_NONE) {
-		vterm::vterm_keyboard_key(term.vterm,
-			0, vtkey);
+		vterm::vterm_keyboard_key(term.vterm, vtkey, 0);
 	};
 
 	const layer = if (term.shift) 1 else 0;
@@ -291,11 +329,12 @@ fn vt_keyev(code: u32, state: key_state, user: nullable *opaque) void = {
 		return;
 	};
 	if (sym == 'd' && term.ctrl && !term.shift) {
+		// TODO: This is a bit hacky
 		chr::tty_putc(term, '\x04'); // EOF
 		return;
 	};
 
-	chr::tty_putc(term, sym: u8);
+	vterm::vterm_keyboard_unichar(term.vterm, sym: u32, 0);
 };
 
 fn vt_tick(tick: u64, user: nullable *opaque) void = {
@@ -303,7 +342,7 @@ fn vt_tick(tick: u64, user: nullable *opaque) void = {
 	const rate = arch::getrate();
 
 	// Blink cursor
-	if (tick >= vt.next_tick) {
+	if (tick >= vt.next_tick && vt.cursor_blink) {
 		vt.cursor_shown = !vt.cursor_shown;
 		vt.next_tick = tick + rate;
 		vt_blitcursor(vt);
@@ -337,7 +376,20 @@ fn vt_blitcursor(vt: *vt) void = {
 	if (row != -1 && row != -1) {
 		const row = row: uint;
 		const col = col: uint;
-		vt_blitchar(vt, row, col, '_', COLOR, blit_op::XOR);
+		const x = col: uint * FONT_WIDTH;
+		const y = row: uint * FONT_HEIGHT;
+
+		switch (vt.cursor_shape) {
+		case vterm::VTERM_PROP_CURSORSHAPE_BLOCK =>
+			blitrect(&vt.back, x, y, FONT_WIDTH, FONT_HEIGHT,
+				COLOR, blit_op::XOR);
+		case vterm::VTERM_PROP_CURSORSHAPE_UNDERLINE =>
+			vt_blitchar(vt, row, col, '_', COLOR, blit_op::XOR);
+		case vterm::VTERM_PROP_CURSORSHAPE_BAR_LEFT =>
+			vt_blitchar(vt, row, col, '_', COLOR, blit_op::XOR);
+		case => abort();
+		};
+
 		vt_damage(vt, row, col);
 	};
 };

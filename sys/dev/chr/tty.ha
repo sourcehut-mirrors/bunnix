@@ -40,6 +40,7 @@ export fn tty_init(tty: *tty, serial: bool) void = {
 	tty.major = dev::TTY_MAJOR;
 	tty.buffer = alloc([0...], BUFSIZ);
 	tty.avail = tty.buffer[..0];
+	termios_init(&tty.tios);
 
 	if (serial) {
 		static let nserial = 0u32;
@@ -106,12 +107,24 @@ export fn tty_putc(tty: *tty, c: u8) void = {
 	let add = true;
 	switch (c) {
 	case '\r' =>
-		c = '\n';
+		if (tty.tios.c_iflag & ICRNL != 0) {
+			c = '\n';
+		};
+		if (tty.tios.c_iflag & IGNCR != 0) {
+			return;
+		};
+	case '\n' =>
+		if (tty.tios.c_iflag & INLCR != 0) {
+			c = '\r';
+		};
 	case '\b' =>
 		if (len(tty.avail) == 0) {
 			return;
 		};
 		static delete(tty.avail[len(tty.avail)-1]);
+		add = false;
+	case '\x7f' =>
+		// XXX HACK
 		add = false;
 	case '\x04' =>
 		if (len(tty.avail) == 0) {
@@ -127,15 +140,12 @@ export fn tty_putc(tty: *tty, c: u8) void = {
 		static append(tty.avail, c);
 	};
 
-	// TODO:
-	// - More sophisticated line editing
-	// - RAW mode
-	// - NOECHO mode
+	if (tty.tios.c_lflag & ECHO != 0) {
+		const iface = tty.tty_iface as *tty_iface;
+		iface.write(tty, [c])!;
+	};
 
-	const iface = tty.tty_iface as *tty_iface;
-	iface.write(tty, [c])!;
-
-	if (c == '\n' || len(tty.avail) == len(tty.buffer)) {
+	if (tty.tios.c_lflag & ICANON == 0 || c == '\n' || len(tty.avail) == len(tty.buffer)) {
 		sched::wake(&tty.wq);
 		poll::signal(&tty.poll, poll::POLLIN);
 	};

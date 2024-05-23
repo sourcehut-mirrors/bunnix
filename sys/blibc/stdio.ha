@@ -23,15 +23,6 @@ export @symbol("fwrite") fn fwrite(
 	return nmemb: int;
 };
 
-export @symbol("vsnprintf") fn vsnprintf(
-	string: *c::char,
-	sz: size,
-	fmt: const *c::char,
-	ap: valist,
-) int = {
-	abort(); // TODO
-};
-
 export @symbol("snprintf") fn snprintf(
 	string: *c::char,
 	sz: size,

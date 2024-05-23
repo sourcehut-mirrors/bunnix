@@ -174,7 +174,7 @@ export type VTermScreenCallbacks = struct {
 	damage: nullable *fn(VTermRect, nullable *opaque) int,
 	moverect: nullable *fn(VTermRect, VTermRect, nullable *opaque) int,
 	movecursor: nullable *fn(VTermPos, VTermPos, int, nullable *opaque) int,
-	settermprop: nullable *fn(VTermProp, VTermValue, nullable *opaque) int,
+	settermprop: nullable *fn(VTermProp, *VTermValue, nullable *opaque) int,
 	bell: nullable *fn(nullable *opaque) int,
 	resize: nullable *fn(int, int, nullable *opaque) int,
 	sb_pushline: nullable *fn(int, const *VTermScreenCell, nullable *opaque) int,
@@ -204,3 +204,4 @@ export type VTermDamageSize = enum size {
 export @symbol("vterm_screen_set_damage_merge") fn vterm_screen_set_damage_merge(*VTermScreen, VTermDamageSize) void;
 export @symbol("vterm_screen_flush_damage") fn vterm_screen_flush_damage(*VTermScreen) void;
 export @symbol("vterm_keyboard_key") fn vterm_keyboard_key(*VTerm, int, int) void;
+export @symbol("vterm_keyboard_unichar") fn vterm_keyboard_unichar(*VTerm, u32, int) void;
