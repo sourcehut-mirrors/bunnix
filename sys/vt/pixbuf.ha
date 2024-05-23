@@ -131,7 +131,7 @@ fn blitchar(
 	for (let gy = 0u; gy < FONT_HEIGHT; gy += 1)
 	for (let gx = 0u; gx < FONT_PXWIDTH; gx += 1) {
 		let pixel = &data[(y + gy) * wstride + (x + gx)];
-		const mask = 1 << (FONT_PXWIDTH - gx);
+		const mask = 1 << (FONT_PXWIDTH - (gx + 1));
 		if (glyph[gy] & mask != 0) {
 			blitop(pixel, color, op);
 		};
