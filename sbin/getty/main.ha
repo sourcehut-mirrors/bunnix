@@ -57,7 +57,7 @@ export fn main() void = {
 		};
 	};
 
-	os::setenv("TERM", "bunnix")!;
+	os::setenv("TERM", "xterm-256color")!;
 	os::chdir("/root")!;
 
 	// TODO: call /bin/login
