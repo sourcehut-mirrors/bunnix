@@ -78,6 +78,7 @@ DIRS=\
      process \
      regex \
      search \
+     select \
      setjmp \
      signal \
      stat \

@@ -136,10 +136,11 @@ typedef struct __ucontext {
 #define SIGPROF   21
 #define SIGSYS    22
 #define SIGTRAP   23
-#define SIGURG    24
-#define SIGVTALRM 25
-#define SIGXCPU   26
-#define SIGXFSZ   27
+#define SIGWINCH  24
+#define SIGURG    25
+#define SIGVTALRM 26
+#define SIGXCPU   27
+#define SIGXFSZ   28
 
 #define _NSIG 65
 
