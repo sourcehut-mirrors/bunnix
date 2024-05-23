@@ -37,6 +37,12 @@ LIBC_SOURCES=$(call rwildcard,lib/libc,*.c *.h *.S)
 $(SYSROOT)/usr/lib/libc.a: $(LIBC_SOURCES)
 	make -C lib install DESTDIR=../$(SYSROOT)
 
+$(SYSROOT)/usr/lib/libcurses.a: $(SYSROOT)/usr/lib/libc.a
+	make -C vendor/curses all-static
+	make -C vendor/curses install-static DESTDIR=../../$(SYSROOT)
+
+SYS_LIBS=$(SYSROOT)/usr/lib/libcurses.a
+
 $(SYSROOT)/bin: $(SYSROOT)/usr/lib/libc.a
 	mkdir -p $(SYSROOT)/bin
 	make -C bin install DESTDIR=../$(SYSROOT)
@@ -58,7 +64,7 @@ ifeq ($(BUILD_PORTS), 1)
 include ports/ports.mk
 endif
 
-$(SYSROOT): $(SYSROOT)/bin $(SYSROOT)/sbin $(SYSROOT)/etc
+$(SYSROOT): $(SYSROOT)/bin $(SYSROOT)/sbin $(SYSROOT)/etc $(SYS_LIBS)
 	mkdir -p $(SYSROOT)
 	for d in \
 		boot \
