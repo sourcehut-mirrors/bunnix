@@ -19,6 +19,10 @@ const platforms: [_]platform = [
 		...
 	},
 	platform {
+		name = "Bunnix",
+		...
+	},
+	platform {
 		name = "OpenBSD",
 		need_libc = true,
 		default_flags = [
