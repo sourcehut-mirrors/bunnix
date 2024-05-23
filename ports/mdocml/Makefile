@@ -315,8 +315,7 @@ base-install: base-build
 	mkdir -p $(DESTDIR)$(MANDIR)/man7
 	mkdir -p $(DESTDIR)$(SYSCONFDIR)
 	mkdir -p $(DESTDIR)$(SYSCONFDIR)/default
-	$(INSTALL_PROGRAM) mandoc demandoc $(DESTDIR)$(BINDIR)
-	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/$(BINM_MAN)
+	$(INSTALL_PROGRAM) mandoc $(DESTDIR)$(BINDIR)/man
 	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
 	$(INSTALL_LIB) man.h mandoc.h mandoc_aux.h mdoc.h \
 		$(DESTDIR)$(INCLUDEDIR)
@@ -331,7 +330,7 @@ base-install: base-build
 	$(INSTALL_MAN) tbl.7 $(DESTDIR)$(MANDIR)/man7/${MANM_TBL}.7
 	$(INSTALL_MAN) mandoc_char.7 $(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_DATA) example.style.css $(DESTDIR)$(EXAMPLEDIR)
-	$(INSTALL_DATA) man.conf.default $(DESTDIR)$(SYSCONFDIR)/default/man.conf
+	$(INSTALL_DATA) man.conf.default $(DESTDIR)$(SYSCONFDIR)/man.conf
 
 db-install: base-build
 	mkdir -p $(DESTDIR)$(BINDIR)

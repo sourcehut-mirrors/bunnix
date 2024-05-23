@@ -53,6 +53,8 @@ ports/build-less/less: $(SYSROOT)/usr/lib/libc.a $(SYSROOT)/usr/lib/libcurses.a
 		--prefix=/usr \
 		--host=x86_64-bunnix
 	cd ports/build-less && make
+	# Fix unusual issues with timestamps
+	touch ports/build-less/less
 
 $(SYSROOT)/usr/bin/less: ports/build-less/less
 	cp ports/build-less/less $(SYSROOT)/usr/bin/less
@@ -80,6 +82,22 @@ clean-make:
 	rm -rf ports/build-make
 .PHONY: clean-make
 clean-ports: clean-make
+
+#### mandoc
+
+ports/mdocml/mandoc: $(SYSROOT)/usr/lib/libc.a
+	make -C ports/mdocml
+
+$(SYSROOT)/usr/bin/man: ports/mdocml/mandoc
+	make -C ports/mdocml install DESTDIR="$(ASYSROOT)"
+
+# mandoc is installed by default
+$(SYSROOT)/usr/bin: $(SYSROOT)/usr/bin/man
+
+clean-mandoc:
+	make -C ports/mdocml clean
+.PHONY: clean-mandoc
+clean-ports: clean-mandoc
 
 #### tcc
 

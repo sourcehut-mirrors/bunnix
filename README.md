@@ -57,6 +57,7 @@ You need the following:
 * sfdisk
 * xorriso
 * qemu-system-x86\_64 and qemu-img
+* scdoc
 * yacc
 
 To build with EFI support:
@@ -97,6 +98,7 @@ Bunnix includes (often patched versions of) the following third-party software:
 * [lolcat](https://github.com/jaseg/lolcat): just for fun
 * [NetBSD curses](https://github.com/sabotage-linux/netbsd-curses): curses support
 * [Vim 5.7](https://sources.vsta.org:7100/vim57/index): editor
+* [mdocml 1.13.3](https://mandoc.bsd.lv/): mandoc plus some Sortix patches
 
 \* sbase is good software written by questionable people. I do not endorse
    suckless.
