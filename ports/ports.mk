@@ -89,3 +89,14 @@ clean-tcc:
 	rm -rf ports/build-tcc
 .PHONY: clean-tcc
 clean-ports: clean-tcc
+
+#### vim
+
+ports/vim57/vim: $(SYSROOT)/usr/lib/libc.a $(SYSROOT)/usr/lib/libcurses.a
+	make -C ports/vim57
+
+$(SYSROOT)/usr/bin/vim: ports/vim57/vim
+	cp ports/vim57/vim $(SYSROOT)/usr/bin/vim
+
+# vim is installed by default, it is required to unpack ports
+$(SYSROOT)/usr/bin: $(SYSROOT)/usr/bin/vim
