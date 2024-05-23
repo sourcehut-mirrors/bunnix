@@ -40,6 +40,7 @@
 #define __NR_brk		36
 #define __NR_utimensat		37
 #define __NR_ioctl		38
+#define __NR_poll		39
 
 #endif
 #define SYS_readv		0
@@ -81,3 +82,4 @@
 #define SYS_brk		36
 #define SYS_utimensat		37
 #define SYS_ioctl		38
+#define SYS_poll		39
