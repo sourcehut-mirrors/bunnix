@@ -1,3 +1,1 @@
-build-gzip
-build-make
-build-tcc
+build-*

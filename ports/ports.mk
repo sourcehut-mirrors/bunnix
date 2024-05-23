@@ -45,6 +45,21 @@ clean-gzip:
 .PHONY: clean-gzip
 clean-ports: clean-gzip
 
+#### less
+
+ports/build-less/less: $(SYSROOT)/usr/lib/libc.a $(SYSROOT)/usr/lib/libcurses.a
+	mkdir -p ports/build-less/
+	cd ports/build-less/ && ../less/configure \
+		--prefix=/usr \
+		--host=x86_64-bunnix
+	cd ports/build-less && make
+
+$(SYSROOT)/usr/bin/less: ports/build-less/less
+	cp ports/build-less/less $(SYSROOT)/usr/bin/less
+
+# less is installed by default
+$(SYSROOT)/usr/bin: $(SYSROOT)/usr/bin/less
+
 #### make
 
 ports/build-make/make: $(SYSROOT)/usr/lib/libc.a
@@ -98,5 +113,10 @@ ports/vim57/vim: $(SYSROOT)/usr/lib/libc.a $(SYSROOT)/usr/lib/libcurses.a
 $(SYSROOT)/usr/bin/vim: ports/vim57/vim
 	cp ports/vim57/vim $(SYSROOT)/usr/bin/vim
 
-# vim is installed by default, it is required to unpack ports
+# vim is installed by default
 $(SYSROOT)/usr/bin: $(SYSROOT)/usr/bin/vim
+
+clean-vim:
+	make -C ports/vim57 clean
+.PHONY: clean-vim
+clean-ports: clean-vim
