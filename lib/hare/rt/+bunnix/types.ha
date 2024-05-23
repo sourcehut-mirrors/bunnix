@@ -224,3 +224,11 @@ export type pollfd = struct {
 	events: uint,
 	revents: uint,
 };
+
+export def TIOCGWINSZ: uint = 0x5413;
+export def TIOCSWINSZ: uint = 0x5414;
+
+export type winsize = struct {
+	ws_row: u16,
+	ws_col: u16,
+};

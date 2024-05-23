@@ -311,3 +311,15 @@ export fn uname(uts: *utsname) (void | errno) = {
 export fn poll(fd: *[*]pollfd, nfd: size, timeout: int) (int | errno) = {
 	return syswrap(syscall(sys::POLL, fd, nfd, timeout: i64))?: int;
 };
+
+export type ioctl_arg = (nullable *opaque | u64);
+
+export fn ioctl(fd: int, req: u64, arg: ioctl_arg) (int | errno) = {
+	let fd = fd: u64, req = req: u64;
+	return syswrap(match (arg) {
+	case let u: u64 =>
+		yield syscall(sys::IOCTL, fd, req, u);
+	case let v: nullable *opaque =>
+		yield syscall(sys::IOCTL, fd, req, v: uintptr: u64);
+	})?: int;
+};
