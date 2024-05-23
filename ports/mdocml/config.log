@@ -1,0 +1,106 @@
+dirent-namlen: testing...
+x86_64-bunnix-gcc -g -std=gnu11 -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -Wno-unused -Werror  -o test-dirent-namlen test-dirent-namlen.c
+test-dirent-namlen.c: In function 'main':
+test-dirent-namlen.c:9:30: error: 'struct dirent' has no member named 'd_namlen'; did you mean 'd_name'?
+    9 |         return (sizeof(entry.d_namlen) == 0);
+      |                              ^~~~~~~~
+      |                              d_name
+dirent-namlen: x86_64-bunnix-gcc failed with 1
+
+fgetln: testing...
+x86_64-bunnix-gcc -g -std=gnu11 -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -Wno-unused -Werror  -o test-fgetln test-fgetln.c
+fgetln: x86_64-bunnix-gcc succeeded
+fgetln: yes
+
+fts: testing...
+x86_64-bunnix-gcc -g -std=gnu11 -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -Wno-unused -Werror  -o test-fts test-fts.c
+test-fts.c:3:10: fatal error: fts.h: No such file or directory
+    3 | #include <fts.h>
+      |          ^~~~~~~
+compilation terminated.
+fts: x86_64-bunnix-gcc failed with 1
+
+getsubopt: testing...
+x86_64-bunnix-gcc -g -std=gnu11 -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -Wno-unused -Werror  -o test-getsubopt test-getsubopt.c
+/usr/local/lib/gcc/x86_64-bunnix/15.0.0/../../../../x86_64-bunnix/bin/ld: /tmp/ccLKeGaH.o: in function `main':
+/home/sircmpwn/sources/mdocml-1.13.3/test-getsubopt.c:32:(.text+0x48): undefined reference to `getsubopt'
+collect2: error: ld returned 1 exit status
+getsubopt: x86_64-bunnix-gcc failed with 1
+
+mmap: testing...
+x86_64-bunnix-gcc -g -std=gnu11 -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -Wno-unused -Werror  -o test-mmap test-mmap.c
+mmap: x86_64-bunnix-gcc succeeded
+mmap: yes
+
+reallocarray: testing...
+x86_64-bunnix-gcc -g -std=gnu11 -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -Wno-unused -Werror  -o test-reallocarray test-reallocarray.c
+reallocarray: x86_64-bunnix-gcc succeeded
+reallocarray: yes
+
+strcasestr: testing...
+x86_64-bunnix-gcc -g -std=gnu11 -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -Wno-unused -Werror  -o test-strcasestr test-strcasestr.c
+test-strcasestr.c: In function 'main':
+test-strcasestr.c:11:20: error: implicit declaration of function 'strcasestr'; did you mean 'strcasecmp'? [-Wimplicit-function-declaration]
+   11 |         char *cp = strcasestr(big, "Gst");
+      |                    ^~~~~~~~~~
+      |                    strcasecmp
+test-strcasestr.c:11:20: error: initialization of 'char *' from 'int' makes pointer from integer without a cast [-Wint-conversion]
+strcasestr: x86_64-bunnix-gcc failed with 1
+
+strlcat: testing...
+x86_64-bunnix-gcc -g -std=gnu11 -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -Wno-unused -Werror  -o test-strlcat test-strlcat.c
+strlcat: x86_64-bunnix-gcc succeeded
+strlcat: yes
+
+strlcpy: testing...
+x86_64-bunnix-gcc -g -std=gnu11 -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -Wno-unused -Werror  -o test-strlcpy test-strlcpy.c
+strlcpy: x86_64-bunnix-gcc succeeded
+strlcpy: yes
+
+strptime: testing...
+x86_64-bunnix-gcc -g -std=gnu11 -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -Wno-unused -Werror  -o test-strptime test-strptime.c
+strptime: x86_64-bunnix-gcc succeeded
+strptime: yes
+
+strsep: testing...
+x86_64-bunnix-gcc -g -std=gnu11 -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -Wno-unused -Werror  -o test-strsep test-strsep.c
+strsep: x86_64-bunnix-gcc succeeded
+strsep: yes
+
+strtonum: testing...
+x86_64-bunnix-gcc -g -std=gnu11 -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -Wno-unused -Werror  -o test-strtonum test-strtonum.c
+test-strtonum.c: In function 'main':
+test-strtonum.c:25:13: error: implicit declaration of function 'strtonum'; did you mean 'strtoul'? [-Wimplicit-function-declaration]
+   25 |         if (strtonum("1", 0, 2, &errstr) != 1)
+      |             ^~~~~~~~
+      |             strtoul
+strtonum: x86_64-bunnix-gcc failed with 1
+
+wchar: testing...
+x86_64-bunnix-gcc -g -std=gnu11 -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -Wno-unused -Werror  -o test-wchar test-wchar.c
+wchar: x86_64-bunnix-gcc succeeded
+wchar: yes
+
+sqlite3: testing...
+x86_64-bunnix-gcc -g -std=gnu11 -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -Wno-unused -Werror -lsqlite3 -o test-sqlite3 test-sqlite3.c
+test-sqlite3.c:20:10: fatal error: sqlite3.h: No such file or directory
+   20 | #include <sqlite3.h>
+      |          ^~~~~~~~~~~
+compilation terminated.
+sqlite3: x86_64-bunnix-gcc failed with 1
+
+sqlite3: testing...
+x86_64-bunnix-gcc -g -std=gnu11 -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -Wno-unused -Werror -I/usr/local/include -L/usr/local/lib -lsqlite3 -o test-sqlite3 test-sqlite3.c
+test-sqlite3.c:20:10: fatal error: sqlite3.h: No such file or directory
+   20 | #include <sqlite3.h>
+      |          ^~~~~~~~~~~
+compilation terminated.
+sqlite3: x86_64-bunnix-gcc failed with 1
+
+BUILD_DB=0 (no sqlite3)
+
+manpath: no
+
+config.h: written
+Makefile.local: written
+man.conf.default: written
