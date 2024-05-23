@@ -93,7 +93,7 @@ export fn wq_unlink(link: *wq_link) void = {
 		return;
 	};
 
-	const prev = link.prev as *nullable *wq_link;
+	let prev = link.prev as *nullable *wq_link;
 	*prev = link.next;
 
 	match (link.next) {

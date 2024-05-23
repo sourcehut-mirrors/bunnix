@@ -199,3 +199,9 @@ export type utimensat_options = struct {
 	atime: nullable *io::timespec,
 	mtime: nullable *io::timespec,
 };
+
+export type pollfd = struct {
+	fd: int,
+	events: uint,
+	revents: uint,
+};

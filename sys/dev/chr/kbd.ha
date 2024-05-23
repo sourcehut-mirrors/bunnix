@@ -2,8 +2,7 @@ use dev;
 use errors::{error, errno};
 use io;
 use sched;
-// XXX TEMP
-use log;
+use poll;
 
 def KBD_KEYBUF_SZ: size = 32;
 
@@ -31,8 +30,10 @@ export type kbd = struct {
 	kbd_iface: const *kbd_iface,
 	buffer: [KBD_KEYBUF_SZ]kbd_evdata,
 	buf: []kbd_evdata,
-	wq: sched::wq_head,
 	refs: int,
+
+	wq: sched::wq_head,
+	poll: poll::event_source,
 
 	// Used by drivers which make use of the keyboard internally to the
 	// kernel, i.e. the vt driver. Just passes keyboard events straight
@@ -89,6 +90,7 @@ export fn kbd_keyproc(kbd: *kbd, scancode: u32, state: key_state) void = {
 		state = state,
 	});
 	sched::wake(&kbd.wq);
+	poll::signal(&kbd.poll, poll::POLLIN);
 };
 
 const kbd_chardev_impl = chardev_iface {
@@ -116,6 +118,7 @@ export type kbd_file = struct {
 
 let kbd_file_impl = io::vtable {
 	read = &kbd_read,
+	poll = &kbd_poll,
 	finish = &kbd_finish,
 	...
 };
@@ -147,6 +150,25 @@ fn kbd_read(file: *io::file, buf: []u8) (size | io::EOF | error) = {
 		n += size(kbd_evdata);
 	};
 	return n;
+};
+
+fn kbd_poll(file: *io::file, poll: *io::pollfd) (u64 | error) = {
+	const file = file: *kbd_file;
+	const kbd = file.kbd;
+
+	let events = 0u64;
+	if (poll.events & poll::POLLIN != 0) {
+		if (len(kbd.buf) != 0) {
+			poll.revents |= poll::POLLIN;
+			events = 1;
+		};
+	};
+
+	if (events == 0) {
+		poll::register(&kbd.poll, poll);
+	};
+
+	return events;
 };
 
 fn kbd_finish(file: *io::file) void = {

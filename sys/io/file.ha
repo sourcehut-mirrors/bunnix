@@ -42,6 +42,7 @@ export type vtable = struct {
 	readdir: nullable *fn_file_readdir,
 	ioctl: nullable *fn_file_ioctl,
 	mmap: nullable *fn_file_mmap,
+	poll: nullable *fn_file_poll,
 	finish: nullable *fn_file_finish,
 };
 
@@ -72,6 +73,10 @@ export type fn_file_mmap = fn(
 	flags: int,
 	offs: i64,
 ) (uintptr | error);
+
+// Executes a poll operation on a file. Returns 1 if there are pending events,
+// or 0 otherwise.
+export type fn_file_poll = fn(fd: *file, poll: *pollfd) (u64 | error);
 
 // Frees all resources associated with a file.
 export type fn_file_finish = fn(s: *file) void;
@@ -147,6 +152,17 @@ export fn mmap(
 		return func(file, vmm, addr, length, prot, flags, offs);
 	case null =>
 		return errno::ACCES;
+	};
+};
+
+// Executes an ioctl on this file descriptor.
+export fn poll(file: *file, poll: *pollfd) (u64 | error) = {
+	match (file.vtable.poll) {
+	case let func: *fn_file_poll =>
+		return func(file, poll);
+	case null =>
+		poll.revents = poll.events;
+		return 1u64;
 	};
 };
 

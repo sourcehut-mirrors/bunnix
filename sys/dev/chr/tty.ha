@@ -3,6 +3,7 @@ use errors::{error, errno};
 use fmt;
 use io;
 use mman;
+use poll;
 use sched;
 
 // Forward declaration
@@ -18,8 +19,10 @@ export type tty = struct {
 	avail: []u8,
 	eof: bool,
 	refs: int,
-	wq: sched::wq_head,
 	tios: termios,
+
+	wq: sched::wq_head,
+	poll: poll::event_source,
 };
 
 // TTY device implementation.
@@ -114,6 +117,7 @@ export fn tty_putc(tty: *tty, c: u8) void = {
 		if (len(tty.avail) == 0) {
 			tty.eof = true;
 			sched::wake(&tty.wq);
+			poll::signal(&tty.poll, poll::POLLIN);
 		};
 		return;
 	case => void;
@@ -133,6 +137,7 @@ export fn tty_putc(tty: *tty, c: u8) void = {
 
 	if (c == '\n' || len(tty.avail) == len(tty.buffer)) {
 		sched::wake(&tty.wq);
+		poll::signal(&tty.poll, poll::POLLIN);
 	};
 };
 
@@ -159,6 +164,7 @@ const tty_file_impl = io::vtable {
 	read = &tty_read,
 	write = &tty_write,
 	ioctl = &tty_ioctl,
+	poll = &tty_poll,
 	finish = &tty_finish,
 	...
 };
@@ -184,6 +190,10 @@ fn tty_read(tty: *io::file, buf: []u8) (size | io::EOF | error) = {
 	buf[..ncopy] = tty.avail[..ncopy];
 	static delete(tty.avail[..ncopy]);
 
+	if (len(tty.avail) < len(tty.buffer)) {
+		poll::signal(&tty.poll, poll::POLLOUT);
+	};
+
 	return ncopy;
 };
 
@@ -191,7 +201,34 @@ fn tty_write(tty: *io::file, buf: const []u8) (size | error) = {
 	const file = tty: *tty_file;
 	const tty = file.tty;
 	const iface = tty.tty_iface as *tty_iface;
-	return iface.write(tty, buf);
+	const n = iface.write(tty, buf);
+	poll::signal(&tty.poll, poll::POLLIN);
+	return n;
+};
+
+fn tty_poll(tty: *io::file, poll: *io::pollfd) (u64 | error) = {
+	const file = tty: *tty_file;
+	const tty = file.tty;
+
+	let events = 0u64;
+	if (poll.events & poll::POLLOUT != 0) {
+		if (len(tty.avail) < len(tty.buffer)) {
+			poll.revents |= poll::POLLOUT;
+			events = 1;
+		};
+	};
+	if (poll.events & poll::POLLIN != 0) {
+		if (len(tty.avail) != 0) {
+			poll.revents |= poll::POLLIN;
+			events = 1;
+		};
+	};
+
+	if (events == 0) {
+		poll::register(&tty.poll, poll);
+	};
+
+	return events;
 };
 
 fn tty_ioctl(tty: *io::file, req: uint, arg: u64) (u64 | error) = {
