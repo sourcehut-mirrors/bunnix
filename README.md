@@ -94,6 +94,8 @@ Bunnix includes (often patched versions of) the following third-party software:
 * [gzip](https://www.gnu.org/software/gzip/): for installing ports
 * [tcc](https://bellard.org/tcc/): C compiler
 * [lolcat](https://github.com/jaseg/lolcat): just for fun
+* [NetBSD curses](https://github.com/sabotage-linux/netbsd-curses): curses support
+* [Vim 5.7](https://sources.vsta.org:7100/vim57/index): editor
 
 \* sbase is good software written by questionable people. I do not endorse
    suckless.
