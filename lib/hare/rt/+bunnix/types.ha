@@ -211,3 +211,16 @@ export type utsname = struct {
 	version: [65]u8,
 	machine: [65]u8,
 };
+
+export def POLLIN     = 0x001;
+export def POLLPRI    = POLLIN;
+export def POLLOUT    = 0x004;
+export def POLLERR    = 0x008;
+export def POLLHUP    = 0x010;
+export def POLLNVAL   = 0x020;
+
+export type pollfd = struct {
+	fd: int,
+	events: uint,
+	revents: uint,
+};

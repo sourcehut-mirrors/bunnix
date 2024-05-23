@@ -33,6 +33,7 @@ export type sys = enum u64 {
 	SETCREDS,
 	SETGROUPS,
 	MOUNT,
+	FACCESSAT,
 	UNAME,
 	SETHOSTNAME,
 	CHROOTAT,
@@ -40,4 +41,5 @@ export type sys = enum u64 {
 	BRK,
 	UTIMENSAT,
 	IOCTL,
+	POLL,
 };

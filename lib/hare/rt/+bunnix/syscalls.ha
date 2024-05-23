@@ -307,3 +307,7 @@ export fn mount(opts: *mount_options) (void | errno) = {
 export fn uname(uts: *utsname) (void | errno) = {
 	syswrap(syscall(sys::UNAME, uts: uintptr: u64))?;
 };
+
+export fn poll(fd: *[*]pollfd, nfd: size, timeout: int) (int | errno) = {
+	return syswrap(syscall(sys::POLL, fd, nfd, timeout: i64))?: int;
+};
