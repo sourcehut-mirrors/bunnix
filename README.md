@@ -92,6 +92,7 @@ Bunnix includes (often patched versions of) the following third-party software:
 * [lok](https://github.com/dimkr/lok): /bin/awk
 * [musl libc](http://musl.libc.org/): the libc is derived from musl
 * [gzip](https://www.gnu.org/software/gzip/): for installing ports
+* [GNU make](https://www.gnu.org/software/make/): make support
 * [tcc](https://bellard.org/tcc/): C compiler
 * [lolcat](https://github.com/jaseg/lolcat): just for fun
 * [NetBSD curses](https://github.com/sabotage-linux/netbsd-curses): curses support
