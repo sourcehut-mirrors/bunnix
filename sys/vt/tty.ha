@@ -47,6 +47,7 @@ export type vt = struct {
 	// Cursor
 	cursor: (int, int),
 	cursor_shown: bool,
+	cursor_visible: bool,
 	cursor_blink: bool,
 	cursor_shape: int,
 	next_tick: u64,
@@ -89,8 +90,9 @@ export fn vt_init(fb: *chr::fb) *vt = {
 			...
 		},
 		cursor = (-1, -1),
-		cursor_shape = vterm::VTERM_PROP_CURSORSHAPE_UNDERLINE,
+		cursor_shape = vterm::VTERM_PROP_CURSORSHAPE_BLOCK,
 		cursor_blink = true,
+		cursor_visible = true,
 		vterm = vterm,
 		vscreen = vscreen,
 		...
@@ -203,13 +205,8 @@ fn vterm_movecursor(
 		vt_blitcursor(vt);
 	};
 
-	if (visible == 1) {
-		vt.cursor = (pos.row, pos.col);
-	} else {
-		vt.cursor = (-1, -1);
-	};
+	vt.cursor = (pos.row, pos.col);
 
-	vt.cursor_shown = visible == 1;
 	if (vt.cursor_shown) {
 		vt_blitcursor(vt);
 	};
@@ -224,6 +221,16 @@ fn vterm_settermprop(
 ) int = {
 	let vt = user: *vt;
 	switch (prop) {
+	case vterm::VTermProp::VTERM_PROP_CURSORVISIBLE =>
+		// XXX: for some reason libvterm sets this to false when
+		// vim exits
+		void;
+
+		//vt.cursor_visible = val.boolean == 1;
+		//if (!vt.cursor_visible && vt.cursor_shown) {
+		//	vt.cursor_shown = false;
+		//	vt_blitcursor(vt);
+		//};
 	case vterm::VTermProp::VTERM_PROP_CURSORBLINK =>
 		vt.cursor_blink = val.boolean == 1;
 
@@ -270,6 +277,17 @@ fn vt_write(tty: *chr::tty, buf: const []u8) (size | error) = {
 		case =>
 			vterm::vterm_input_write(vterm, &buf[i]: *c::char, 1);
 		};
+	};
+
+	if (vt.cursor_visible) {
+		if (!vt.cursor_shown) {
+			vt.cursor_shown = true;
+			vt_blitcursor(vt);
+		};
+
+		const rate = arch::getrate();
+		const now = arch::gettime();
+		vt.next_tick = now + rate;
 	};
 
 	if (vt.last_present == 0) {
@@ -342,7 +360,7 @@ fn vt_tick(tick: u64, user: nullable *opaque) void = {
 	const rate = arch::getrate();
 
 	// Blink cursor
-	if (tick >= vt.next_tick && vt.cursor_blink) {
+	if (tick >= vt.next_tick && vt.cursor_blink && vt.cursor_visible) {
 		vt.cursor_shown = !vt.cursor_shown;
 		vt.next_tick = tick + rate;
 		vt_blitcursor(vt);
@@ -381,12 +399,13 @@ fn vt_blitcursor(vt: *vt) void = {
 
 		switch (vt.cursor_shape) {
 		case vterm::VTERM_PROP_CURSORSHAPE_BLOCK =>
-			blitrect(&vt.back, x, y, FONT_WIDTH, FONT_HEIGHT,
+			blitrect(&vt.back, x, y, FONT_WIDTH - 1, FONT_HEIGHT,
 				COLOR, blit_op::XOR);
 		case vterm::VTERM_PROP_CURSORSHAPE_UNDERLINE =>
 			vt_blitchar(vt, row, col, '_', COLOR, blit_op::XOR);
 		case vterm::VTERM_PROP_CURSORSHAPE_BAR_LEFT =>
-			vt_blitchar(vt, row, col, '_', COLOR, blit_op::XOR);
+			blitrect(&vt.back, x, y, 2, FONT_HEIGHT,
+				COLOR, blit_op::XOR);
 		case => abort();
 		};
 
@@ -438,7 +457,7 @@ fn vt_present(vt: *vt) void = {
 	};
 
 	// Erase cursor before redraw
-	if (vt.cursor_shown) {
+	if (vt.cursor_visible && vt.cursor_shown) {
 		vt_blitcursor(vt);
 	};
 
@@ -453,24 +472,38 @@ fn vt_present(vt: *vt) void = {
 
 		const x = col: uint * FONT_WIDTH;
 		const y = row: uint * FONT_HEIGHT;
-		blitrect(&vt.back, x, y, FONT_WIDTH, FONT_HEIGHT);
 
 		if (cell.chars[0] == 0) {
+			blitrect(&vt.back, x, y, FONT_WIDTH, FONT_HEIGHT);
 			continue;
 		};
 
+		vterm::vterm_screen_convert_color_to_rgb(vscreen, &cell.bg);
+		let bg =
+			0xFF000000 |
+			cell.bg.rgb.red: u32	<< 16 |
+			cell.bg.rgb.green: u32	<< 8 |
+			cell.bg.rgb.blue: u32	<< 0;
+
 		vterm::vterm_screen_convert_color_to_rgb(vscreen, &cell.fg);
-		const fg =
+		let fg =
 			0xFF000000 |
 			cell.fg.rgb.red: u32	<< 16 |
 			cell.fg.rgb.green: u32	<< 8 |
 			cell.fg.rgb.blue: u32	<< 0;
 
+		if (cell.attrs & vterm::VTermScreenCellAttrs::REVERSE != 0) {
+			let x = bg;
+			bg = fg;
+			fg = x;
+		};
+
+		blitrect(&vt.back, x, y, FONT_WIDTH, FONT_HEIGHT, bg);
 		vt_blitchar(vt, row, col, cell.chars[0]: rune, fg);
 	};
 
 	// Repaint cursor
-	if (vt.cursor_shown) {
+	if (vt.cursor_visible && vt.cursor_shown) {
 		vt_blitcursor(vt);
 	};
 

@@ -118,11 +118,13 @@ export fn tty_putc(tty: *tty, c: u8) void = {
 			c = '\r';
 		};
 	case '\b' =>
-		if (len(tty.avail) == 0) {
-			return;
+		if (tty.tios.c_lflag & ICANON != 0) {
+			if (len(tty.avail) == 0) {
+				return;
+			};
+			static delete(tty.avail[len(tty.avail)-1]);
+			add = false;
 		};
-		static delete(tty.avail[len(tty.avail)-1]);
-		add = false;
 	case '\x7f' =>
 		// XXX HACK
 		add = false;

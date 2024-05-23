@@ -59,7 +59,7 @@ export type VTermStringFragment = struct {
 };
 
 export type VTermValue = union {
-	boolean: int,
+	boolean: u8,
 	number: int,
 	string: VTermStringFragment,
 	color: VTermColor,
@@ -151,7 +151,15 @@ export @symbol("vterm_set_utf8") fn vterm_set_utf8(*VTerm, int) void;
 export @symbol("vterm_get_size") fn vterm_get_size(const *VTerm, *int, *int) void;
 export @symbol("vterm_set_size") fn vterm_set_size(*VTerm, int, int) void;
 
-export type VTermScreenCellAttrs = uint; // TODO
+export type VTermScreenCellAttrs = enum uint {
+	NONE = 0,
+	BOLD = 1 << 0,
+	UNDERLINE = 0b11 << 2,
+	ITALIC = 1 << 3,
+	BLINK = 1 << 4,
+	REVERSE = 1 << 5,
+	// ...
+};
 
 export def VTERM_UNDERLINE_OFF = 0;
 export def VTERM_UNDERLINE_SINGLE = 1;
