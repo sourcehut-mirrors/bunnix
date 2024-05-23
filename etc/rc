@@ -27,11 +27,18 @@ done </etc/fstab
 
 info "Starting user sessions"
 
+session() {
+	while :
+	do
+		getty $1
+	done
+}
+
 echo
 for tty in /dev/tty*
 do
 	# skip /dev/tty psuedo-device
 	[ "$tty" = "/dev/tty" ] && continue
 
-	getty $tty &
+	session $tty &
 done

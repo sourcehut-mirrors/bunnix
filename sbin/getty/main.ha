@@ -67,5 +67,6 @@ export fn main() void = {
 	case let cmd: exec::command =>
 		yield cmd;
 	};
+	exec::setname(&cmd, "-sh"); // Login shell
 	exec::exec(&cmd);
 };

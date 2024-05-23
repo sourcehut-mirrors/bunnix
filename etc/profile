@@ -1,0 +1,15 @@
+export MANPATH=/usr/share/man
+export PAGER=less
+
+for script in /etc/profile.d/*.sh
+do
+	if [ -r "$script" ]
+	then
+		. "$script"
+	fi
+done
+
+echo
+echo "Welcome to Bunnix!"
+echo "Run 'man intro' to learn more about Bunnix."
+echo
