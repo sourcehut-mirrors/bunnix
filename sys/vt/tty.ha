@@ -96,7 +96,7 @@ export fn vt_init(fb: *chr::fb) *vt = {
 
 	// Erase the front buffer
 	// TODO: Preserve and/or replay early console
-	pixbuf_copy(&term.front, &term.front);
+	pixbuf_copy(&term.front, &term.back);
 
 	term.vscreen = vscreen;
 	term.vterm = vterm;
