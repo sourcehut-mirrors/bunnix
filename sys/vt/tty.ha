@@ -78,7 +78,7 @@ export fn vt_init(fb: *chr::fb) *vt = {
 	const vscreen = vterm::vterm_obtain_screen(vterm);
 	vterm::vterm_screen_reset(vscreen, 1);
 	vterm::vterm_screen_enable_altscreen(vscreen, 1);
-	vterm::vterm_screen_set_damage_merge(vscreen, vterm::VTermDamageSize::CELL);
+	vterm::vterm_screen_set_damage_merge(vscreen, vterm::VTermDamageSize::SCROLL);
 
 	const term = alloc(vt {
 		tty_iface = &tty_impl,
