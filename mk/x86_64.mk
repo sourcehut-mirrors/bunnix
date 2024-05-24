@@ -157,7 +157,7 @@ clean-target:
 clean: clean-target
 
 # Disks for emulator use
-target/fs.fat.img: $(SYSROOT)
+target/fs.fat.img: $(SYSROOT)/boot/bunnix target/initrd
 	qemu-img create -f raw $@ $(FAT_PARTSZ)
 	mkdosfs $@
 	mmd -i $@ ::EFI

@@ -34,3 +34,4 @@ contrib/vstudio/vc143/arm64
 contrib/nuget/bin
 contrib/nuget/obj
 *.included
+*.exe

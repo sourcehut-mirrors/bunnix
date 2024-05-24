@@ -100,6 +100,7 @@ Bunnix includes (often patched versions of) the following third-party software:
 * [musl libc](http://musl.libc.org/): the libc is derived from musl
 * [sbase](https://git.sr.ht/~sircmpwn/sbase): core utilities*
 * [tcc](https://bellard.org/tcc/): C compiler
+* [zlib](https://www.zlib.net/): Decompressing initramfs in EFI bootloader
 
 \* sbase is good software written by questionable people. I do not endorse
    suckless.
