@@ -69,6 +69,7 @@ ports/build-make/make: $(SYSROOT)/usr/lib/libc.a
 
 $(SYSROOT)/usr/bin/make: ports/build-make/make
 	cd ports/build-make/ && make install DESTDIR="$(ASYSROOT)"
+	rm -rf "$(SYSROOT)"/usr/share/info
 
 $(SYSROOT)/usr/bin: $(SYSROOT)/usr/bin/make
 
@@ -85,7 +86,6 @@ ports/mdocml/mandoc: $(SYSROOT)/usr/lib/libc.a
 $(SYSROOT)/usr/bin/man: ports/mdocml/mandoc
 	make -C ports/mdocml install DESTDIR="$(ASYSROOT)"
 
-# mandoc is installed by default
 $(SYSROOT)/usr/bin: $(SYSROOT)/usr/bin/man
 
 clean-mandoc:
@@ -123,7 +123,6 @@ ports/vim57/vim: $(SYSROOT)/usr/lib/libc.a $(SYSROOT)/usr/lib/libcurses.a
 $(SYSROOT)/usr/bin/vim: ports/vim57/vim
 	cp ports/vim57/vim $(SYSROOT)/usr/bin/vim
 
-# vim is installed by default
 $(SYSROOT)/usr/bin: $(SYSROOT)/usr/bin/vim
 
 clean-vim:
