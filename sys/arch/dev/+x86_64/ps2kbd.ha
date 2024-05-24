@@ -17,7 +17,11 @@ export fn ps2_init() void = {
 fn ps2_irq(irq: u8, user: nullable *opaque) void = {
 	defer arch::irq_ack(irq);
 
-	let scancode = x86_64::inb(PS2_DATA);
+	let scancode = x86_64::inb(PS2_DATA): u32;
+	if (scancode == 0xE0) {
+		scancode <<= 8;
+		scancode |= x86_64::inb(PS2_DATA);
+	};
 
 	const mask = 1u8 << 7;
 	const state = if (scancode & mask == 0) {
