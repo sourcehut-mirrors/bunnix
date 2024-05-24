@@ -4,7 +4,6 @@ use dev;
 use dev::chr;
 use dev::chr::{key_state};
 use errors::{error, errno};
-use fmt;
 use io;
 use lib::vterm;
 use rt;
@@ -45,13 +44,17 @@ export type vt = struct {
 	vscreen: *vterm::VTermScreen,
 
 	// Cursor
-	cursor: (int, int),
+	cursor: cursor,
+	next_cursor: cursor,
 	cursor_shown: bool,
-	cursor_visible: bool,
-	cursor_blink: bool,
-	cursor_shape: int,
-	next_tick: u64,
+	next_blink: u64,
 	last_present: u64,
+};
+
+export type cursor = struct {
+	pos: (int, int),
+	blink: bool,
+	shape: int,
 };
 
 // vt console device
@@ -89,12 +92,19 @@ export fn vt_init(fb: *chr::fb) *vt = {
 			vtable = &cons_impl,
 			...
 		},
-		cursor = (-1, -1),
-		cursor_shape = vterm::VTERM_PROP_CURSORSHAPE_BLOCK,
-		cursor_blink = true,
-		cursor_visible = true,
+		cursor = cursor {
+			pos = (-1, -1),
+			shape = vterm::VTERM_PROP_CURSORSHAPE_BLOCK,
+			blink = true,
+		},
+		next_cursor = cursor {
+			pos = (-1, -1),
+			shape = vterm::VTERM_PROP_CURSORSHAPE_BLOCK,
+			blink = true,
+		},
 		vterm = vterm,
 		vscreen = vscreen,
+		next_blink = 0,
 		...
 	});
 	pixbuf_init_mapped(&term.front, fb);
@@ -200,17 +210,8 @@ fn vterm_movecursor(
 	user: nullable *opaque,
 ) int = {
 	let vt = user: *vt;
-	if (vt.cursor_shown) {
-		// Erase cursor if visible
-		vt_blitcursor(vt);
-	};
-
-	vt.cursor = (pos.row, pos.col);
-
-	if (vt.cursor_shown) {
-		vt_blitcursor(vt);
-	};
-
+	vt.next_cursor.pos = (pos.row, pos.col);
+	vt_damagecursor(vt);
 	return 1;
 };
 
@@ -225,29 +226,10 @@ fn vterm_settermprop(
 		// XXX: for some reason libvterm sets this to false when
 		// vim exits
 		void;
-
-		//vt.cursor_visible = val.boolean == 1;
-		//if (!vt.cursor_visible && vt.cursor_shown) {
-		//	vt.cursor_shown = false;
-		//	vt_blitcursor(vt);
-		//};
 	case vterm::VTermProp::VTERM_PROP_CURSORBLINK =>
-		vt.cursor_blink = val.boolean == 1;
-
-		if (!vt.cursor_shown) {
-			vt.cursor_shown = true;
-			vt_blitcursor(vt);
-		};
+		vt.next_cursor.blink = val.boolean == 1;
 	case vterm::VTermProp::VTERM_PROP_CURSORSHAPE =>
-		if (vt.cursor_shown) {
-			vt_blitcursor(vt);
-		};
-
-		vt.cursor_shape = val.number;
-
-		if (vt.cursor_shown) {
-			vt_blitcursor(vt);
-		};
+		vt.next_cursor.shape = val.number;
 	case => void;
 	};
 
@@ -279,17 +261,11 @@ fn vt_write(tty: *chr::tty, buf: const []u8) (size | error) = {
 		};
 	};
 
-	if (vt.cursor_visible) {
-		if (!vt.cursor_shown) {
-			vt.cursor_shown = true;
-			vt_blitcursor(vt);
-		};
-
-		const rate = arch::getrate();
-		const now = arch::gettime();
-		vt.next_tick = now + rate;
+	if (!vt.cursor_shown) {
+		vt.next_blink = 0;
 	};
 
+	// TODO: There is an issue here
 	if (vt.last_present == 0) {
 		vt_present(vt);
 	};
@@ -364,19 +340,17 @@ fn vt_keyev(code: u32, state: key_state, user: nullable *opaque) void = {
 	};
 };
 
-fn vt_tick(tick: u64, user: nullable *opaque) void = {
+fn vt_tick(now: u64, user: nullable *opaque) void = {
 	let vt = user: *vt;
 	const rate = arch::getrate();
 
-	// Blink cursor
-	if (tick >= vt.next_tick && vt.cursor_blink && vt.cursor_visible) {
-		vt.cursor_shown = !vt.cursor_shown;
-		vt.next_tick = tick + rate;
-		vt_blitcursor(vt);
+	// Damage the cursor area if the next blink is due
+	if (now >= vt.next_blink) {
+		vt_damagecursor(vt);
 	};
 
 	// Present no faster than 24 Hz
-	const ellapsed = tick - vt.last_present;
+	const ellapsed = now - vt.last_present;
 	const deadline = rate / 24;
 	if (ellapsed > deadline) {
 		vt_present(vt);
@@ -399,14 +373,14 @@ fn vt_blitchar(
 fn vt_blitcursor(vt: *vt) void = {
 	def COLOR: u32 = 0xFFFFFFFF;
 
-	const (row, col) = vt.cursor;
+	const (row, col) = vt.cursor.pos;
 	if (row != -1 && row != -1) {
 		const row = row: uint;
 		const col = col: uint;
 		const x = col: uint * FONT_WIDTH;
 		const y = row: uint * FONT_HEIGHT;
 
-		switch (vt.cursor_shape) {
+		switch (vt.cursor.shape) {
 		case vterm::VTERM_PROP_CURSORSHAPE_BLOCK =>
 			blitrect(&vt.back, x, y, FONT_WIDTH - 1, FONT_HEIGHT,
 				COLOR, blit_op::XOR);
@@ -449,8 +423,17 @@ fn vt_damage(
 	d.cols = c2 - c1;
 };
 
+fn vt_damagecursor(vt: *vt) void = {
+	const (row, col) = vt.cursor.pos;
+	vt_damage(vt, row: uint, col: uint);
+	const (row, col) = vt.next_cursor.pos;
+	vt_damage(vt, row: uint, col: uint);
+};
+
 fn vt_present(vt: *vt) void = {
-	vt.last_present = arch::gettime();
+	const now = arch::gettime();
+	const rate = arch::getrate();
+	vt.last_present = now;
 
 	// If userspace holds a fb reference, do not present
 	if (vt.fb.refs != 0) {
@@ -466,7 +449,7 @@ fn vt_present(vt: *vt) void = {
 	};
 
 	// Erase cursor before redraw
-	if (vt.cursor_visible && vt.cursor_shown) {
+	if (vt.cursor_shown) {
 		vt_blitcursor(vt);
 	};
 
@@ -511,11 +494,17 @@ fn vt_present(vt: *vt) void = {
 		vt_blitchar(vt, row, col, cell.chars[0]: rune, fg);
 	};
 
-	// Repaint cursor
-	if (vt.cursor_visible && vt.cursor_shown) {
+	// Update cursor
+	vt.cursor = vt.next_cursor;
+	if (now >= vt.next_blink && vt.cursor.blink) {
+		vt.cursor_shown = !vt.cursor_shown;
+		vt.next_blink = now + rate;
+	};
+	if (vt.cursor_shown) {
 		vt_blitcursor(vt);
 	};
 
+	// Swap buffers
 	pixbuf_copyrect(&vt.front, &vt.back, &rect {
 		x = damage.col * FONT_WIDTH,
 		y = damage.row * FONT_HEIGHT,
