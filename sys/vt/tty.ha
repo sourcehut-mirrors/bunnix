@@ -265,9 +265,10 @@ fn vt_write(tty: *chr::tty, buf: const []u8) (size | error) = {
 		vt.next_blink = 0;
 	};
 
-	// TODO: There is an issue here
-	if (vt.last_present == 0) {
-		vt_present(vt);
+	if (!sched::active()) {
+		// Manually tick the presentation timer if the scheduler is not
+		// online yet.
+		vt_tick(arch::gettime(), vt);
 	};
 
 	return len(buf);

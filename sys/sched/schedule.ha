@@ -7,6 +7,11 @@ let head: nullable *task = null;
 // Forward declaration
 fn proc::resume_signal(task: *task) bool;
 
+// Returns true if the scheduler is active.
+export fn active() bool = {
+	return head != null || is_idle();
+};
+
 // Switches to the next available task. Returns true if we switched contexts.
 export fn schedule() bool = {
 	const prev = match (current()) {
