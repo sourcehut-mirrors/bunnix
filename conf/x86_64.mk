@@ -19,6 +19,7 @@ CC = $(TRIPLET)-gcc
 CXX = $(TRIPLET)-g++
 AR = $(TRIPLET)-ar
 RANLIB = $(TRIPLET)-ranlib
+SCODC = scdoc
 
 #
 # Build and install optional ports

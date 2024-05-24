@@ -64,7 +64,19 @@ ifeq ($(BUILD_PORTS), 1)
 include ports/ports.mk
 endif
 
-$(SYSROOT): $(SYSROOT)/bin $(SYSROOT)/sbin $(SYSROOT)/etc $(SYS_LIBS)
+$(SYSROOT)/usr/share:
+	make -C usr.share install DESTDIR=../$(SYSROOT)
+
+.PHONY: $(SYSROOT)/usr/share
+
+SYSROOT_DEPS=\
+	$(SYSROOT)/bin \
+	$(SYSROOT)/sbin \
+	$(SYSROOT)/etc \
+	$(SYSROOT)/usr/share \
+	$(SYS_LIBS)
+
+$(SYSROOT): $(SYSROOT_DEPS)
 	mkdir -p $(SYSROOT)
 	for d in \
 		boot \
