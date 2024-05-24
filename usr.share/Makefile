@@ -17,6 +17,8 @@ man/man7/%.7: man/man7/%.7.scd
 	$(SCDOC) < $^ > $@
 
 install: $(MAN1) $(MAN7)
+	mkdir -p $(DESTDIR)/usr/share/man/man1
+	mkdir -p $(DESTDIR)/usr/share/man/man7
 	for doc in $(MAN1); do\
 		install -Dm644 $$doc $(DESTDIR)/usr/share/man/man1/; \
 	done
