@@ -100,13 +100,13 @@ target/initrd: $(SYSROOT)
 
 ifeq ($(INSTALL_SRC), 1)
 
-$(SYSROOT)/src:
-	@mkdir -p $(SYSROOT)/src
-	git archive HEAD | tar -C $(SYSROOT)/src -x
+$(SYSROOT)/usr/src:
+	@mkdir -p $(SYSROOT)/usr/src
+	git archive HEAD | tar -C $(SYSROOT)/usr/src -x
 
-.PHONY: $(SYSROOT)/src
+.PHONY: $(SYSROOT)/usr/src
 
-$(SYSROOT): $(SYSROOT)/src
+$(SYSROOT): $(SYSROOT)/usr/src
 
 endif
 
