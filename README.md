@@ -82,6 +82,20 @@ Use `make` to compile Bunnix. The following targets are available:
 * make gdb: run but waits for gdb
 * make gdbc: connect gdbc to a waiting qemu instance
 
+## Source code layout
+
+Important directories:
+
+* bin: contents of /bin (core utilities)
+* boot: bootloaders
+* etc: contents of /etc (e.g. /etc/rc)
+* lib: libc, Hare standard library for userspace
+* ports: optional third-party software
+* sbin: contents of /sbin (critical system utilities)
+* sys: kernel source
+* usr.share: man pages
+* vendor: critical third-party software
+
 ## Included third-party software
 
 Bunnix includes (often patched versions of) the following third-party software:
