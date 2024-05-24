@@ -1,5 +1,6 @@
 export MANPATH=/usr/share/man
 export PAGER=less
+export LANG=C
 
 for script in /etc/profile.d/*.sh
 do
