@@ -57,6 +57,11 @@ Bunnix includes a more-or-less functional terminal emulator as /dev/tty0.
 If you wish to write your own terminal-aware programs, *curses* is available in
 /usr. Build your programs with *-lcurses -lterminfo*.
 
+# PERSISTENT INSTALL
+
+It is possible to install Bunnix to disk and boot it without the iso. The exact
+details are mostly left for the user to infer, but *boot*(7) may be of service.
+
 # SOURCE CODE
 
 If your distribution of Bunnix was configured to include the source code, the
