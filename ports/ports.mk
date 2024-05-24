@@ -25,6 +25,26 @@ $(SYSROOT)/usr/bin/distinstall: ports/distinstall
 
 $(SYSROOT)/usr/bin: $(SYSROOT)/usr/bin/distinstall
 
+#### advent
+
+ports/build-advent/src/advent: $(SYSROOT)/usr/lib/libc.a
+	mkdir -p ports/build-advent/
+	cd ports/build-advent/ && ../advent/configure \
+		--prefix=/usr \
+		--host=x86_64-bunnix
+	cd ports/build-advent && make
+
+$(SYSROOT)/usr/bin/advent: ports/build-advent/src/advent
+	cd ports/build-advent/ && make install DESTDIR="$(ASYSROOT)"
+
+# advent is installed by default
+$(SYSROOT)/usr/bin: $(SYSROOT)/usr/bin/advent
+
+clean-advent:
+	rm -rf ports/build-advent
+.PHONY: clean-advent
+clean-ports: clean-advent
+
 #### gzip
 
 ports/build-gzip/gzip: $(SYSROOT)/usr/lib/libc.a

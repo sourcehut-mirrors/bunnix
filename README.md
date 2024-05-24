@@ -86,19 +86,20 @@ Use `make` to compile Bunnix. The following targets are available:
 
 Bunnix includes (often patched versions of) the following third-party software:
 
-* [lwext4](https://github.com/gkostka/lwext4): ext4 implementation (kernel)
-* [libvterm](https://www.leonerd.org.uk/code/libvterm/): terminal emulation for kernel console
-* [dash](https://git.sr.ht/~sircmpwn/dash): /bin/sh
-* [sbase](https://git.sr.ht/~sircmpwn/sbase): core utilities*
-* [lok](https://github.com/dimkr/lok): /bin/awk
-* [musl libc](http://musl.libc.org/): the libc is derived from musl
-* [gzip](https://www.gnu.org/software/gzip/): for installing ports
 * [GNU make](https://www.gnu.org/software/make/): make support
-* [tcc](https://bellard.org/tcc/): C compiler
-* [lolcat](https://github.com/jaseg/lolcat): just for fun
 * [NetBSD curses](https://github.com/sabotage-linux/netbsd-curses): curses support
 * [Vim 5.7](https://sources.vsta.org:7100/vim57/index): editor
+* [advent](https://github.com/troglobit/adventure): Colossal Cave Adventure
+* [dash](https://git.sr.ht/~sircmpwn/dash): /bin/sh
+* [gzip](https://www.gnu.org/software/gzip/): for installing ports
+* [libvterm](https://www.leonerd.org.uk/code/libvterm/): terminal emulation for kernel console
+* [lok](https://github.com/dimkr/lok): /bin/awk
+* [lolcat](https://github.com/jaseg/lolcat): just for fun
+* [lwext4](https://github.com/gkostka/lwext4): ext4 implementation (kernel)
 * [mdocml 1.13.3](https://mandoc.bsd.lv/): mandoc plus some Sortix patches
+* [musl libc](http://musl.libc.org/): the libc is derived from musl
+* [sbase](https://git.sr.ht/~sircmpwn/sbase): core utilities*
+* [tcc](https://bellard.org/tcc/): C compiler
 
 \* sbase is good software written by questionable people. I do not endorse
    suckless.
