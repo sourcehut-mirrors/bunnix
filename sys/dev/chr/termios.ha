@@ -17,6 +17,7 @@ export fn termios_init(tios: *termios) void = {
 	tios.c_oflag = OPOST | ONLCR;
 	tios.c_lflag = ECHO | ICANON | ISIG | IEXTEN;
 	tios.c_cflag = CREAD | CS7 | PARENB | HUPCL;
+	tios.c_cc[VEOF] = '\x04';
 };
 
 export def VINTR	= 0;

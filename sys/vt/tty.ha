@@ -328,6 +328,16 @@ fn vt_keyev(code: u32, state: key_state, user: nullable *opaque) void = {
 		return;
 	};
 
+	const layer = if (term.shift) 1 else 0;
+	const sym = keysyms[keycode][layer];
+
+	if (term.tios.c_lflag & chr::ICANON != 0) {
+		if (sym == 'd' && term.ctrl && !term.shift) {
+			chr::tty_putc(term, term.tios.c_cc[chr::VEOF]);
+			return;
+		};
+	};
+
 	let vtmods = vterm::VTERM_MOD_NONE;
 	if (term.shift) {
 		vtmods |= vterm::VTERM_MOD_SHIFT;
@@ -349,18 +359,9 @@ fn vt_keyev(code: u32, state: key_state, user: nullable *opaque) void = {
 		vterm::vterm_keyboard_key(term.vterm, vtkey, vtmods);
 	};
 
-	const layer = if (term.shift) 1 else 0;
-	const sym = keysyms[keycode][layer];
-	if (sym == '\0') {
-		return;
+	if (sym != '\0') {
+		vterm::vterm_keyboard_unichar(term.vterm, sym: u32, vtmods);
 	};
-	if (sym == 'd' && term.ctrl && !term.shift) {
-		// TODO: This is a bit hacky
-		chr::tty_putc(term, '\x04'); // EOF
-		return;
-	};
-
-	vterm::vterm_keyboard_unichar(term.vterm, sym: u32, vtmods);
 };
 
 fn vt_tick(tick: u64, user: nullable *opaque) void = {

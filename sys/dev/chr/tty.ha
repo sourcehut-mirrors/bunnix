@@ -128,14 +128,16 @@ export fn tty_putc(tty: *tty, c: u8) void = {
 	case '\x7f' =>
 		// XXX HACK
 		add = false;
-	case '\x04' =>
+	case => void;
+	};
+
+	if (tty.tios.c_lflag & ICANON != 0 && c == tty.tios.c_cc[VEOF]) {
 		if (len(tty.avail) == 0) {
 			tty.eof = true;
 			sched::wake(&tty.wq);
 			poll::signal(&tty.poll, poll::POLLIN);
 		};
 		return;
-	case => void;
 	};
 
 	if (add) {
