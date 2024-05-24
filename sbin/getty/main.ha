@@ -57,10 +57,14 @@ export fn main() void = {
 		};
 	};
 
+	// TODO: call /bin/login properly
 	os::setenv("TERM", "xterm-256color")!;
+	os::setenv("SHELL", "/bin/sh")!;
+	os::setenv("USER", "root")!;
+	os::setenv("LOGNAME", "root")!;
+	os::setenv("HOME", "/root")!;
 	os::chdir("/root")!;
 
-	// TODO: call /bin/login
 	const cmd = match (exec::cmd("/bin/sh")) {
 	case let err: exec::error =>
 		fmt::fatal("Error executing /bin/login:", exec::strerror(err));
