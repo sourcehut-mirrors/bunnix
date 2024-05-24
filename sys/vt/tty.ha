@@ -328,6 +328,14 @@ fn vt_keyev(code: u32, state: key_state, user: nullable *opaque) void = {
 		return;
 	};
 
+	let vtmods = vterm::VTERM_MOD_NONE;
+	if (term.shift) {
+		vtmods |= vterm::VTERM_MOD_SHIFT;
+	};
+	if (term.ctrl) {
+		vtmods |= vterm::VTERM_MOD_CTRL;
+	};
+
 	let vtkey = vterm::VTERM_KEY_NONE;
 	switch (code) {
 	case K_BKSP =>
@@ -338,7 +346,7 @@ fn vt_keyev(code: u32, state: key_state, user: nullable *opaque) void = {
 	};
 
 	if (vtkey != vterm::VTERM_KEY_NONE) {
-		vterm::vterm_keyboard_key(term.vterm, vtkey, 0);
+		vterm::vterm_keyboard_key(term.vterm, vtkey, vtmods);
 	};
 
 	const layer = if (term.shift) 1 else 0;
@@ -352,7 +360,7 @@ fn vt_keyev(code: u32, state: key_state, user: nullable *opaque) void = {
 		return;
 	};
 
-	vterm::vterm_keyboard_unichar(term.vterm, sym: u32, 0);
+	vterm::vterm_keyboard_unichar(term.vterm, sym: u32, vtmods);
 };
 
 fn vt_tick(tick: u64, user: nullable *opaque) void = {
