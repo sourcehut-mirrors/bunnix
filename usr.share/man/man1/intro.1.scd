@@ -31,8 +31,8 @@ text editors. Build your programs with *cc* and/or *make*.
 ## FILESYSTEMS
 
 The Bunnix kernel includes *ext4* support. If you have an ext4 filesystem
-installed on your filesystem, you may mount it with *mount -t ext4 <device>
-<path>*, where <device> is e.g. */dev/sata0a*.
+installed on your disk, you may mount it with *mount -t ext4 <device> <path>*,
+where <device> is e.g. */dev/sata0a*.
 
 ## GAMES
 
