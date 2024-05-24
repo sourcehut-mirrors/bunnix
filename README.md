@@ -91,8 +91,8 @@ Bunnix includes (often patched versions of) the following third-party software:
 * [Vim 5.7](https://sources.vsta.org:7100/vim57/index): editor
 * [advent](https://github.com/troglobit/adventure): Colossal Cave Adventure
 * [dash](https://git.sr.ht/~sircmpwn/dash): /bin/sh
-* [gzip](https://www.gnu.org/software/gzip/): for installing ports
-* [libvterm](https://www.leonerd.org.uk/code/libvterm/): terminal emulation for kernel console
+* [gzip](https://www.gnu.org/software/gzip/): /usr/bin/gzip et al
+* [libvterm](https://www.leonerd.org.uk/code/libvterm/): terminal emulation (kernel)
 * [lok](https://github.com/dimkr/lok): /bin/awk
 * [lolcat](https://github.com/jaseg/lolcat): just for fun
 * [lwext4](https://github.com/gkostka/lwext4): ext4 implementation (kernel)
@@ -100,7 +100,7 @@ Bunnix includes (often patched versions of) the following third-party software:
 * [musl libc](http://musl.libc.org/): the libc is derived from musl
 * [sbase](https://git.sr.ht/~sircmpwn/sbase): core utilities*
 * [tcc](https://bellard.org/tcc/): C compiler
-* [zlib](https://www.zlib.net/): Decompressing initramfs in EFI bootloader
+* [zlib](https://www.zlib.net/): Decompressing initramfs (EFI bootloader)
 
 \* sbase is good software written by questionable people. I do not endorse
    suckless.
