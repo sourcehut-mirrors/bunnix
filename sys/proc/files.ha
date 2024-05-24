@@ -43,7 +43,7 @@ export fn getfd(
 		append(proc.fds, [filedesc { ... }...], len(proc.fds) - fd: size);
 	};
 
-	if (fd < 0 || fd: size > len(proc.fds)) {
+	if (fd < 0 || fd: size >= len(proc.fds)) {
 		return errno::BADF;
 	};
 	if (proc.fds[fd].file == null && !allocate) {
