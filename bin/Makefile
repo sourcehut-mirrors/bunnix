@@ -13,8 +13,14 @@ install-bin:
 	do install -Dm755 "$$f" $(DESTDIR)/bin; \
 	done
 
-install: install-bin
+install-man:
+	mkdir -p $(DESTDIR)/usr/share/man/man1
+	for f in $^; \
+	do install -Dm644 "$$f" $(DESTDIR)/usr/share/man/man1; \
+	done
+
+install: install-bin install-man
 
 clean:
 
-.PHONY: install install-bin clean
+.PHONY: install install-bin install-man clean

@@ -116,6 +116,8 @@ define sbase_prog
 $1: $(SBASE_SOURCES) $(SBASE_LIBS) $(SYSROOT)/usr/lib/libc.a
 	make -C $(SBASE) $(shell basename $1) $(SBASE_MAKEVARS)
 
+install-man: $1.1
+
 all: $1
 endef
 
