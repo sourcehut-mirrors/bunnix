@@ -500,6 +500,8 @@ fn vt_present(vt: *vt) void = {
 	if (now >= vt.next_blink && vt.cursor.blink) {
 		vt.cursor_shown = !vt.cursor_shown;
 		vt.next_blink = now + rate;
+	} else if (!vt.cursor.blink) {
+		vt.cursor_shown = true;
 	};
 	if (vt.cursor_shown) {
 		vt_blitcursor(vt);
