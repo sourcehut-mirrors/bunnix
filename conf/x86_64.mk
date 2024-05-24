@@ -26,6 +26,10 @@ SCODC = scdoc
 BUILD_PORTS=0
 
 #
+# strip(1) binaries
+STRIP_BINS=1
+
+#
 # Bootloader configuration
 ENABLE_EFI=1
 ENABLE_LEGACY=1

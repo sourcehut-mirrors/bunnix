@@ -88,6 +88,10 @@ $(SYSROOT): $(SYSROOT_DEPS)
 		var; \
 	do mkdir -p $(SYSROOT)/$$d; \
 	done
+ifeq ($(STRIP_BINS), 1)
+	$(STRIP) $(SYSROOT)/bin/* 2>/dev/null || true
+	$(STRIP) $(SYSROOT)/usr/bin/* 2>/dev/null || true
+endif
 
 target/initrd: $(SYSROOT)
 	# TODO: gzip me
