@@ -94,8 +94,7 @@ ifeq ($(STRIP_BINS), 1)
 endif
 
 target/initrd: $(SYSROOT)
-	# TODO: gzip me
-	cd $(SYSROOT) && tar -cvf ../../$@ *
+	cd $(SYSROOT) && tar -czvf ../../$@ *
 
 .PHONY: target/initrd
 
