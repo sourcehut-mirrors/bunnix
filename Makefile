@@ -103,6 +103,7 @@ ifeq ($(INSTALL_SRC), 1)
 $(SYSROOT)/usr/src:
 	@mkdir -p $(SYSROOT)/usr/src
 	git archive HEAD | tar -C $(SYSROOT)/usr/src -x
+	rm -f $(SYSROOT)/usr/src/ports/doom/doom1.wad
 
 .PHONY: $(SYSROOT)/usr/src
 

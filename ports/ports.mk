@@ -23,6 +23,23 @@ clean-advent:
 .PHONY: clean-advent
 clean-ports: clean-advent
 
+#### doom
+
+ports/doom/doomgeneric/doom: $(SYSROOT)/usr/lib/libc.a
+	make -C ports/doom/doomgeneric -f Makefile.bunnix
+
+$(SYSROOT)/usr/bin/doom: ports/doom/doomgeneric/doom
+	cp ports/doom/doomgeneric/doom $(SYSROOT)/usr/bin/
+	mkdir -p $(SYSROOT)/usr/share/games/doom/
+	cp ports/doom/doom1.wad $(SYSROOT)/usr/share/games/doom/
+
+$(SYSROOT)/usr/bin: $(SYSROOT)/usr/bin/doom
+
+clean-doom:
+	make -C ports/doom/doomgeneric -f Makefile.bunnix clean
+.PHONY: clean-doom
+clean-ports: clean-doom
+
 #### gzip
 
 ports/build-gzip/gzip: $(SYSROOT)/usr/lib/libc.a
