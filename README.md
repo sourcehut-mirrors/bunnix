@@ -62,7 +62,7 @@ You need the following:
 
 To build with EFI support:
 
-* binutils and gcc configured for x86-64-w64-migw32
+* binutils and gcc configured for x86-64-w64-mingw32
 * OVMF (only requried if PREFER\_EFI=1, for qemu)
 
 To build with legacy boot support:
