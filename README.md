@@ -37,7 +37,7 @@ And GCC:
     --with-sysroot=$sysroot \
     --enable-languages=c,c++ \
     --disable-gcov \
-    --disable-nlp
+    --disable-nls
 make all-gcc all-target-libgcc
 make install-gcc install-target-libgcc
 make all-target-libstdc++-v3
