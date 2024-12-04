@@ -30,13 +30,13 @@ export @symbol("vsnprintf") fn vsnprintf(
 		rn = fmt[i];
 		switch (rn) {
 		case 's' =>
-			const arg: const *c::char = vaarg(ap);
+			const arg = vaarg(ap, const *c::char);
 			n += fmt::fprint(&out, c::tostr_unsafe(arg))!;
 		case 'd' =>
-			const arg: int = vaarg(ap);
+			const arg = vaarg(ap, int);
 			n += fmt::fprint(&out, arg)!;
 		case 'c' =>
-			const arg: c::uchar = vaarg(ap);
+			const arg = vaarg(ap, c::uchar);
 			n += fmt::fprint(&out, arg: u32: rune)!;
 		case =>
 			abort();

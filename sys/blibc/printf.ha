@@ -19,10 +19,10 @@ export @symbol("printf") fn printf(format: *const c::char, ...) int = {
 		rn = fmt[i];
 		switch (rn) {
 		case 's' =>
-			const arg: const *c::char = vaarg(ap);
+			const arg = vaarg(ap, const *c::char);
 			n += log::print(c::tostr_unsafe(arg));
 		case 'd' =>
-			const arg: int = vaarg(ap);
+			const arg = vaarg(ap, int);
 			n += log::print(arg);
 		case =>
 			n += log::printf("(%unsupp {})", rn);
