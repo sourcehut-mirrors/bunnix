@@ -54,22 +54,22 @@ export fn encodestr(in: uuid) str = {
 	let buf = buf[..0];
 
 	for (let i = TIME_LOW; i < TIME_LOW + 4; i += 1) {
-		static append(buf, hexconv(in[i])...);
+		static append(buf, hexconv(in[i])...)!;
 	};
-	static append(buf, '-');
+	static append(buf, '-')!;
 	for (let i = TIME_MID; i < TIME_MID + 2; i += 1) {
-		static append(buf, hexconv(in[i])...);
+		static append(buf, hexconv(in[i])...)!;
 	};
-	static append(buf, '-');
+	static append(buf, '-')!;
 	for (let i = TIME_HI_AND_VERSION; i < TIME_HI_AND_VERSION + 2; i += 1) {
-		static append(buf, hexconv(in[i])...);
+		static append(buf, hexconv(in[i])...)!;
 	};
-	static append(buf, '-');
-	static append(buf, hexconv(in[CLOCK_SEQ_HI_AND_RESERVED])...);
-	static append(buf, hexconv(in[CLOCK_SEQ_LOW])...);
-	static append(buf, '-');
+	static append(buf, '-')!;
+	static append(buf, hexconv(in[CLOCK_SEQ_HI_AND_RESERVED])...)!;
+	static append(buf, hexconv(in[CLOCK_SEQ_LOW])...)!;
+	static append(buf, '-')!;
 	for (let i = NODE; i < NODE + 6; i += 1) {
-		static append(buf, hexconv(in[i])...);
+		static append(buf, hexconv(in[i])...)!;
 	};
 
 	return strings::fromutf8_unsafe(buf);

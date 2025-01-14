@@ -38,7 +38,7 @@ export fn tty_init(tty: *tty, serial: bool) void = {
 	assert(tty.tty_iface != null);
 	tty.iface = &tty_chardev_impl;
 	tty.major = dev::TTY_MAJOR;
-	tty.buffer = alloc([0...], BUFSIZ);
+	tty.buffer = alloc([0...], BUFSIZ)!;
 	tty.avail = tty.buffer[..0];
 	termios_init(&tty.tios);
 
@@ -52,7 +52,7 @@ export fn tty_init(tty: *tty, serial: bool) void = {
 		nother += 1;
 	};
 
-	append(ttys, tty);
+	append(ttys, tty)!;
 
 	register(tty);
 };
@@ -141,7 +141,7 @@ export fn tty_putc(tty: *tty, c: u8) void = {
 	};
 
 	if (add) {
-		static append(tty.avail, c);
+		static append(tty.avail, c)!;
 	};
 
 	if (tty.tios.c_lflag & ECHO != 0) {
@@ -166,7 +166,7 @@ fn tty_open(cdev: *chardev) (*io::file | error) = {
 		vtable = &tty_file_impl,
 		tty = tty,
 		...
-	});
+	})!;
 };
 
 type tty_file = struct {

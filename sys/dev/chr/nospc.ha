@@ -21,7 +21,7 @@ fn nospc_open(cdev: *chardev) (*io::file | error) = {
 	return alloc(io::file {
 		vtable = &devnospc_file_impl,
 		...
-	});
+	})!;
 };
 
 let devnospc_file_impl = io::vtable {

@@ -29,7 +29,7 @@ export fn installfd(
 		};
 	};
 
-	append(proc.fds, fd);
+	append(proc.fds, fd)!;
 	return (len(proc.fds) - 1): int;
 };
 
@@ -40,7 +40,7 @@ export fn getfd(
 	allocate: bool = false,
 ) (*filedesc | error) = {
 	if (allocate && fd: size >= len(proc.fds)) {
-		append(proc.fds, [filedesc { ... }...], len(proc.fds) - fd: size);
+		append(proc.fds, [filedesc { ... }...], len(proc.fds) - fd: size)!;
 	};
 
 	if (fd < 0 || fd: size >= len(proc.fds)) {
@@ -62,7 +62,7 @@ export fn getavailfd(
 		if (*min: size >= len(proc.fds)) {
 			append(proc.fds,
 				[filedesc { ... }...],
-				len(proc.fds) - *min: size);
+				len(proc.fds) - *min: size)!;
 		};
 
 		if (proc.fds[*min].file != null) {

@@ -20,7 +20,7 @@ export fn new() *fs::superblock = {
 			io::mode::DIR | 0o755,
 			null,
 		),
-	});
+	})!;
 	sb.root.sb = sb;
 	return sb;
 };

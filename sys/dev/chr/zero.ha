@@ -21,7 +21,7 @@ fn zero_open(cdev: *chardev) (*io::file | error) = {
 	return alloc(io::file {
 		vtable = &devzero_file_impl,
 		...
-	});
+	})!;
 };
 
 let devzero_file_impl = io::vtable {

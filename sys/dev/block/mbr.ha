@@ -29,7 +29,7 @@ fn scanpart_mbr(
 			partno = partno,
 			lba = part.lba,
 			...
-		});
+		})!;
 
 		log::kprintfln(BLOCK, "{}{}{}: MBR partition {} type {}:{}",
 			iface_str(bdev.iface),

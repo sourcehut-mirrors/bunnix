@@ -43,7 +43,7 @@ export fn cons_register(out: *io::file) void = {
 		return;
 	};
 
-	static append(cons.out, out);
+	static append(cons.out, out)!;
 };
 
 // Removes a console file from the list of kernel consoles.
@@ -67,7 +67,7 @@ export fn cons_write(buf: const []u8) void = {
 	//	const diff = STATIC_LOG - (len(cons.log) + len(buf));
 	//	static delete(cons.log[..diff]);
 	//};
-	//static append(cons.log, buf...);
+	//static append(cons.log, buf...)!;
 };
 
 // Returns the contents of the kernel log buffer.
@@ -79,7 +79,7 @@ fn cons_open(cdev: *chardev) (*io::file | error) = {
 	return alloc(io::file {
 		vtable = &console_file_impl,
 		...
-	});
+	})!;
 };
 
 // A "file" for writing to the kernel console.

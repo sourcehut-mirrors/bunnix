@@ -20,7 +20,7 @@ fn null_open(cdev: *chardev) (*io::file | error) = {
 	return alloc(io::file {
 		vtable = &devnull_file_impl,
 		...
-	});
+	})!;
 };
 
 let devnull_file_impl = io::vtable {

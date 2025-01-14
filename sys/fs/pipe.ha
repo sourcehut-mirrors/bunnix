@@ -36,18 +36,18 @@ export fn mkpipe() ((*io::file, *io::file) | error) = {
 		vtable = &pipe_rd_impl,
 		pipe = null: *pipe,
 		...
-	});
+	})!;
 	let wr = alloc(pipe_file {
 		vtable = &pipe_wr_impl,
 		pipe = null: *pipe,
 		...
-	});
+	})!;
 	let pipe = alloc(pipe {
 		rd = rd,
 		wr = wr,
-		buffer = alloc([0...], PIPE_BUF),
+		buffer = alloc([0...], PIPE_BUF)!,
 		...
-	});
+	})!;
 	rd.pipe = pipe;
 	wr.pipe = pipe;
 	pipe.avail = pipe.buffer[..0];
@@ -118,7 +118,7 @@ fn pipe_file_write(f: *io::file, buf: const []u8) (size | error) = {
 	if (len(buf) < copy) {
 		copy = len(buf);
 	};
-	static append(pipe.avail, buf[..copy]...);
+	static append(pipe.avail, buf[..copy]...)!;
 
 	// Wake readers
 	const rd = pipe.rd as *pipe_file;

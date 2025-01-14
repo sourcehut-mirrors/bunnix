@@ -26,7 +26,7 @@ fn mkfile(ino: *inode, flag: io::flag) (*io::file | error) = {
 		inode = ino,
 		flag = flag,
 		...
-	});
+	})!;
 };
 
 fn file_finish(file: *io::file) void = {

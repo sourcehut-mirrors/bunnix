@@ -26,7 +26,7 @@ export fn serial_init(dev: *pcserial, port: u16) void = {
 
 	serial_outb(dev, IER,    0x00);   // Disable interrupts
 	serial_outb(dev, LCR,    0x80);   // Enable divisor mode
-	serial_outb(dev, DL_LSB, 0x01);   // Div Low:  01 Set the port to 115200 bps
+	serial_outb(dev, DL_LSB, 0x01);   // Div Low:  01 Set the port to 115200 baud
 	serial_outb(dev, DL_MSB, 0x00);   // Div High: 00
 	serial_outb(dev, LCR,    0x03);   // Disable divisor mode, set parity
 	serial_outb(dev, FCR,    0xC7);   // Enable FIFO and clear

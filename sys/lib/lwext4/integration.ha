@@ -3,7 +3,7 @@ use errors::{error, errno};
 
 // Makes an lwext4 block device for a given Bunnix block device.
 export fn mkblockdev(bdev: *block::blockdev) *blockdev = {
-	let buffer: []u8 = alloc([0...], bdev.blocksz);
+	let buffer: []u8 = alloc([0...], bdev.blocksz)!;
 	const iface = alloc(blockdev_iface {
 		open = &bdev_open,
 		close = &bdev_open,
@@ -14,13 +14,13 @@ export fn mkblockdev(bdev: *block::blockdev) *blockdev = {
 		ph_bbuf = &buffer[0],
 		p_user = bdev,
 		...
-	});
+	})!;
 	return alloc(blockdev {
 		bdif = iface,
 		part_offset = 0,
 		part_size = bdev.blocksz * bdev.blocks,
 		...
-	});
+	})!;
 };
 
 fn bdev_open(bdev: *blockdev) errno = {

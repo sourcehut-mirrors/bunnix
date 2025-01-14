@@ -10,10 +10,10 @@ export fn fork() (int | error) = {
 
 	const child = new_proc(parent.root, parent.cwd, parent.cwd_str, parent)?;
 	const ctask = sched::newtask(&child.vmm, child)?;
-	append(child.tasks, ctask);
+	append(child.tasks, ctask)!;
 	mman::fork(&parent.vmm, &child.vmm)?;
 
-	child.fds = alloc([filedesc { ... }...], len(parent.fds));
+	child.fds = alloc([filedesc { ... }...], len(parent.fds))!;
 	for (let i = 0z; i < len(parent.fds); i += 1) {
 		match (parent.fds[i].file) {
 		case let f: *io::file =>

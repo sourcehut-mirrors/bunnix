@@ -22,7 +22,7 @@ export fn mount_root(
 	vfs.root = root;
 	root.mountpoint = alloc(mountpoint {
 		sb = fs,
-	});
+	})!;
 	return root;
 };
 
@@ -41,5 +41,5 @@ export fn mount_fs(
 	};
 	parent.mountpoint = alloc(mountpoint {
 		sb = fs,
-	});
+	})!;
 };

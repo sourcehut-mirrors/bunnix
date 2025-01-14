@@ -106,7 +106,7 @@ export fn vt_init(fb: *chr::fb) *vt = {
 		vscreen = vscreen,
 		next_blink = 0,
 		...
-	});
+	})!;
 	pixbuf_init_mapped(&term.front, fb);
 	pixbuf_init_back(&term.back, fb);
 

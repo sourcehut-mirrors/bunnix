@@ -28,7 +28,7 @@ let cpus: []cpu = [];
 
 // Initialize the Nth CPU (which must be the CPU calling this function)
 export fn init_cpu(i: size) void = {
-	static append(cpus, cpu { ... });
+	static append(cpus, cpu { ... })!;
 	cpus[i].cpu = &cpus[i];
 
 	let cpu = &cpus[len(cpus)-1];

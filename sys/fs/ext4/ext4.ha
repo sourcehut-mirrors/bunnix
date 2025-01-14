@@ -55,7 +55,7 @@ fn open(opts: *fs::fs_opts) (*fs::superblock | error) = {
 			mounted = true,
 			...
 		},
-	});
+	})!;
 
 	const lwbdev = lwext4::mkblockdev(bdev);
 	let r = lwext4::block_init(lwbdev);

@@ -88,7 +88,7 @@ export fn kbd_keyproc(kbd: *kbd, scancode: u32, state: key_state) void = {
 	static append(kbd.buf, kbd_evdata {
 		scancode = scancode,
 		state = state,
-	});
+	})!;
 	sched::wake(&kbd.wq);
 	poll::signal(&kbd.poll, poll::POLLIN);
 };
@@ -108,7 +108,7 @@ fn kbd_open(cdev: *chardev) (*io::file | error) = {
 		vtable = &kbd_file_impl,
 		kbd = kbd,
 		...
-	});
+	})!;
 };
 
 export type kbd_file = struct {

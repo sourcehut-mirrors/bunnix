@@ -20,5 +20,5 @@ let buses: []*bus = [];
 
 // Registers a bus with the system.
 export fn bus_register(bus: *bus) void = {
-	append(buses, bus);
+	append(buses, bus)!;
 };

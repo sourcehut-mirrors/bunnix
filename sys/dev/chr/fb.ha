@@ -39,7 +39,7 @@ export fn fb_init(dev: *fb) void = {
 		static let buf: [8]*fb = [null: *fb...];
 		fbs = buf[..0];
 	};
-	static append(fbs, dev);
+	static append(fbs, dev)!;
 };
 
 // Returns the underlying physical memory address of this framebuffer.
@@ -82,7 +82,7 @@ fn fb_open(cdev: *chardev) (*io::file | error) = {
 		vtable = &fb_file_impl,
 		dev = dev,
 		...
-	});
+	})!;
 };
 
 type fb_file = struct {

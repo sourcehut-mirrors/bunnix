@@ -32,7 +32,7 @@ fn scanpart_gpt(
 			partno = partno,
 			lba = part.start_lba,
 			...
-		});
+		})!;
 
 		log::kprintfln(BLOCK, "{}{}{}: GPT partition {}: {}",
 			iface_str(bdev.iface),

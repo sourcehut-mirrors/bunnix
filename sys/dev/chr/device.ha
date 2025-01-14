@@ -25,7 +25,7 @@ export fn register(dev: *chardev) void = {
 	};
 
 	// TODO: Binary search by device number
-	static append(devs, dev);
+	static append(devs, dev)!;
 };
 
 // Finds a character device with the given device number.

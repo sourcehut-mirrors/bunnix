@@ -173,8 +173,8 @@ fn sys_setgroups(groups: *[*]int, ngroup: size) (u64 | error) = {
 	};
 
 	free(cur.groups);
-	cur.groups = alloc([], len(groups));
-	append(cur.groups, groups...);
+	cur.groups = alloc([], len(groups))!;
+	append(cur.groups, groups...)!;
 
 	return 0u64;
 };

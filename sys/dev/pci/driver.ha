@@ -58,6 +58,6 @@ export fn probe(bus: *pcibus, device: u32) void = {
 	match (driver.probe(&info)) {
 	case null => return;
 	case let dev: *pcidev =>
-		append(devices, dev);
+		append(devices, dev)!;
 	};
 };

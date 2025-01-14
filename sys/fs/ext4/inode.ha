@@ -38,7 +38,7 @@ fn inode_from_ref(sb: *superblock, ref: *lwext4::inode_ref) *inode = {
 		ref = *ref,
 		inode = ref.inode as *lwext4::inode,
 		...
-	});
+	})!;
 	ino.ino = ref.index;
 	ino.mode = lwext4::inode_get_mode(&fs.sb, ino.inode): io::mode;
 	ino.uid = lwext4::inode_get_uid(ino.inode);

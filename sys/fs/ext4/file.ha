@@ -28,7 +28,7 @@ fn mkfile(ino: *inode, flag: io::flag) (*io::file | error) = {
 		vtable = impl,
 		inode = ino,
 		...
-	});
+	})!;
 	return f;
 };
 

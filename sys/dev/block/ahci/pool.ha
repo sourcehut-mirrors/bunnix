@@ -33,7 +33,7 @@ export fn buffer_pool_init() *buffer_pool = {
 		virt = base: *[NBUFFER * SECTORSZ]u8,
 		phys = phys,
 		bitmap = 0,
-	});
+	})!;
 };
 
 // Locks a buffer from the pool. May return a buffer smaller than the requested

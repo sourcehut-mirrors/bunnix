@@ -8,7 +8,7 @@ use strings;
 // representation, returning a new string. The return value must be freed by the
 // caller.
 export fn strlower(s: str) str = {
-	let new: []u8 = alloc([], len(s));
+	let new: []u8 = alloc([], len(s))!;
 	return strlower_buf(s, new);
 };
 
@@ -19,7 +19,7 @@ export fn strlower(s: str) str = {
 export fn strlower_buf(s: str, buf: []u8) str = {
 	let it = strings::iter(s);
 	for (let r => strings::next(&it)) {
-		static append(buf, utf8::encoderune(tolower(r))...);
+		static append(buf, utf8::encoderune(tolower(r))...)!;
 	};
 	return strings::fromutf8(buf)!;
 };
@@ -28,7 +28,7 @@ export fn strlower_buf(s: str, buf: []u8) str = {
 // representation, returning a new string. The return value must be freed by the
 // caller.
 export fn strupper(s: str) str = {
-	let new: []u8 = alloc([], len(s));
+	let new: []u8 = alloc([], len(s))!;
 	return strupper_buf(s, new);
 };
 
@@ -39,7 +39,7 @@ export fn strupper(s: str) str = {
 export fn strupper_buf(s: str, buf: []u8) str = {
 	let it = strings::iter(s);
 	for (let r => strings::next(&it)) {
-		static append(buf, utf8::encoderune(toupper(r))...);
+		static append(buf, utf8::encoderune(toupper(r))...)!;
 	};
 	return strings::fromutf8(buf)!;
 };

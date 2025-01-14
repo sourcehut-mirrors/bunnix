@@ -10,7 +10,7 @@ fn sys_poll(fds: *[*]pollfd, nfd: size, timeout: i64) (u64 | error) = {
 
 	let fds = fds[..nfd];
 	let ctx = poll::context {
-		fd = alloc([], nfd),
+		fd = alloc([], nfd)!,
 		...
 	};
 
@@ -43,7 +43,7 @@ fn do_poll(ctx: *poll::context, fds: []pollfd) (u64 | error) = {
 			ctx = ctx,
 			events = fd.events,
 			...
-		});
+		})!;
 		let pfd = &ctx.fd[len(ctx.fd)-1];
 
 		const file = match (validate_fd(fd.fd)) {

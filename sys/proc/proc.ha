@@ -62,7 +62,7 @@ export fn new_proc(
 		cwd_str = strings::dup(cwd_str),
 		creds = creds,
 		...
-	});
+	})!;
 	mman::vmm_init(&new_proc.vmm)?;
 
 	match (parent) {
@@ -71,11 +71,11 @@ export fn new_proc(
 		new_proc.creds.pid = nextpid;
 		new_proc.creds.ppid = proc.creds.pid;
 		new_proc.ctty = proc.ctty;
-		append(proc.children, new_proc);
+		append(proc.children, new_proc)!;
 	case null => void;
 	};
 
-	append(procs, new_proc);
+	append(procs, new_proc)!;
 	return new_proc;
 };
 
@@ -111,7 +111,7 @@ fn cleanup(proc: *proc) void = {
 	assert(init.creds.pid == 1);
 	for (let child .. proc.children) {
 		child.creds.ppid = 1;
-		append(init.children, child);
+		append(init.children, child)!;
 	};
 	free(proc.children);
 

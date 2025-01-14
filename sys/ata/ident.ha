@@ -62,8 +62,8 @@ fn decode_idstr(in: []u16, buf: []u8) str = {
 
 	let out = buf[..0];
 	for (let i = 0z; i < len(in); i += 2) {
-		static append(out, in[i + 1]);
-		static append(out, in[i + 0]);
+		static append(out, in[i + 1])!;
+		static append(out, in[i + 0])!;
 	};
 
 	return strings::rtrim(strings::fromutf8(out)!);

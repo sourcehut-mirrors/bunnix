@@ -30,7 +30,7 @@ export fn register(bdev: *blockdev) void = {
 	bdev.major += bdev.serial: u32;
 	bdev.minor = 0;
 
-	append(blockdevs, bdev);
+	append(blockdevs, bdev)!;
 
 	log::kprintfln(BLOCK, "Registered block device {}{} ({} bytes) {}:{}",
 		iface_str(bdev.iface), bdev.serial,

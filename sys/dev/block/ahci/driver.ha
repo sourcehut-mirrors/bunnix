@@ -47,7 +47,7 @@ fn ahci_probe(info: *pci::probe_info) nullable *pci::pcidev = {
 		device = info.device,
 		hba = ghc,
 		...
-	});
+	})!;
 	pci::install_irq(cont, &cont.irq, &ahci_irq, cont);
 	hba_init(cont);
 	return cont;

@@ -54,7 +54,7 @@ export fn exec(
 
 	if (len(proc.tasks) == 0) {
 		let task = sched::newtask(&proc.vmm, proc)!;
-		append(proc.tasks, task);
+		append(proc.tasks, task)!;
 	};
 
 	// Note: exec cannot fail beyond this point

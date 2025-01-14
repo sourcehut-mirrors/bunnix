@@ -47,7 +47,7 @@ fn port_init(
 		base = dev,
 		port = hba_port,
 		...
-	});
+	})!;
 
 	const s64a = dev.hba.cap & HBA_CAP_S64A != 0;
 	assert(s64a || phys & ~((1 << 32) - 1) == 0,

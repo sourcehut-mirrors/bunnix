@@ -37,7 +37,7 @@ export fn icache_put(ic: *icache, ino: *io::inode) void = {
 	if (i < len(ic.ino)) {
 		assert(ic.ino[i].ino != ino.ino);
 	};
-	insert(ic.ino[i], ino);
+	insert(ic.ino[i], ino)!;
 };
 
 // Removes an inode from the cache. No effect if the inode was not cached.

@@ -7,7 +7,7 @@ export fn openfile(bdev: *blockdev) *io::file = {
 		vtable = &block_file_impl,
 		bdev = bdev,
 		...
-	});
+	})!;
 };
 
 type blockfile = struct {

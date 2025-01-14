@@ -53,7 +53,7 @@ fn mkinode(
 		ino = ino,
 		mode = mode,
 		...
-	});
+	})!;
 
 	if (io::isdir(mode)) {
 		inode_link(ino, ino, ".")!;
@@ -100,7 +100,7 @@ fn inode_trunc(ino: *io::inode, length: size) (void | error) = {
 	} else if (len(ino.data) > length) {
 		delete(ino.data[length..]);
 	} else {
-		append(ino.data, [0...], length - len(ino.data));
+		append(ino.data, [0...], length - len(ino.data))!;
 	};
 	fs::put_time(&ino.ctime);
 	fs::put_time(&ino.mtime);
@@ -121,7 +121,7 @@ fn inode_mkchild(ino: *io::inode, name: str, mode: io::mode) (*io::inode | error
 		inode = child,
 	};
 	const i = sort::lbisect(parent.entries, size(dirent), &dent, &dent_cmp);
-	insert(parent.entries[i], dent);
+	insert(parent.entries[i], dent)!;
 	child.nlink += 1;
 
 	fs::put_time(&parent.ctime);
@@ -184,7 +184,7 @@ fn inode_link(
 		inode = child,
 	};
 	const i = sort::lbisect(parent.entries, size(dirent), &dent, &dent_cmp);
-	insert(parent.entries[i], dent);
+	insert(parent.entries[i], dent)!;
 
 	child.nlink += 1;
 
