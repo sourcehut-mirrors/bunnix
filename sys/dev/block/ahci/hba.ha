@@ -77,7 +77,7 @@ fn hba_reset(hba: *hba_ghc) void = {
 // Performs the BIOS hand-off procedure.
 fn hba_do_bios_handoff(hba: *hba_ghc) void = {
 	log::kprintln(AHCI, "Initiate BIOS handoff");
-	if (hba.cap & HBA_BOHC_BOS == 0) {
+	if (hba.bohc & HBA_BOHC_BOS == 0) {
 		return;
 	};
 	hba.bohc |= HBA_BOHC_OOS;
